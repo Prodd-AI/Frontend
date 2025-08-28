@@ -8,6 +8,7 @@ Prod AI is a productivity and culture management platform that leverages autonom
 - **React Router**: Client-side routing
 - **TanStack Query**: API data fetching, caching, and server state
 - **Tailwind CSS**: Utility‑first CSS styling
+- **Open Sans**: Primary font
 - **Zustand**: Client state management
 - **shadcn/ui**: Component library and primitives
 - **React Icons**: Icon library
@@ -99,6 +100,12 @@ src/
 - All React code should be written using functional components and hooks.
 - XState is primarily scoped to onboarding; expand as needed for complex flows.
 - Routing: Use React Router with layout shells in `src/layout/` (`dashboard`, `settings`), nested routes for role areas under their respective folders, and lazy‑loaded route modules for code‑splitting where appropriate.
+
+### Typography
+
+- **Primary font**: Open Sans
+- **Include**: via Google Fonts link in `index.html` or self‑host under `public/assets/fonts`.
+- **Tailwind**: set `theme.extend.fontFamily.sans` to include "Open Sans" with sensible system fallbacks.
 
 ### Links
 
