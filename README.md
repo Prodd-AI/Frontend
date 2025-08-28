@@ -111,3 +111,10 @@ src/
 
 - **Frontend Repository (GitHub)**: https://github.com/Prodd-AI/Frontend/
 - **Figma Design**: https://www.figma.com/design/ixIxtSJqkHCEARAdqTBNal/ProdAI?node-id=0-1&p=f&t=pFo7uQBZtvYXW9o0-0
+
+### Important Instructions
+
+- **DO NOT ADD ERROR METHODS FOR API CALLS EXCEPT FOR CUSTOM REASONS. THESE HAS BEEN SETUP**
+- **Files and folders**: use kebab-case (e.g., `team-member`, `view-team-card.page.tsx`).
+- **Variables**: use snake_case (e.g., `current_user_id`, `team_member_count`).
+- **Filename type segment**: include the file type in the name (e.g., `.page.tsx`, `.utils.ts`, `.d.ts`). Examples: `hr.page.tsx`, `getMessage.utils.ts`, `team-member.d.ts`.

@@ -1,11 +1,5 @@
-import { AiFillAccountBook } from "react-icons/ai";
-
 function App() {
-  return (
-    <>
-      <AiFillAccountBook />
-    </>
-  );
+  return <></>;
 }
 
 export default App;

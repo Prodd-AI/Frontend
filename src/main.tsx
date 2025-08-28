@@ -1,10 +1,34 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./App.tsx";
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryCache,
+  MutationCache,
+} from "@tanstack/react-query";
+import { Toaster, toast } from "sonner";
+import { getErrorMessage } from "./shared/utils/error-message.utils.ts";
 
-createRoot(document.getElementById('root')!).render(
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error));
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error));
+    },
+  }),
+});
+
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
-)
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+    <Toaster richColors position="top-right" />
+  </StrictMode>
+);
