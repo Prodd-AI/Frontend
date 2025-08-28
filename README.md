@@ -1,69 +1,106 @@
-# React + TypeScript + Vite
+## PROD AI — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Prod AI is a productivity and culture management platform that leverages autonomous AI agents to drive employee engagement, performance, retention, and organizational alignment. This frontend implements a modular, AI‑enhanced experience that integrates with existing workplace tools, delivering real‑time productivity insights, morale analysis, performance gamification, and AI‑driven coaching across diverse enterprise environments and team structures.
 
-Currently, two official plugins are available:
+### Tech stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React (TypeScript, Vite)**: Application framework and tooling
+- **React Router**: Client-side routing
+- **TanStack Query**: API data fetching, caching, and server state
+- **Tailwind CSS**: Utility‑first CSS styling
+- **Zustand**: Client state management
+- **shadcn/ui**: Component library and primitives
+- **React Icons**: Icon library
+- **Zod**: Schema validation and form validation
+- **XState**: Statecharts for onboarding flows
+- **Vercel**: Hosting and deployment
+- **FE repo**: GitHub (link TBD)
 
-## Expanding the ESLint configuration
+### Onboarding screens
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Team Lead**: wizzywizpad@gmail.com
+- **Team Member**: Saviour Ise
+- **HR**: yhungdew@gmail.com
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Reusable components
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- **Task card**
+- **Daily Mood check‑in**
+- **Weekly streak**
+- **Progress bar**
+- **Auth / Onboarding card**
+- **Select role card**
+- **Progress stepper**
+- **Team card (onboarding)**
+- **View team card**
+- **View member page**
+- **View team page**
+- **Task review card**
+- **Meeting card**
+- **Mood card**
+- **Tabs (settings screen)**
+- **Tabs**
+- **Mood emoji card**
+- **Team analysis card**
+- **Status card**
+- **Flight risk card**
+- **Wellness trend card**
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### General pages
+
+- **Layout**
+- **Authentication flow**
+- **Profile screens**
+
+### Folder structure
+
+```text
+public/
+  assets/
+    images/
+    icons/
+    fonts/
+src/
+  components/           # shadcn components
+  pages/                # general pages
+  layout/
+    dashboard/
+    settings/
+  shared/
+    pages/
+    components/
+    utils/
+    typings/
+  super-admin/
+    pages/
+    components/
+    utils/
+    typings/
+  hr/
+    pages/
+    components/
+    utils/
+    typings/
+  team-member/
+    pages/
+    components/
+    utils/
+    typings/
+  team-leader/
+    pages/
+    components/
+    utils/
+    typings/
+  config/               # state management and TanStack Query config
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Notes
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- All React code should be written using functional components and hooks.
+- XState is primarily scoped to onboarding; expand as needed for complex flows.
+- Routing: Use React Router with layout shells in `src/layout/` (`dashboard`, `settings`), nested routes for role areas under their respective folders, and lazy‑loaded route modules for code‑splitting where appropriate.
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Links
+
+- **Frontend Repository (GitHub)**: https://github.com/Prodd-AI/Frontend/
+- **Figma Design**: https://www.figma.com/design/ixIxtSJqkHCEARAdqTBNal/ProdAI?node-id=0-1&p=f&t=pFo7uQBZtvYXW9o0-0

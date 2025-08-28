@@ -1,0 +1,127 @@
+## PROD AI — Cursor Rules
+
+These rules guide AI-driven edits for the PROD AI frontend.
+
+### Purpose & Scope
+
+- Build a productivity and culture management platform that uses autonomous AI agents to drive engagement, performance, retention, and organizational alignment.
+- Integrate with workplace tools to deliver real-time productivity insights, morale analysis, performance gamification, and AI-driven coaching.
+
+### Tech Stack & Constraints
+
+- React (TypeScript, Vite). Always use functional React components and hooks.
+- Tailwind CSS for styling. Prefer utility classes; avoid custom CSS unless necessary.
+- shadcn/ui as the component library. Follow its composition patterns and naming.
+- TanStack Query for API/server state. No custom fetch wrappers that duplicate Query features.
+- Zustand for client UI/local state. Keep server state in TanStack Query.
+- Zod for schema and form validation. Co-locate schemas near usage or under `shared/typings`.
+- XState for onboarding flows only (statecharts for complex onboarding logic).
+- React Icons for icons. Use a consistent icon pack per feature.
+- Vercel for deployment. Keep SPA-friendly code and avoid Node-only APIs in the client.
+
+### Architecture & Folder Structure
+
+Mirror and extend this structure as features are added:
+
+```text
+public/
+  assets/
+    images/
+    icons/
+    fonts/
+src/
+  components/           # shadcn/ui-based shared components
+  pages/                # general pages
+  layout/
+    dashboard/
+    settings/
+  shared/
+    pages/
+    components/
+    utils/
+    typings/
+  super-admin/
+    pages/
+    components/
+    utils/
+    typings/
+  hr/
+    pages/
+    components/
+    utils/
+    typings/
+  team-member/
+    pages/
+    components/
+    utils/
+    typings/
+  team-leader/
+    pages/
+    components/
+    utils/
+    typings/
+  config/               # Zustand stores, TanStack Query client/config
+```
+
+Rules:
+
+- Place role-specific UI and logic under the corresponding role folder.
+- Place cross-cutting UI in `shared/components` and utilities in `shared/utils`.
+- Keep global config (query client, stores) in `src/config`.
+
+### Reusable Components (targets)
+
+- Task card, Daily Mood check-in, Weekly streak, Progress bar
+- Auth/Onboarding card, Select role card, Progress stepper
+- Team card (onboarding), View team card
+- View member page, View team page
+- Task review card, Meeting card, Mood card
+- Tabs (settings), Tabs, Mood emoji card
+- Team analysis card, Status card, Flight risk card, Wellness trend card
+
+When creating these:
+
+- Use shadcn/ui primitives; compose with Tailwind utilities.
+- Keep components focused; lift server state to TanStack Query, local UI state to Zustand.
+- Co-locate component-specific types and Zod schemas.
+
+### Pages & Layouts
+
+- Maintain top-level `layout/` for `dashboard` and `settings` shells.
+- Implement role-based pages under respective role folders; reuse `shared/components`.
+- Ensure authentication flow and profile screens live under `pages/` or role folders as appropriate.
+
+### Data & State Conventions
+
+- TanStack Query: define stable query keys (arrays), set sensible `staleTime`/`gcTime` per resource, and use `select` for derived data.
+- Mutations must optimistically update cache where appropriate and roll back on error.
+- Zustand: create small, focused stores; avoid duplicating server state.
+- Zod: validate API payloads and forms; infer TS types from schemas where useful.
+- XState: restrict to onboarding; model steps, guards, and side effects explicitly.
+
+### Styling & Accessibility
+
+- Tailwind first. Extract small UI helpers only when duplication grows.
+- Use semantic HTML and shadcn/ui accessible primitives.
+- Support keyboard navigation and proper ARIA where needed.
+
+### TypeScript & Naming
+
+- Prefer explicit types on public APIs/exports; avoid `any`.
+- File casing: PascalCase for React component files; kebab-case for non-component modules.
+- Component names are PascalCase; hooks prefixed with `use`.
+
+### SEO & Index
+
+- Keep `index.html` meta tags aligned with product purpose/scope.
+- Use Open Graph and Twitter tags; update titles/descriptions per feature rollout if needed.
+
+### Repository & Deployment
+
+- Frontend repo is hosted on GitHub.
+- Deploy via Vercel with preview deployments from feature branches.
+
+### Non-Goals
+
+- Do not introduce alternative UI libraries or CSS frameworks beyond shadcn/ui + Tailwind.
+- Do not add routing/state libs beyond the specified stack without approval.
