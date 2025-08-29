@@ -120,6 +120,7 @@ When creating these:
 
 - Frontend repo is hosted on GitHub.
 - Deploy via Vercel with preview deployments from feature branches.
+- Contribution workflow: Each developer must create a personal feature branch per task (e.g., `feat/<your-name>/<task-name>`). Open PRs targeting the `dev` branch. Do not push directly to `main`.
 
 ### Non-Goals
 

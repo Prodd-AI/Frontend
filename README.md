@@ -118,3 +118,5 @@ src/
 - **Files and folders**: use kebab-case (e.g., `team-member`, `view-team-card.page.tsx`).
 - **Variables**: use snake_case (e.g., `current_user_id`, `team_member_count`).
 - **Filename type segment**: include the file type in the name (e.g., `.page.tsx`, `.utils.ts`, `.d.ts`). Examples: `hr.page.tsx`, `getMessage.utils.ts`, `team-member.d.ts`.
+- **Branching**: create a personal feature branch per task (e.g., `your-name`).
+- **Pull Requests**: always open PRs to the `dev` branch; do not push directly to `main`.
