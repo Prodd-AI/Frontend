@@ -1,5 +1,7 @@
+import { AppRouter } from "@/config/routes/index.route";
+
 function App() {
-  return <></>;
+  return <AppRouter />;
 }
 
 export default App;

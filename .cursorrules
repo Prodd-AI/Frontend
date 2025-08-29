@@ -125,3 +125,10 @@ When creating these:
 
 - Do not introduce alternative UI libraries or CSS frameworks beyond shadcn/ui + Tailwind.
 - Do not add routing/state libs beyond the specified stack without approval.
+
+### Important Instructions
+
+- DO NOT ADD ERROR METHODS FOR API CALLS EXCEPT FOR CUSTOM REASONS. THESE HAS BEEN SETUP
+- Files and folders: use kebab-case (e.g., `team-member`, `view-team-card.page.tsx`).
+- Variables: use snake_case (e.g., `current_user_id`, `team_member_count`).
+- Filename type segment: include the file type in the name (e.g., `.page.tsx`, `.utils.ts`, `.d.ts`). Examples: `hr.page.tsx`, `getMessage.utils.ts`, `team-member.d.ts`.
