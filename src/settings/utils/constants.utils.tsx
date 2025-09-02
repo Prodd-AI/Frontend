@@ -3,6 +3,9 @@ import { PiGearLight } from "react-icons/pi";
 import { CiCircleCheck } from "react-icons/ci";
 import { IoShieldOutline } from "react-icons/io5";
 import { PiUsersLight } from "react-icons/pi";
+import { TbFocusCentered } from "react-icons/tb";
+import { IoCheckmark } from "react-icons/io5";
+import { FaRegClock } from "react-icons/fa";
 
 export const tabs = [
   {
@@ -31,5 +34,23 @@ export const tabs = [
     label: "Team Details",
     value: "team",
     icon: <PiUsersLight size={20} />,
+  },
+];
+
+export const tabItems = [
+  {
+    label: "Today's Focus",
+    value: "todays_focus",
+    icon: <TbFocusCentered size={20} />,
+  },
+  {
+    label: "Tasks",
+    value: "tasks",
+    icon: <IoCheckmark size={20} />,
+  },
+  {
+    label: "Recent Mood",
+    value: "mood",
+    icon: <FaRegClock size={20} />,
   },
 ];

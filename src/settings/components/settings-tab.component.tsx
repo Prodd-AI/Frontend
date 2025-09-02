@@ -14,7 +14,7 @@ const SettingsTabComponent = ({
         <div
           key={tab.value}
           onClick={() => setActiveTab(tab.value as SettingsTab)}
-          className={`cursor-pointer relative flex items-center justify-center text-[#6B7280] text-sm font-semibold transition-all duration-300 py-4 ${
+          className={`cursor-pointer relative flex items-center justify-center text-[#6B7280] text-sm font-medium transition-all duration-300 py-4 ${
             activeTab === tab.value ? "text-primary-color" : ""
           } ${index === 0 ? "pr-4" : "px-4"}`}
         >
