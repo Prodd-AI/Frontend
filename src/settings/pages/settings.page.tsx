@@ -5,39 +5,52 @@ import { tabItems } from "../utils/constants.utils";
 import { useState } from "react";
 import TaskReviewComponent from "@/team-leader/components/task-review.component";
 import { sample_task_reviews } from "@/team-leader/utils/constants.utils";
+import MeetingCardComponent from "@/shared/components/meeting-card.component";
+import { sample_meetings } from "@/shared/utils/meeting.constants";
 
 function SettingsPage() {
   const [activeTab, setActiveTab] = useState<string>("todays_focus");
   return (
-    <div className="p-4 bg-muted">
-      <p className="text-2xl font-bold">Settings</p>
-      <p className="text-sm text-gray-500">Components</p>
+    <div className="bg-linear-to-r from-primary-color/5 to-white">
+      <div className="max-w-screen-xl mx-auto md:p-10 p-4 ">
+        <p className="text-2xl font-bold">Settings</p>
+        <p className="text-sm text-gray-500">Components</p>
 
-      {/* Components */}
-      <ul className="flex flex-col gap-4 mt-4">
-        <li>
-          <p className="text-sm font-bold">Settings Tab</p>
-          <SettingsTabComponent initialActiveTab={SettingsTab.OVERVIEW} />
-        </li>
+        {/* Components */}
+        <ul className="flex flex-col gap-10 mt-4">
+          <li>
+            <p className="text-sm font-bold">Settings Tab</p>
+            <SettingsTabComponent initialActiveTab={SettingsTab.OVERVIEW} />
+          </li>
 
-        <li>
-          <p className="text-sm font-bold">Tab</p>
-          <TabComponent
-            items={tabItems}
-            activeTab={activeTab}
-            onTabChange={(tab) => setActiveTab(tab)}
-          />
-        </li>
+          <li>
+            <p className="text-sm font-bold">Tab</p>
+            <TabComponent
+              items={tabItems}
+              activeTab={activeTab}
+              onTabChange={(tab) => setActiveTab(tab)}
+            />
+          </li>
 
-        <li className="flex flex-col gap-4 bg-white rounded-xl p-4">
-          <p className="text-sm font-bold">Task Review Card</p>
-          <div className="flex flex-col gap-4">
-            {sample_task_reviews.map((item) => (
-              <TaskReviewComponent key={item.id} item={item} />
-            ))}
-          </div>
-        </li>
-      </ul>
+          <li className="flex flex-col gap-4 bg-white rounded-xl p-4">
+            <p className="text-sm font-bold">Task Review Card</p>
+            <div className="flex flex-col gap-4">
+              {sample_task_reviews.map((item) => (
+                <TaskReviewComponent key={item.id} item={item} />
+              ))}
+            </div>
+          </li>
+
+          <li>
+            <p className="text-sm font-bold mb-2">Meeting Card</p>
+            <div className="flex flex-col gap-4">
+              {sample_meetings.map((meeting) => (
+                <MeetingCardComponent key={meeting.id} meeting={meeting} />
+              ))}
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 }
