@@ -7,6 +7,8 @@ import TaskReviewComponent from "@/team-leader/components/task-review.component"
 import { sample_task_reviews } from "@/team-leader/utils/constants.utils";
 import MeetingCardComponent from "@/shared/components/meeting-card.component";
 import { sample_meetings } from "@/shared/utils/meeting.constants";
+import TeamAnalysisCardComponent from "@/shared/components/team-analysis-card.component";
+import { sample_team_analyses } from "@/shared/utils/team-analysis.constants";
 
 function SettingsPage() {
   const [activeTab, setActiveTab] = useState<string>("todays_focus");
@@ -46,6 +48,15 @@ function SettingsPage() {
             <div className="flex flex-col gap-4">
               {sample_meetings.map((meeting) => (
                 <MeetingCardComponent key={meeting.id} meeting={meeting} />
+              ))}
+            </div>
+          </li>
+
+          <li>
+            <p className="text-sm font-bold mb-2">Team Analysis Card</p>
+            <div className="grid md:grid-cols-2 gap-6">
+              {sample_team_analyses.map((team) => (
+                <TeamAnalysisCardComponent key={team.id} team={team} />
               ))}
             </div>
           </li>
