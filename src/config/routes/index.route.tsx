@@ -11,6 +11,7 @@ import { admin_routes } from "@/config/routes/admin.route";
 import { auth_routes } from "@/config/routes/auth.route";
 import { onboarding_routes } from "@/config/routes/onboarding.route";
 import NotFoundPage from "@/shared/pages/not-found.page";
+import { settings_routes } from "./settings.route";
 
 const router = createBrowserRouter([
   { path: "/", element: <Navigate to="/auth" replace /> },
@@ -20,6 +21,7 @@ const router = createBrowserRouter([
   { path: "/admin", children: admin_routes },
   { path: "/auth", children: auth_routes },
   { path: "/onboarding", children: onboarding_routes },
+  { path: "/settings", children: settings_routes },
   { path: "*", element: <NotFoundPage /> },
 ]);
 
