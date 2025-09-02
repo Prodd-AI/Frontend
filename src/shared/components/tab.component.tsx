@@ -10,7 +10,7 @@ const TabComponent = ({ items, activeTab, onTabChange }: TabComponentProps) => {
             key={item.value}
             value={item.value}
             onClick={() => onTabChange(item.value)}
-            className={`flex items-center justify-center text-sm font-medium gap-2 cursor-pointer px-4 transition-all duration-300 text-[#251F2D] font-medium ${
+            className={`flex items-center justify-center text-sm gap-2 cursor-pointer px-4 transition-all duration-300 text-[#251F2D] font-medium ${
               activeTab === item.value ? "!shadow-lg" : ""
             }`}
           >
