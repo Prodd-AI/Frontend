@@ -9,32 +9,29 @@
  *
  * 1. Import the component and types:
  * ```tsx
- * import WeeklyStreak, { type WeeklyStreakRef, type DayStatus } from '@/shared/components/weekly-streak.component';
+ * import WeeklyStreak, { type WeeklyStreakRef, type DayStatus, type DayData } from '@/shared/components/weekly-streak.component';
  * ```
  *
  * 2. Set up state in your parent component:
  * ```tsx
- * const [weeklyData, setWeeklyData] = useState(initialData);
- * const [isUpdating, setIsUpdating] = useState(false);
+ * const [days, setDays] = useState<DayData[]>([
+ *   { day: 1, status: "completed" },
+ *   { day: 2, status: "pending" },
+ *   // ... 7 days total
+ * ]);
  * const streakRef = useRef<WeeklyStreakRef>(null);
  * ```
  *
  * 3. Create interaction handlers:
  * ```tsx
  * const handleDayToggle = async (day: number, newStatus: DayStatus) => {
- *   setIsUpdating(true);
  *   try {
- *     await updateDayStatus(day, newStatus);
- *     setWeeklyData(prev => ({
- *       ...prev,
- *       days: prev.days.map(d =>
- *         d.day === day ? { ...d, status: newStatus } : d
- *       )
- *     }));
+ *     await updateDayStatus(day, newStatus); // Your API call
+ *     setDays(prev =>
+ *       prev.map(d => d.day === day ? { ...d, status: newStatus } : d)
+ *     );
  *   } catch (error) {
  *     console.error('Failed to update day:', error);
- *   } finally {
- *     setIsUpdating(false);
  *   }
  * };
  * ```
@@ -46,9 +43,8 @@
  *   numberOfTaskCompleted={weeklyData.completed}
  *   numberOfTaskCompletedForTheDay={todayData.completed}
  *   totalNumberOfTaskForTheDay={todayData.total}
- *   days={weeklyData.days}
+ *   days={days}
  *   onDayToggle={handleDayToggle}
- *   isUpdating={isUpdating}
  * />
  * ```
  *
@@ -58,7 +54,7 @@
  * - Follows accessibility guidelines with proper ARIA labels
  * - Responsive design with flexible layouts
  *
- * @author Frontend Team
+ * @author Wizzy
  * @since 2025-08-30
  * @version 2.0.0
  */
@@ -108,18 +104,18 @@ interface WeeklyStreakPropsInt {
   /** Number of tasks completed today */
   numberOfTaskCompletedForTheDay: number;
   /**
-   * Array of day data for the week. If not provided, defaults to 7 pending days.
+   * Array of day data for the week. Required for the component to display days.
    * Should contain 7 items representing Monday through Sunday.
    */
   days?: DayData[];
   /**
    * Callback function called when user toggles a day's completion status.
+   * Must be provided for interactive functionality. Parent is responsible for
+   * updating the days prop based on this callback.
    * @param day - The day number that was toggled
    * @param newStatus - The new status for that day
    */
-  onDayToggle?: (day: number, newStatus: DayStatus) => void;
-  /** Whether a day update is currently in progress (shows loading state) */
-  isUpdating?: boolean;
+  onDayToggle?: (day: number, newStatus: DayStatus) => void | Promise<void>;
   /** Whether the component interactions are disabled */
   disabled?: boolean;
   /** Custom message to display instead of default "Excellent progress! 🔥" */
@@ -154,27 +150,40 @@ interface WeeklyStreakRef {
  * - ✨ **Smooth Animations**: CSS transitions for all state changes
  * - 🎨 **Gradient Design**: Beautiful gradients for completed states
  * - ♿ **Accessibility**: Proper semantic HTML and keyboard navigation
- * - 🔄 **Parent-controlled**: Submission logic handled by parent component
+ * - 🔄 **Parent-controlled**: Fully controlled component - parent manages all state
  *
  * ## Architecture
- * This component follows the principle of separation of concerns:
- * - **Component responsibility**: UI rendering, user interactions, animations
- * - **Parent responsibility**: Business logic, API calls, state management
+ * This component follows the controlled component pattern:
+ * - **Component responsibility**: UI rendering, user interactions, loading states
+ * - **Parent responsibility**: All business logic, API calls, data state management
+ * - **Required props**: `days` and `onDayToggle` for interactive functionality
  *
  * @param props - Component props (see WeeklyStreakPropsInt)
  * @param ref - React ref for imperative control (see WeeklyStreakRef)
  * @returns JSX.Element - The rendered weekly streak component
  *
  * @example
- * // Basic usage
+ * // Parent-controlled usage (recommended)
  * ```tsx
+ * const [days, setDays] = useState([
+ *   { day: 1, status: "completed" },
+ *   { day: 2, status: "pending" },
+ *   // ... more days
+ * ]);
+ *
+ * const handleDayToggle = async (day: number, newStatus: DayStatus) => {
+ *   // Update your state after API call
+ *   setDays(prev => prev.map(d =>
+ *     d.day === day ? { ...d, status: newStatus } : d
+ *   ));
+ * };
+ *
  * <WeeklyStreak
  *   numberOfTaskCompleted={14}
  *   numberOfTaskCompletedForTheDay={6}
  *   totalNumberOfTaskForTheDay={7}
- *   days={weeklyData.days}
- *   onDayToggle={(day, newStatus) => handleDayUpdate(day, newStatus)}
- *   isUpdating={isLoading}
+ *   days={days}
+ *   onDayToggle={handleDayToggle}
  * />
  * ```
  *
@@ -183,17 +192,20 @@ interface WeeklyStreakRef {
  * ```tsx
  * const streakRef = useRef<WeeklyStreakRef>(null);
  *
- * const handleResetWeek = () => {
- *   streakRef.current?.resetWeek();
+ * const getWeekStats = () => {
+ *   const stats = streakRef.current?.getWeekData();
+ *   console.log(stats);
  * };
  *
  * <WeeklyStreak
  *   ref={streakRef}
+ *   days={days}
+ *   onDayToggle={handleDayToggle}
  *   // ...other props
  * />
  * ```
  *
- * @version 2.0.0
+ * @version 2.1.0
  * @author Wizzy
  * @since 2025-08-30
  */
@@ -206,51 +218,51 @@ const WeeklyStreak = forwardRef<WeeklyStreakRef, WeeklyStreakPropsInt>(
       numberOfTaskCompletedForTheDay,
       days: propDays,
       onDayToggle,
-      isUpdating = false,
       disabled = false,
       customMessage,
     },
     ref
   ) => {
-    /**
-     * Default week data - 7 days starting with first day completed
-     */
-    const defaultDays: DayData[] = [
-      { day: 1, status: "completed" },
-      { day: 2, status: "pending" },
-      { day: 3, status: "pending" },
-      { day: 4, status: "pending" },
-      { day: 5, status: "pending" },
-      { day: 6, status: "pending" },
-      { day: 7, status: "pending" },
-    ];
+    const [updatingDays, setUpdatingDays] = useState<Set<number>>(new Set());
 
-    const [internalDays, setInternalDays] = useState<DayData[]>(
-      propDays || defaultDays
-    );
-
-    // Use prop days if provided, otherwise use internal state
-    const days = propDays || internalDays;
+    // Use prop days if provided, otherwise empty array
+    const days = propDays || [];
 
     /**
      * Handles day toggle when user clicks on a day.
-     * Determines the new status and calls parent callback if provided.
+     * Calls parent callback which is responsible for updating state.
+     * Manages individual day loading states during async operations.
      */
     const handleDayToggle = useCallback(
-      (day: number, currentStatus: DayStatus) => {
-        if (disabled || isUpdating) return;
+      async (day: number, currentStatus: DayStatus) => {
+        if (disabled || updatingDays.has(day)) return;
+
+        // Add day to updating set
+        setUpdatingDays((prev) => new Set(prev).add(day));
 
         const newStatus: DayStatus =
           currentStatus === "completed" ? "pending" : "completed";
 
-        // Self-controlled: update internal state
-        setInternalDays((prev) =>
-          prev.map((d) => (d.day === day ? { ...d, status: newStatus } : d))
-        );
+        try {
+          // Call parent callback if provided
+          if (onDayToggle) {
+            await onDayToggle(day, newStatus);
+          }
+          // Note: Component is now fully parent-controlled
+          // Parent must provide 'days' prop and handle state updates
+        } catch (error) {
+          console.error("Failed to update day status:", error);
+        } finally {
+          // Remove day from updating set
+          setUpdatingDays((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(day);
+            return newSet;
+          });
+        }
       },
-      [onDayToggle, disabled, isUpdating]
+      [onDayToggle, disabled, updatingDays]
     );
-
     /**
      * Gets current week data without causing re-renders.
      */
@@ -364,7 +376,7 @@ const WeeklyStreak = forwardRef<WeeklyStreakRef, WeeklyStreakPropsInt>(
                 className={clsx(
                   "size-[31px] rounded-[4.24px] flex justify-center items-center transition-all duration-300 ease-in-out",
                   "hover:scale-110 active:scale-95",
-                  disabled || isUpdating
+                  disabled || updatingDays.has(dayData.day)
                     ? "cursor-not-allowed opacity-50"
                     : "cursor-pointer hover:shadow-md",
                   dayData.status === "completed"
@@ -372,7 +384,7 @@ const WeeklyStreak = forwardRef<WeeklyStreakRef, WeeklyStreakPropsInt>(
                     : "bg-[#E0DAE8] hover:bg-[#D1CAD9]"
                 )}
               >
-                {isUpdating ? (
+                {updatingDays.has(dayData.day) ? (
                   <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
                 ) : dayData.status === "completed" ? (
                   <FaCheck className="text-[#fff] transition-transform duration-200 group-hover:scale-110" />

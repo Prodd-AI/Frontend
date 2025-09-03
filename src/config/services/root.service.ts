@@ -70,9 +70,9 @@ export class ApiService {
    * @private
    */
   private options<T>(
-    method: "POST" | "GET" | "PUT" | "DELETE",
+    method: "POST" | "GET" | "PUT" | "DELETE" | "PATCH",
     data: T,
-    requireAuth: boolean =false
+    requireAuth: boolean = false
   ) {
     const headers: HeadersInit = {
       "Content-Type": "application/json",
@@ -90,6 +90,7 @@ export class ApiService {
         return base_options;
       case "POST":
       case "PUT":
+      case "PATCH":
         if (!data) {
           throw new Error(`Data must be provided for ${method} requests`);
         }
@@ -316,6 +317,37 @@ export class ApiService {
   ): Promise<T> {
     const url = this.urlMapper(path);
     const options = this.options("PUT", data, requireAuth);
+    return this.requestHandler<T>(url, options);
+  }
+
+  /**
+   * Makes a PATCH request to partially update existing data on the server.
+   *
+   * Use this when you need to update only specific fields of an existing resource.
+   * Unlike PUT, PATCH only updates the fields you provide, leaving others unchanged.
+   *
+   * @template T - The type of response you expect
+   * @template U - The type of data you're sending (partial update)
+   * @param path - API endpoint (e.g., '/users/123', '/posts/456')
+   * @param data - The partial data to update (will be JSON stringified)
+   * @param requireAuth - Whether authentication is needed (default: false)
+   * @returns Promise containing the server's response
+   *
+   * @example
+   * ```typescript
+   * // Update only user's email
+   * const updatedUser = await api.patch<User, Partial<UpdateUserData>>('/users/123', {
+   *   email: 'newemail@example.com'
+   * }, true);
+   * ```
+   */
+  async patch<T, U>(
+    path: string,
+    data: U,
+    requireAuth: boolean = false
+  ): Promise<T> {
+    const url = this.urlMapper(path);
+    const options = this.options("PATCH", data, requireAuth);
     return this.requestHandler<T>(url, options);
   }
 
