@@ -9,6 +9,10 @@ body {
 	font-family: 'Open Sans', sans-serif;
 }
 
+.bg-card-bg-active {
+	background: var(--card-background-active);
+}
+
 @theme inline {
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
@@ -18,6 +22,7 @@ body {
 	--spacing-6\.5: 30px;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
+	--color-text-grey-600: var(--text-grey-600);
 	--color-card: var(--card);
 	--color-card-foreground: var(--card-foreground);
 	--color-popover: var(--popover);
@@ -48,6 +53,8 @@ body {
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-button-bg-primary: var(--button-background-primary);
+	--color-grey-light: var(--bg-grey-light);
+	--color-grey-lighter: var(--bg-grey-lighter)
 }
 
 :root {
@@ -55,11 +62,15 @@ body {
 	--radius-auth-card: 2.03875rem;
 	--background: oklch(1 0 0);
 	--foreground: oklch(0.145 0 0);
+	--text-grey-600: #4f5359;
+	--bg-grey-light: #EAE7EF;
+	--bg-grey-lighter: #e9e6ee4a;
 	--card: oklch(1 0 0);
+	--card-background-active: linear-gradient(192.27deg, #955deb 6.73%, #6619de 93.27%);
 	--card-foreground: oklch(0.145 0 0);
 	--popover: oklch(1 0 0);
 	--popover-foreground: oklch(0.145 0 0);
-	--primary: oklch(0.205 0 0);
+	--primary: #6619de;
 	--primary-foreground: oklch(0.985 0 0);
 	--secondary: oklch(0.97 0 0);
 	--secondary-foreground: oklch(0.205 0 0);
@@ -84,7 +95,6 @@ body {
 	--sidebar-accent-foreground: oklch(0.205 0 0);
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
-	--button-background-primary: linear-gradient(269.35deg, var(--color-primary) -4.25%, var(--color-secondary) 30.49%);
 }
 
 .dark {
