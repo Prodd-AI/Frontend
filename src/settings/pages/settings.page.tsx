@@ -12,6 +12,8 @@ import FlightRiskCardComponent from "@/hr/components/flight-risk-card.component"
 import { sample_flight_risks } from "@/hr/utils/flight-risk.constants";
 import WellnessTrendCards from "@/hr/components/wellness-trend-cards.component";
 import { sample_wellness_trends } from "@/hr/utils/wellness-trend.constants";
+import StatusCards from "@/shared/components/status-cards.component";
+import { sample_status_cards } from "@/shared/utils/status-cards.constants";
 
 function SettingsPage() {
   const [activeTab, setActiveTab] = useState<string>("todays_focus");
@@ -78,6 +80,11 @@ function SettingsPage() {
           <li>
             <p className="text-sm font-bold mb-2">Wellness Trend Cards</p>
             <WellnessTrendCards items={sample_wellness_trends} />
+          </li>
+
+          <li className="flex flex-col gap-4 bg-white rounded-xl p-4">
+            <p className="text-sm font-bold mb-2">Status Cards</p>
+            <StatusCards items={sample_status_cards} />
           </li>
         </ul>
       </div>
