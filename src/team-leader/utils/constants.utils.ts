@@ -1,5 +1,3 @@
-import type { TaskReviewItem } from "../typings/task-review.d";
-
 export const sample_task_reviews: TaskReviewItem[] = [
   {
     id: "alex-jan-8",

@@ -1,8 +1,5 @@
-import { clsx} from "clsx";
+import { clsx } from "clsx";
 import { TbWaveSawTool } from "react-icons/tb";
-import type { TodaysProgresssPropsInt } from "../typings/todays-progress";
-
-
 
 /**
  * TodaysProgress - A visual progress dashboard component that displays daily task completion metrics and mood tracking.

@@ -1,7 +1,3 @@
-import type {
-  StatusCardsProps,
-  StatusCardItem,
-} from "../typings/status-cards.d";
 import { cn } from "@/lib/utils";
 
 function formatDelta(item: StatusCardItem): { text: string; cls: string } {

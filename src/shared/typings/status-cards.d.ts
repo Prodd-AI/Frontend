@@ -1,8 +1,6 @@
-import type { ReactNode } from "react";
+type DeltaColor = "auto" | "success" | "danger" | "warning" | "muted";
 
-export type DeltaColor = "auto" | "success" | "danger" | "warning" | "muted";
-
-export interface StatusCardItem {
+interface StatusCardItem {
   id: string;
   title: string;
   value: number | string;
@@ -17,7 +15,7 @@ export interface StatusCardItem {
   delta_color?: DeltaColor; // default: auto based on sign
 }
 
-export interface StatusCardsProps {
+interface StatusCardsProps {
   items: StatusCardItem[];
   className?: string;
   grid_classname?: string; // override grid layout classes

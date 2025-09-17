@@ -1,4 +1,3 @@
-import type { TaskReviewProps } from "../typings/task-review.d";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { IoChevronForward } from "react-icons/io5";

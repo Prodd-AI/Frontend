@@ -2,12 +2,12 @@
  * Available day status options.
  * Represents the completion state of tasks for a specific day.
  */
-export type DayStatus = "completed" | "pending";
+type DayStatus = "completed" | "pending";
 
 /**
  * Day data structure for tracking daily progress.
  */
-export interface DayData {
+interface DayData {
   /** Day number (1-7 for week) */
   day: number;
   /** Current completion status */
@@ -21,7 +21,7 @@ export interface DayData {
 /**
  * Props interface for the WeeklyStreak component.
  */
-export interface WeeklyStreakPropsInt {
+interface WeeklyStreakPropsInt {
   /** Total number of tasks completed this week */
   numberOfTaskCompleted: number;
   /** Additional CSS classes to apply to the component container */
@@ -53,7 +53,7 @@ export interface WeeklyStreakPropsInt {
  * Ref interface for imperative control of the WeeklyStreak component.
  * Use these methods to programmatically control the component from parent.
  */
-export interface WeeklyStreakRef {
+interface WeeklyStreakRef {
   /** Gets current week data without triggering re-renders */
   getWeekData: () => {
     completedDays: number;

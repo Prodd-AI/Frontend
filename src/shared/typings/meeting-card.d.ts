@@ -1,6 +1,6 @@
-export type MeetingStatus = "starting_soon" | "live" | "scheduled";
+type MeetingStatus = "starting_soon" | "live" | "scheduled";
 
-export interface MeetingInfo {
+interface MeetingInfo {
   id: string;
   title: string;
   subtitle?: string; // e.g., team name or context
@@ -9,12 +9,12 @@ export interface MeetingInfo {
   status: MeetingStatus;
 }
 
-export interface MeetingActions {
+interface MeetingActions {
   on_join?: (id: string) => void;
   on_open_more?: (id: string) => void;
 }
 
-export type MeetingCardProps = {
+type MeetingCardProps = {
   meeting: MeetingInfo;
   actions?: MeetingActions;
   className?: string;

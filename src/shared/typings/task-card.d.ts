@@ -1,9 +1,7 @@
-import type { ClassValue } from "clsx";
-
 /**
  * Props interface for the TaskCard component.
  */
-export interface TaskCardPropsInt {
+interface TaskCardPropsInt {
   /** Task priority level - affects visual styling and urgency indicators */
   priority: TaskPriority;
   /** Current task status - determines badge color and completion state */
@@ -41,7 +39,7 @@ export interface TaskCardPropsInt {
  * Ref interface for imperative control of the TaskCard component.
  * Use these methods to programmatically control the component from parent.
  */
-export interface TaskCardRef {
+interface TaskCardRef {
   /** Focuses the status toggle button if visible */
   focus: () => void;
   /** Gets current task data without triggering re-renders */
@@ -53,15 +51,14 @@ export interface TaskCardRef {
   };
 }
 
-
 /**
  * Available task status options.
  * Represents the current state of a task in the workflow.
  */
-export type TaskStatus = "completed" | "pending" | "cancelled";
+type TaskStatus = "completed" | "pending" | "cancelled";
 
 /**
  * Available task priority levels.
  * Determines the urgency and visual treatment of tasks.
  */
-export type TaskPriority = "high" | "low" | "medium";
+type TaskPriority = "high" | "low" | "medium";

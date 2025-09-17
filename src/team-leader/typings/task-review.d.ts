@@ -1,6 +1,6 @@
-export type ReviewStatus = "pending" | "approved" | "changes_requested";
+type ReviewStatus = "pending" | "approved" | "changes_requested";
 
-export interface TaskReviewItem {
+interface TaskReviewItem {
   id: string;
   member_name: string;
   week_label: string; // e.g. "Week of January 8"
@@ -10,13 +10,13 @@ export interface TaskReviewItem {
   status: ReviewStatus;
 }
 
-export interface TaskReviewActions {
+interface TaskReviewActions {
   on_approve?: (id: string) => void;
   on_request_changes?: (id: string) => void;
   on_open_details?: (id: string) => void;
 }
 
-export type TaskReviewProps = {
+type TaskReviewProps = {
   item: TaskReviewItem;
   actions?: TaskReviewActions;
   className?: string;

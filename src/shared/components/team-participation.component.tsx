@@ -1,7 +1,5 @@
-import { clsx }from "clsx";
+import { clsx } from "clsx";
 import { GrGroup } from "react-icons/gr";
-import type { TeamParticipationSliderPropsInt } from "../typings/team-participation";
-
 
 /**
  * TeamParticipationSlider - A visual component that displays team engagement metrics and participation rates.
