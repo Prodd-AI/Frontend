@@ -1,4 +1,3 @@
-import type { TeamAnalysisCardProps } from "../typings/team-analysis-card.d";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PiUsersThreeLight } from "react-icons/pi";

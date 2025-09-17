@@ -1,9 +1,7 @@
-import type { ClassValue } from "clsx";
-
 /**
  * Interface for TeamParticipationSlider component props
  */
-export interface TeamParticipationSliderPropsInt {
+interface TeamParticipationSliderPropsInt {
   /** Optional title for the team participation component */
   title?: string;
   /** Additional CSS classes to apply to the component */

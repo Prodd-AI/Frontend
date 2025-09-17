@@ -1,7 +1,7 @@
 /**
  * Props interface for the DailyMoodCheckIn component.
  */
-export interface DailyMoodCheckInPropsInt {
+interface DailyMoodCheckInPropsInt {
   /** Additional CSS classes to apply to the component container */
   className?: ClassValue;
   /** Title displayed at the top of the component */
@@ -24,7 +24,7 @@ export interface DailyMoodCheckInPropsInt {
  * Ref interface for imperative control of the DailyMoodCheckIn component.
  * Use these methods to programmatically control the component from parent.
  */
-export interface DailyMoodCheckInRef {
+interface DailyMoodCheckInRef {
   /** Resets the form to its initial state (clears mood selection and description) */
   reset: () => void;
   /** Gets the current form data without triggering re-renders */
@@ -35,4 +35,4 @@ export interface DailyMoodCheckInRef {
  * Available mood options for the daily mood check-in component.
  * Each mood represents a different emotional state from positive to negative.
  */
-export type Moods = "Great" | "Good" | "Okay" | "Not Great" | "Rough";
+type Moods = "Great" | "Good" | "Okay" | "Not Great" | "Rough";

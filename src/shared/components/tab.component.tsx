@@ -1,4 +1,3 @@
-import type { TabComponentProps } from "../typings/tab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TabComponent = ({ items, activeTab, onTabChange }: TabComponentProps) => {

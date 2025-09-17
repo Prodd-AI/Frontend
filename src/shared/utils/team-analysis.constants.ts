@@ -1,5 +1,3 @@
-import type { TeamAnalysisInfo } from "../typings/team-analysis-card.d";
-
 export const sample_team_analyses: TeamAnalysisInfo[] = [
   {
     id: "eng",

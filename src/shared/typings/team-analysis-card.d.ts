@@ -1,4 +1,4 @@
-export interface TeamAnalysisInfo {
+interface TeamAnalysisInfo {
   id: string;
   team_name: string;
   lead_name: string; // e.g., "Sarah Johnson"
@@ -9,11 +9,11 @@ export interface TeamAnalysisInfo {
   participation_percent: number; // 0-100
 }
 
-export interface TeamAnalysisActions {
+interface TeamAnalysisActions {
   on_view?: (id: string) => void;
 }
 
-export type TeamAnalysisCardProps = {
+type TeamAnalysisCardProps = {
   team: TeamAnalysisInfo;
   actions?: TeamAnalysisActions;
   className?: string;

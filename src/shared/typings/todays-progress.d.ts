@@ -1,7 +1,7 @@
 /**
  * Interface for TodaysProgress component props
  */
-export interface TodaysProgresssPropsInt {
+interface TodaysProgresssPropsInt {
   /** Optional title for the progress component */
   title?: string;
   /** Additional CSS classes to apply to the component */

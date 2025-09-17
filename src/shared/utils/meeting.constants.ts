@@ -1,5 +1,3 @@
-import type { MeetingInfo } from "../typings/meeting-card.d";
-
 export const sample_meetings: MeetingInfo[] = [
   {
     id: "mtg-sprint-planning",

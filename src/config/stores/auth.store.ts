@@ -1,5 +1,3 @@
-import type { AuthState } from "@/shared/typings/auth.store";
-import type { TeamMember } from "@/shared/typings/team-member";
 import { create } from "zustand";
 
 const useAuthStore = create<AuthState>((set) => ({
