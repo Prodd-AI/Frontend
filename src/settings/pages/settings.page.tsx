@@ -1,6 +1,5 @@
 import TabComponent from "@/shared/components/tab.component";
 import SettingsTabComponent from "../components/settings-tab.component";
-import { SettingsTab } from "../typings/tab.d";
 import { tabItems } from "../utils/constants.utils";
 import { useState } from "react";
 import TaskReviewComponent from "@/team-leader/components/task-review.component";
@@ -11,6 +10,8 @@ import TeamAnalysisCardComponent from "@/shared/components/team-analysis-card.co
 import { sample_team_analyses } from "@/shared/utils/team-analysis.constants";
 import FlightRiskCardComponent from "@/hr/components/flight-risk-card.component";
 import { sample_flight_risks } from "@/hr/utils/flight-risk.constants";
+import WellnessTrendCards from "@/hr/components/wellness-trend-cards.component";
+import { sample_wellness_trends } from "@/hr/utils/wellness-trend.constants";
 
 function SettingsPage() {
   const [activeTab, setActiveTab] = useState<string>("todays_focus");
@@ -24,7 +25,9 @@ function SettingsPage() {
         <ul className="flex flex-col gap-10 mt-4">
           <li>
             <p className="text-sm font-bold">Settings Tab</p>
-            <SettingsTabComponent initialActiveTab={SettingsTab.OVERVIEW} />
+            <SettingsTabComponent
+              initialActiveTab={"overview" as SettingsTab}
+            />
           </li>
 
           <li>
@@ -70,6 +73,11 @@ function SettingsPage() {
                 <FlightRiskCardComponent key={person.id} person={person} />
               ))}
             </div>
+          </li>
+
+          <li>
+            <p className="text-sm font-bold mb-2">Wellness Trend Cards</p>
+            <WellnessTrendCards items={sample_wellness_trends} />
           </li>
         </ul>
       </div>

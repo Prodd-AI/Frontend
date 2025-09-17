@@ -1,6 +1,6 @@
-export type FlightRiskStatus = "at_risk" | "watch" | "healthy";
+type FlightRiskStatus = "at_risk" | "watch" | "healthy";
 
-export interface FlightRiskInfo {
+interface FlightRiskInfo {
   id: string;
   member_name: string; // e.g., "Alex Chan"
   role_title: string; // e.g., "Frontend Develop"
@@ -15,14 +15,14 @@ export interface FlightRiskInfo {
   scheduled_call_label?: string; // e.g., "Call scheduled for 1/21/2024"
 }
 
-export interface FlightRiskActions {
+interface FlightRiskActions {
   on_schedule_one_to_one?: (id: string) => void;
   on_contact_team_lead?: (id: string) => void;
   on_view_profile?: (id: string) => void;
   on_see_more?: (id: string) => void;
 }
 
-export type FlightRiskCardProps = {
+type FlightRiskCardProps = {
   person: FlightRiskInfo;
   actions?: FlightRiskActions;
   className?: string;

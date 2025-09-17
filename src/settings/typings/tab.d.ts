@@ -1,4 +1,4 @@
-export enum SettingsTab {
+enum SettingsTab {
   OVERVIEW = "overview",
   ACCOUNT = "account",
   PREFERENCES = "preferences",

@@ -1,5 +1,3 @@
-import type { FlightRiskInfo } from "../typings/flight-risk-card.d";
-
 export const sample_flight_risks: FlightRiskInfo[] = [
   {
     id: "alex-chan",

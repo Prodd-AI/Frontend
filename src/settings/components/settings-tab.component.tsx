@@ -1,4 +1,3 @@
-import type { SettingsTab } from "../typings/tab";
 import { tabs } from "../utils/constants.utils";
 import { useState } from "react";
 
