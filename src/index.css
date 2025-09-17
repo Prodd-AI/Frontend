@@ -9,14 +9,41 @@ body {
   font-family: "Open Sans", sans-serif;
 }
 
+.bg-card-bg-active {
+  background: var(--card-background-active);
+}
+
+.bg-button-bg-primary {
+  background: var(--button-bg-primary);
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
+  --radius-xss: calc(var(--radius) - 7px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-auth-card: var(--radius-auth-card);
+  --text-xxxs: 8px;
+  --text-xxxs--line-height: 10px;
+  --text-xxs: 10px;
+  --text-xxs--line-height: 12px;
+  --spacing-6\.5: 30px;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-grey-600: var(--text-grey-600);
+  --color-grey-400: #6b7280;
+  --color-grey-800: var(--text-grey-800);
   --color-card: var(--card);
+  --color-performance-red: #ef4444;
+  --color-performance-green: #25ac42;
+  --color-performance-yellow: #e0b012;
+  --color-bg-status-green: #e6f4e9;
+  --color-bg-status-yellow: #ddca0036;
+  --color-bg-status-red: #fd00000d;
+  --color-text-status-green: #10b981;
+  --color-text-status-yellow: #8d591a;
+  --color-text-status-red: #ef4444;
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
@@ -45,6 +72,9 @@ body {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-grey-light: var(--bg-grey-light);
+  --color-grey-lighter: var(--bg-grey-lighter);
+  --color-grey-primary: var(--bg-grey-primary);
 
   --color-primary-color: var(--primary-color);
   --color-primary-color-purple: var(--primary-color-purple);
@@ -55,13 +85,29 @@ body {
 
 :root {
   --radius: 0.625rem;
+  --radius-auth-card: 2.03875rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  --text-grey-600: #4f5359;
+  --text-grey-800: #251f2d;
+  --bg-grey-primary: #f3f4f6;
+  --bg-grey-light: #eae7ef;
+  --bg-grey-lighter: #e9e6ee4a;
   --card: oklch(1 0 0);
+  --card-background-active: linear-gradient(
+    192.27deg,
+    #955deb 6.73%,
+    #6619de 93.27%
+  );
+  --button-bg-primary: linear-gradient(
+    103.15deg,
+    #6619de 46.92%,
+    #1186da 104.49%
+  );
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: #6619de;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);

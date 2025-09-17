@@ -9,6 +9,8 @@ import MeetingCardComponent from "@/shared/components/meeting-card.component";
 import { sample_meetings } from "@/shared/utils/meeting.constants";
 import TeamAnalysisCardComponent from "@/shared/components/team-analysis-card.component";
 import { sample_team_analyses } from "@/shared/utils/team-analysis.constants";
+import FlightRiskCardComponent from "@/hr/components/flight-risk-card.component";
+import { sample_flight_risks } from "@/hr/utils/flight-risk.constants";
 
 function SettingsPage() {
   const [activeTab, setActiveTab] = useState<string>("todays_focus");
@@ -57,6 +59,15 @@ function SettingsPage() {
             <div className="grid md:grid-cols-2 gap-6">
               {sample_team_analyses.map((team) => (
                 <TeamAnalysisCardComponent key={team.id} team={team} />
+              ))}
+            </div>
+          </li>
+
+          <li>
+            <p className="text-sm font-bold mb-2">Flight Risk Card</p>
+            <div className="flex flex-col gap-4">
+              {sample_flight_risks.map((person) => (
+                <FlightRiskCardComponent key={person.id} person={person} />
               ))}
             </div>
           </li>
