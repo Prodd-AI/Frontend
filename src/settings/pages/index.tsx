@@ -1,13 +1,15 @@
 import SettingsTabComponent from "../components/settings-tab.component";
 import ProfileOverviewComponent from "../components/profile-overview.component";
 import { useState } from "react";
+import AccountSettingsComponent from "../components/account-settings.component";
 
 function SettingsPage() {
   const [active_tab, set_active_tab] = useState<SettingsTab>(
     "overview" as SettingsTab
   );
+
   return (
-    <div className="bg-linear-to-r from-primary-color/5 to-white min-h-screen">
+    <div className="bg-linear-to-r from-primary-color/5 to-primary-color/5 min-h-screen">
       <div className="max-w-screen-xl mx-auto md:p-10 p-4 ">
         {/* Top brand bar */}
         <div className="flex items-center gap-2 mb-6">
@@ -28,6 +30,7 @@ function SettingsPage() {
 
           <div className="mt-6">
             {active_tab === "overview" && <ProfileOverviewComponent />}
+            {active_tab === "account" && <AccountSettingsComponent />}
           </div>
         </div>
       </div>
