@@ -3,6 +3,8 @@ import ProfileOverviewComponent from "../components/profile-overview.component";
 import { useState } from "react";
 import AccountSettingsComponent from "../components/account-settings.component";
 import PreferencesComponent from "../components/preferences.component";
+import PrivacyComponent from "../components/privacy.component";
+import TeamDetailsComponent from "../components/team-details.component";
 
 function SettingsPage() {
   const [active_tab, set_active_tab] = useState<SettingsTab>(
@@ -33,6 +35,8 @@ function SettingsPage() {
             {active_tab === "overview" && <ProfileOverviewComponent />}
             {active_tab === "account" && <AccountSettingsComponent />}
             {active_tab === "preferences" && <PreferencesComponent />}
+            {active_tab === "privacy" && <PrivacyComponent />}
+            {active_tab === "team" && <TeamDetailsComponent />}
           </div>
         </div>
       </div>
