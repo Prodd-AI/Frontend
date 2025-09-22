@@ -2,6 +2,7 @@ import SettingsTabComponent from "../components/settings-tab.component";
 import ProfileOverviewComponent from "../components/profile-overview.component";
 import { useState } from "react";
 import AccountSettingsComponent from "../components/account-settings.component";
+import PreferencesComponent from "../components/preferences.component";
 
 function SettingsPage() {
   const [active_tab, set_active_tab] = useState<SettingsTab>(
@@ -31,6 +32,7 @@ function SettingsPage() {
           <div className="mt-6">
             {active_tab === "overview" && <ProfileOverviewComponent />}
             {active_tab === "account" && <AccountSettingsComponent />}
+            {active_tab === "preferences" && <PreferencesComponent />}
           </div>
         </div>
       </div>
