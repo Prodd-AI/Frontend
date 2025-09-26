@@ -5,7 +5,7 @@ function AuthLayout({ className, children }: AuthLayoutPropsInt) {
     <div
       className={clsx(
         className,
-        "lg:p-8 px-4 py-6.5 h-svh w-full "
+        "lg:p-8  h-svh w-full bg-linear-to-br from-[#E4D6FA] via-[#F8F8F9] to-[#F8F8F9] "
       )}
     >
       {children}

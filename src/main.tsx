@@ -8,7 +8,7 @@ import {
   QueryCache,
   MutationCache,
 } from "@tanstack/react-query";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { getErrorMessage } from "./shared/utils/error-message.utils.ts";
 
 const queryClient = new QueryClient({
@@ -29,6 +29,5 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <App />
     </QueryClientProvider>
-    <Toaster richColors position="top-right" />
   </StrictMode>
 );

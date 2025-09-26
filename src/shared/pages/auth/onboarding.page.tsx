@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { LuArrowUpRight } from "react-icons/lu";
 import useIsMobile from "@/shared/hooks/useIsMobile";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 function OnboardingPage() {
   return <AuthLayout children={<OnboardingComponent />} />;
@@ -330,26 +331,28 @@ const OnboardingComponent = () => {
               </div>
             </div>
           )}
-          <Button
-            className={`h-[3.188rem] transition-all duration-300 ease-out animate-fade-in-up group ${
-              isMobile && currentSlide !== mobile_carousel_cards.length - 1
-                ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60 hover:bg-gray-400 hover:scale-100 hover:shadow-none"
-                : "bg-[#6619DE] text-white hover:bg-[#5915c7] hover:shadow-xl hover:scale-105"
-            }`}
-            style={{ animationDelay: "1000ms" }}
-            disabled={
-              isMobile && currentSlide !== mobile_carousel_cards.length - 1
-            }
-          >
-            Let's Explore{" "}
-            <LuArrowUpRight
-              className={`transition-transform duration-300 ease-out ${
+          <Link to="/auth/login" className=" w-full">
+            <Button
+              className={`h-[3.188rem] transition-all duration-300 ease-out animate-fade-in-up w-full group ${
                 isMobile && currentSlide !== mobile_carousel_cards.length - 1
-                  ? ""
-                  : "group-hover:translate-x-1 group-hover:-translate-y-1"
+                  ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60 hover:bg-gray-400 hover:scale-100 hover:shadow-none"
+                  : "bg-[#6619DE] text-white hover:bg-[#5915c7] hover:shadow-xl hover:scale-105"
               }`}
-            />
-          </Button>
+              style={{ animationDelay: "1000ms" }}
+              disabled={
+                isMobile && currentSlide !== mobile_carousel_cards.length - 1
+              }
+            >
+              Let's Explore{" "}
+              <LuArrowUpRight
+                className={`transition-transform duration-300 ease-out ${
+                  isMobile && currentSlide !== mobile_carousel_cards.length - 1
+                    ? ""
+                    : "group-hover:translate-x-1 group-hover:-translate-y-1"
+                }`}
+              />
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
