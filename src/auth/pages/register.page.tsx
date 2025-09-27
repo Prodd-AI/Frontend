@@ -1,6 +1,6 @@
 import AuthLayout from "@/shared/components/auth.layout.component";
 
-import RegisterFormComponent from "@/shared/components/forms/register.form.component";
+import RegisterFormComponent from "@/auth/components/forms/register.form.component";
 import AuthFormLayout from "@/shared/components/auth-form-layout";
 
 function Register() {

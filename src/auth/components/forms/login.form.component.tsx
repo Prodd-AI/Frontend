@@ -5,25 +5,25 @@ import { login_schema } from "@/lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import z from "zod";
 import Oauth from "@/shared/components/oauth.component";
 //import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { LoginFormData } from "@/auth/typings/auth";
 
 function LoginFormComponent() {
   const [showPassword, setShowPassword] = useState(false);
-  type LoginForm = z.infer<typeof login_schema>;
+
   const {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm<LoginForm>({
+  } = useForm<LoginFormData>({
     resolver: zodResolver(login_schema),
   });
 
-  const onSubmit = (values: LoginForm) => {
+  const onSubmit = (values: LoginFormData) => {
     console.log(values);
     /** try {
       // Show loading toast

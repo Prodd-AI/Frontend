@@ -1,21 +1,20 @@
+import { ResetPasswordFormData } from "@/auth/typings/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { reset_password_schema } from "@/lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import z from "zod";
 
 function ResetPasswordFormComponent() {
-  type FormData = z.infer<typeof reset_password_schema>;
   const {
     formState: { errors },
     register,
     handleSubmit,
-  } = useForm<FormData>({
+  } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(reset_password_schema),
   });
-  const onSubmit = (values: FormData) => {
+  const onSubmit = (values: ResetPasswordFormData) => {
     console.log(values);
   };
 

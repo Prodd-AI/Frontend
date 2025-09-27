@@ -8,11 +8,10 @@ import { Label } from "@/components/ui/label";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+
 import { useState } from "react";
 import { verify_email_schema } from "@/lib/schemas";
-
-type VerifyEmailForm = z.infer<typeof verify_email_schema>;
+import { VerifyEmailFormData } from "@/auth/typings/auth";
 
 function VerifyEmailFormComponent() {
   const [isResending, setIsResending] = useState(false);
@@ -21,14 +20,14 @@ function VerifyEmailFormComponent() {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<VerifyEmailForm>({
+  } = useForm<VerifyEmailFormData>({
     resolver: zodResolver(verify_email_schema),
     defaultValues: {
       code: "",
     },
   });
 
-  const onSubmit = (values: VerifyEmailForm) => {
+  const onSubmit = (values: VerifyEmailFormData) => {
     console.log("Verify email submit:", values);
     // TODO: Integrate with API to verify the code
   };

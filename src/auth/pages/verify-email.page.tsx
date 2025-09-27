@@ -1,6 +1,6 @@
 import AuthFormLayout from "@/shared/components/auth-form-layout";
 import AuthLayout from "@/shared/components/auth.layout.component";
-import VerifyEmailFormComponent from "@/shared/components/forms/verify-email.form.component";
+import VerifyEmailFormComponent from "@/auth/components/forms/verify-email.form.component";
 
 function VerfiyEmail() {
   return (

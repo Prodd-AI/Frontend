@@ -1,21 +1,20 @@
+import { ForgotPasswordFormData } from "@/auth/typings/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { forgot_password_schema } from "@/lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import z from "zod";
 
 function ForgotPasswordFormComponent() {
-  type FormData = z.infer<typeof forgot_password_schema>;
   const {
     formState: { errors },
     handleSubmit,
     register,
-  } = useForm<FormData>({
+  } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgot_password_schema),
   });
-  const onSubmit = (values: FormData) => {
+  const onSubmit = (values: ForgotPasswordFormData) => {
     console.log(values);
   };
   return (

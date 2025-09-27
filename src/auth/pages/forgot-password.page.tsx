@@ -1,6 +1,6 @@
 import AuthFormLayout from "@/shared/components/auth-form-layout";
 import AuthLayout from "@/shared/components/auth.layout.component";
-import ForgotPasswordFormComponent from "@/shared/components/forms/forgot-password.form.component";
+import ForgotPasswordFormComponent from "@/auth/components/forms/forgot-password.form.component";
 
 function ForgotPassword() {
   return (

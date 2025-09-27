@@ -6,10 +6,10 @@ import Oauth from "@/shared/components/oauth.component";
 import { Link } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { register_schema } from "@/lib/schemas";
+import { RegisterFormData } from "@/auth/typings/auth";
 const RegisterFormComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({
@@ -50,15 +50,13 @@ const RegisterFormComponent = () => {
     return { score, feedback, checks };
   };
 
-  type RegisterForm = z.infer<typeof register_schema>;
-
   const {
     register,
     control,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<RegisterForm>({
+  } = useForm<RegisterFormData>({
     resolver: zodResolver(register_schema),
   });
 
@@ -71,7 +69,7 @@ const RegisterFormComponent = () => {
     setPasswordStrength(strength);
   }, [watchedPassword]);
 
-  const onSubmit = (values: RegisterForm) => {
+  const onSubmit = (values: RegisterFormData) => {
     console.log("Register submit:", values);
   };
   return (

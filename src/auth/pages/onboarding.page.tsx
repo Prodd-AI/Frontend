@@ -125,7 +125,7 @@ const OnboardingComponent = () => {
     }
   };
   return (
-    <div className="mx-auto max-w-[1900px] h-full">
+    <div className="mx-auto max-w-[1900px] h-full sm:overflow-hidden p-5 sm:p-0 lg:p-0">
       <div className="animate-fade-in">
         <Logo />
       </div>
@@ -331,7 +331,7 @@ const OnboardingComponent = () => {
               </div>
             </div>
           )}
-          <Link to="/auth/login" className=" w-full">
+          <Link to="/auth/login" className=" w-full mb-6 sm:mb-0 lg:mb-0">
             <Button
               className={`h-[3.188rem] transition-all duration-300 ease-out animate-fade-in-up w-full group ${
                 isMobile && currentSlide !== mobile_carousel_cards.length - 1
