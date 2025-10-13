@@ -2,7 +2,7 @@ import logo from "../../../public/assets/icons/logo.svg";
 function Logo() {
   return (
     <div className="flex items-center gap-3">
-      <div className=" relative lg:size-[51.20000076293945px] size-[1.601rem]">
+      <div className=" relative lg:size-[51.2px] size-[1.601rem]">
         <img
           src={logo}
           alt="Prod AI logo"

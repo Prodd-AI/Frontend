@@ -18,7 +18,9 @@ const AuthCard = ({
       )}
     >
       <section
-        className={`flex items-center gap-3 ${centralize && "justify-center"}
+        className={`flex items-center gap-3 ${
+          centralize && "justify-center text-center"
+        }
        `}
       >
         <img

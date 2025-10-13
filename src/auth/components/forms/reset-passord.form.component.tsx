@@ -43,7 +43,7 @@ function ResetPasswordFormComponent() {
         </Label>
         <Input
           placeholder="Confirm new password"
-          id="password"
+          id="conmfirm-password"
           {...register("newPassword")}
           className=" h-[55px] rounded-[10px]"
         />
