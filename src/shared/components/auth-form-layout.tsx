@@ -26,7 +26,7 @@ function AuthFormLayout({
           </p>
         </div>
         {Form && <Form />}
-      </AuthCard>
+    </AuthCard>
     </div>
   );
 }

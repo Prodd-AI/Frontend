@@ -10,6 +10,8 @@ import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { register_schema } from "@/lib/schemas";
 import { RegisterFormData } from "@/auth/typings/auth";
+import { useMutation } from "@tanstack/react-query";
+import { RegsiterStakeHolder } from "@/config/services/auth.service";
 const RegisterFormComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({
@@ -21,6 +23,13 @@ const RegisterFormComponent = () => {
       lowercase: false,
       number: false,
     },
+  });
+  const { mutate, isPending } = useMutation<
+    unknown,
+    unknown,
+    Omit<RegisterFormData, "accepted">
+  >({
+    mutationFn: (data) => RegsiterStakeHolder(data),
   });
 
   // Password strength calculation
@@ -69,8 +78,13 @@ const RegisterFormComponent = () => {
     setPasswordStrength(strength);
   }, [watchedPassword]);
 
-  const onSubmit = (values: RegisterFormData) => {
-    console.log("Register submit:", values);
+  const onSubmit = (values: Omit<RegisterFormData, "accepted">) => {
+    mutate({
+      last_name: values.last_name,
+      first_name: values.first_name,
+      email: values.email,
+      password: values.password,
+    });
   };
   return (
     <form
@@ -80,24 +94,47 @@ const RegisterFormComponent = () => {
     >
       <div className="flex flex-col gap-2">
         <Label
-          htmlFor="fullName"
+          htmlFor="first_name"
           className="text-[#000000] font-semibold text-sm sm:text-base"
         >
-          Full Name
+          First Name
         </Label>
         <Input
-          id="fullName"
+          id="first_name"
           type="text"
           autoComplete="name"
-          placeholder="Enter your full name"
-          aria-invalid={!!errors.fullName}
-          aria-describedby={errors.fullName ? "fullName-error" : undefined}
+          placeholder="Enter your First name"
+          aria-invalid={!!errors.first_name}
+          aria-describedby={errors.first_name ? "first_name-error" : undefined}
           className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
-          {...register("fullName")}
+          {...register("first_name")}
         />
-        {errors.fullName && (
-          <p id="fullName-error" className="text-red-500 text-xs sm:text-sm">
-            {errors.fullName.message}
+        {errors.first_name && (
+          <p id="first_name-error" className="text-red-500 text-xs sm:text-sm">
+            {errors.first_name.message}
+          </p>
+        )}
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label
+          htmlFor="first_name"
+          className="text-[#000000] font-semibold text-sm sm:text-base"
+        >
+          Last Name
+        </Label>
+        <Input
+          id="last_name"
+          type="text"
+          autoComplete="name"
+          placeholder="Enter your Last name"
+          aria-invalid={!!errors.last_name}
+          aria-describedby={errors.last_name ? "last_name-error" : undefined}
+          className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
+          {...register("last_name")}
+        />
+        {errors.last_name && (
+          <p id="last_name-error" className="text-red-500 text-xs sm:text-sm">
+            {errors.last_name.message}
           </p>
         )}
       </div>
@@ -249,7 +286,7 @@ const RegisterFormComponent = () => {
         )}
       </div>
 
-      <div className="flex items-start sm:items-center gap-3 text-sm sm:text-base font-medium">
+      <div className="flex items-center  sm:items-center gap-3 text-sm sm:text-base font-medium">
         <Controller
           control={control}
           name="accepted"
@@ -289,7 +326,11 @@ const RegisterFormComponent = () => {
         </div>
       </div>
 
-      <Button type="submit" className="mt-2 h-11 sm:h-[2.543rem]">
+      <Button
+        type="submit"
+        className={`mt-2 h-11 sm:h-[2.543rem] ${isPending && "opacity-25"}`}
+        disabled={isPending}
+      >
         Create Account
       </Button>
       <Oauth />

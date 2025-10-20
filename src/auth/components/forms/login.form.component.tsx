@@ -11,6 +11,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LoginFormData } from "@/auth/typings/auth";
+import { useMutation } from "@tanstack/react-query";
+import { LoginStakeHolder } from "@/config/services/auth.service";
 
 function LoginFormComponent() {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,9 +24,15 @@ function LoginFormComponent() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(login_schema),
   });
+  const { mutate, isPending } = useMutation<unknown, unknown, LoginFormData>({
+    mutationFn: (data) => LoginStakeHolder(data),
+  });
 
   const onSubmit = (values: LoginFormData) => {
-    console.log(values);
+    if (!values) {
+      return;
+    }
+    mutate(values);
     /** try {
       // Show loading toast
       const loadingToast = toast.loading("Signing you in...");
@@ -73,6 +81,7 @@ function LoginFormComponent() {
           className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
           placeholder="e.g  johndoe@gmail.com"
           {...register("email")}
+          autoComplete="true"
         />
         {errors.email && (
           <div className="text-red-500 text-xs sm:text-sm">
@@ -94,6 +103,7 @@ function LoginFormComponent() {
             placeholder="Enter password"
             type={showPassword ? "text" : "password"}
             {...register("password")}
+            autoComplete="true"
           />
           <button
             type="button"
@@ -124,7 +134,11 @@ function LoginFormComponent() {
           Forgot Password?
         </Link>
       </div>
-      <Button type="submit" className="mt-2 h-11 sm:h-[2.543rem]">
+      <Button
+        type="submit"
+        className={`mt-2 h-11 sm:h-[2.543rem] ${isPending && "opacity-25"}`}
+        disabled={isPending}
+      >
         Login
       </Button>
       <Oauth />

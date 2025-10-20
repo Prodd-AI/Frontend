@@ -374,7 +374,7 @@ export class ApiService {
    */
   async delete<T>(
     path: string,
-    data?: any,
+    data?: T,
     requireAuth: boolean = false
   ): Promise<T> {
     const url = this.urlMapper(path);

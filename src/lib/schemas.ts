@@ -2,10 +2,14 @@ import z from "zod";
 
 // Registration Validation schema
 const register_schema = z.object({
-  fullName: z
+  first_name: z
     .string()
-    .min(2, "Full name must be at least 2 characters")
-    .max(80, "Full name is too long"),
+    .min(2, "First Name is be at least 3 characters")
+    .max(80, "First Name must not exceed 80 characters"),
+  last_name: z
+    .string()
+    .min(2, "Last Name is be at least 3 characters")
+    .max(80, "Last Name must not exceed 80 characters"),
   email: z.email("Please enter a valid email"),
   password: z
     .string()
@@ -60,14 +64,14 @@ const reset_password_schema = z
     path: ["newPassword"],
   });
 
-  const verify_email_schema = z.object({
-    code: z.string().length(6, "Code must be exactly 6 digits"),
-  });
-  
+const verify_email_schema = z.object({
+  code: z.string().length(6, "Code must be exactly 6 digits"),
+});
+
 export {
   register_schema,
   login_schema,
   forgot_password_schema,
   reset_password_schema,
-  verify_email_schema
+  verify_email_schema,
 };

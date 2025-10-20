@@ -1,4 +1,9 @@
-import { forgot_password_schema, login_schema } from "@/lib/schemas";
+import {
+  forgot_password_schema,
+  login_schema,
+  register_schema,
+  verify_email_schema,
+} from "@/lib/schemas";
 import z from "zod";
 
 type ForgotPasswordFormData = z.infer<typeof forgot_password_schema>;
