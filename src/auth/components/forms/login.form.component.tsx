@@ -12,7 +12,7 @@ import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LoginFormData } from "@/auth/typings/auth";
 import { useMutation } from "@tanstack/react-query";
-import { LoginStakeHolder } from "@/config/services/auth.service";
+import { LoginTeamMember } from "@/config/services/auth.service";
 
 function LoginFormComponent() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +25,7 @@ function LoginFormComponent() {
     resolver: zodResolver(login_schema),
   });
   const { mutate, isPending } = useMutation<unknown, unknown, LoginFormData>({
-    mutationFn: (data) => LoginStakeHolder(data),
+    mutationFn: (data) => LoginTeamMember(data),
   });
 
   const onSubmit = (values: LoginFormData) => {
@@ -33,7 +33,8 @@ function LoginFormComponent() {
       return;
     }
     mutate(values);
-    /** try {
+
+    /**try {
       // Show loading toast
       const loadingToast = toast.loading("Signing you in...");
 
@@ -59,7 +60,8 @@ function LoginFormComponent() {
         description: "Please check your credentials and try again.",
         duration: 5000,
       });
-    } */
+    } 
+    */
   };
 
   return (

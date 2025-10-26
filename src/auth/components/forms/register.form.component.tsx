@@ -3,7 +3,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Oauth from "@/shared/components/oauth.component";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
@@ -11,7 +11,10 @@ import { Eye, EyeOff } from "lucide-react";
 import { register_schema } from "@/lib/schemas";
 import { RegisterFormData } from "@/auth/typings/auth";
 import { useMutation } from "@tanstack/react-query";
-import { RegsiterStakeHolder } from "@/config/services/auth.service";
+import { RegsiterTeamMember } from "@/config/services/auth.service";
+import { toast } from "sonner";
+import useAuthStore from "@/config/stores/auth.store";
+
 const RegisterFormComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({
@@ -24,12 +27,32 @@ const RegisterFormComponent = () => {
       number: false,
     },
   });
+  const { setInviteOtp } = useAuthStore();
+  const navigate = useNavigate();
   const { mutate, isPending } = useMutation<
-    unknown,
+    GeneralReturnInt<RegisterTeamMemberReturnInt>,
     unknown,
     Omit<RegisterFormData, "accepted">
   >({
-    mutationFn: (data) => RegsiterStakeHolder(data),
+    mutationFn: (data) => RegsiterTeamMember(data),
+    onSuccess: (response) => {
+      toast.success("Account created successfully!", {
+        description: "Please check your email to verify your account.",
+      });
+      setInviteOtp(response?.data?.invite_otp ?? "");
+      setTimeout(() => {
+        navigate("/auth/verify-email");
+      }, 2000);
+    },
+    onError: (error: unknown) => {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An error occurred during registration. Please try again.";
+      toast.error("Registration failed", {
+        description: errorMessage,
+      });
+    },
   });
 
   // Password strength calculation
@@ -64,6 +87,7 @@ const RegisterFormComponent = () => {
     control,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(register_schema),
@@ -79,13 +103,27 @@ const RegisterFormComponent = () => {
   }, [watchedPassword]);
 
   const onSubmit = (values: Omit<RegisterFormData, "accepted">) => {
-    mutate({
-      last_name: values.last_name,
-      first_name: values.first_name,
-      email: values.email,
-      password: values.password,
-    });
+    const loadingToast = toast.loading("Creating your account...");
+
+    mutate(
+      {
+        last_name: values.last_name,
+        first_name: values.first_name,
+        email: values.email,
+        password: values.password,
+      },
+      {
+        onSuccess: () => {
+          toast.dismiss(loadingToast);
+          reset();
+        },
+        onError: () => {
+          toast.dismiss(loadingToast);
+        },
+      }
+    );
   };
+
   return (
     <form
       className="flex flex-col gap-4"
@@ -102,7 +140,7 @@ const RegisterFormComponent = () => {
         <Input
           id="first_name"
           type="text"
-          autoComplete="name"
+          autoComplete="first_name"
           placeholder="Enter your First name"
           aria-invalid={!!errors.first_name}
           aria-describedby={errors.first_name ? "first_name-error" : undefined}
@@ -123,9 +161,9 @@ const RegisterFormComponent = () => {
           Last Name
         </Label>
         <Input
-          id="last_name"
+          id="second_name"
           type="text"
-          autoComplete="name"
+          autoComplete="last_name"
           placeholder="Enter your Last name"
           aria-invalid={!!errors.last_name}
           aria-describedby={errors.last_name ? "last_name-error" : undefined}
@@ -331,15 +369,13 @@ const RegisterFormComponent = () => {
         className={`mt-2 h-11 sm:h-[2.543rem] ${isPending && "opacity-25"}`}
         disabled={isPending}
       >
-        Create Account
+        {isPending ? "....." : "Create Account"}
       </Button>
       <Oauth />
       <div className="text-center mt-[19px] font-[600] text-[1rem]">
         <p>
-          {" "}
           Already have an account?{" "}
           <Link to="/auth/login" className=" text-[#6619DE] hover:underline">
-            {" "}
             Login
           </Link>
         </p>

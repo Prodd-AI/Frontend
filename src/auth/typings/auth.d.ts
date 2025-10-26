@@ -11,3 +11,4 @@ type LoginFormData = z.infer<typeof login_schema>;
 type RegisterFormData = z.infer<typeof register_schema>;
 type ResetPasswordFormData = z.infer<typeof reset_password_schema>;
 type VerifyEmailFormData = z.infer<typeof verify_email_schema>;
+

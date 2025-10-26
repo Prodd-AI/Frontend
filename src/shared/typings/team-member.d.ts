@@ -1,8 +1,9 @@
 interface TeamMember {
   id: string;
-  name: string;
+  first_name: string;
+  last_name :string;
   email: string;
-  role: TeamMemberRole;
+  user_role: TeamMemberRole;
 }
 
 enum TeamMemberRole {

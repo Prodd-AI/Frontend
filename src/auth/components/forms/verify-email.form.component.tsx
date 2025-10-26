@@ -12,6 +12,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { verify_email_schema } from "@/lib/schemas";
 import { VerifyEmailFormData } from "@/auth/typings/auth";
+//import useAuthStore from "@/config/stores/auth.store";
+import { useMutation } from "@tanstack/react-query";
+import { verifyEmail } from "@/config/services/auth.service";
 
 function VerifyEmailFormComponent() {
   const [isResending, setIsResending] = useState(false);
@@ -26,11 +29,19 @@ function VerifyEmailFormComponent() {
       code: "",
     },
   });
+  //  const invite_otp = useAuthStore((state) => state.invite_otp);
 
   const onSubmit = (values: VerifyEmailFormData) => {
     console.log("Verify email submit:", values);
     // TODO: Integrate with API to verify the code
   };
+  useMutation<
+    GeneralReturnInt<unknown>,
+    unknown,
+    { email: string; otp: string }
+  >({
+    mutationFn: (data) => verifyEmail(data),
+  });
 
   const handleResendCode = async () => {
     setIsResending(true);
