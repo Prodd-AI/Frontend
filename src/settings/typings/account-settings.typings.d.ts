@@ -1,9 +1,11 @@
-type TwoFactorSettings = {
-  enabled: boolean;
-};
+declare module "@/settings/typings/account-settings.typings" {
+  export type TwoFactorSettings = {
+    enabled: boolean;
+  };
 
-type ConnectedApp = {
-  id: string;
-  name: "Slack" | "Jira" | "Calendar";
-  status: "connected" | "disconnected";
-};
+  export type ConnectedApp = {
+    id: string;
+    name: "Slack" | "Jira" | "Calendar";
+    status: "connected" | "disconnected";
+  };
+}
