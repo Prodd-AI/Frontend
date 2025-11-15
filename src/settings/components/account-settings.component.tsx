@@ -16,6 +16,7 @@ import {
   simulate_update_two_factor,
   simulate_toggle_app,
 } from "@/settings/utils/account-settings.functions";
+import { ConnectedApp } from "@/settings/typings/account-settings.typings";
 
 const Section = ({ children }: { children: React.ReactNode }) => (
   <div className="rounded-xl border border-[#E5E7EB] p-6">{children}</div>

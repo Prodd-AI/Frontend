@@ -70,6 +70,11 @@ import clsx from "clsx";
 import { FaRegCalendar } from "react-icons/fa";
 import { FiPlus } from "react-icons/fi";
 import { FaCheck } from "react-icons/fa6";
+import {
+  WeeklyStreakRef,
+  DayStatus,
+  WeeklyStreakPropsInt,
+} from "@/shared/typings/weekly-streak";
 
 /**
  * Weekly Streak Component

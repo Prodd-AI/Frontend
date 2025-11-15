@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { AuthLayoutPropsInt } from "@/shared/typings/auth.layout";
 
 function AuthLayout({ className, children }: AuthLayoutPropsInt) {
   return (

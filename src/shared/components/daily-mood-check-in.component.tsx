@@ -76,6 +76,9 @@ import clsx from "clsx";
 import { FaRegSmile } from "react-icons/fa";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Moods } from "@/shared/typings/daily-mood-check-in";
+import { DailyMoodCheckInPropsInt } from "@/shared/typings/daily-mood-check-in";
+import { DailyMoodCheckInRef } from "@/shared/typings/daily-mood-check-in";
 
 /**
  * Emoji mapping for each mood type.

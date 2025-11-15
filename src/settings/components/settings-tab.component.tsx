@@ -1,3 +1,4 @@
+import { SettingsTab } from "@/settings/typings/tab";
 import { tabs } from "../utils/constants.utils";
 
 const SettingsTabComponent = ({

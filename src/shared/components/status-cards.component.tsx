@@ -1,4 +1,8 @@
 import { cn } from "@/lib/utils";
+import {
+  StatusCardItem,
+  StatusCardsProps,
+} from "@/shared/typings/status-cards";
 
 function formatDelta(item: StatusCardItem): { text: string; cls: string } {
   const color = item.delta_color ?? "auto";

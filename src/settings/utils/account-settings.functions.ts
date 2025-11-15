@@ -2,6 +2,10 @@ import type {
   PasswordUpdateForm,
   TwoFactorForm,
 } from "@/config/forms/account-settings.form";
+import {
+  TwoFactorSettings,
+  ConnectedApp,
+} from "@/settings/typings/account-settings.typings";
 
 export const QUERY_KEY_ACCOUNT_SETTINGS = ["settings", "account"] as const;
 

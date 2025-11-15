@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { stylesByVariant } from "../utils/wellness-trend.constants";
+import { WellnessTrendCardsProps } from "@/hr/typings/wellness-trend-cards";
 
 export default function WellnessTrendCards({
   items,

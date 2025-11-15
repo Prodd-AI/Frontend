@@ -1,4 +1,5 @@
 import AuthCard from "./cards/auth-card";
+import { AuthFormLayoutPropsInt } from "@/shared/typings/auth-form.layout";
 
 function AuthFormLayout({
   Form,

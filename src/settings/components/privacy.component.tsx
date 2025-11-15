@@ -18,6 +18,7 @@ import {
   visibility_schema,
   type VisibilityForm,
 } from "@/config/forms/privacy.form";
+import { VisibilityOption } from "@/settings/typings/privacy.typings";
 
 const Section = ({ children }: { children: React.ReactNode }) => (
   <div className="rounded-xl border border-[#E5E7EB] p-6">{children}</div>

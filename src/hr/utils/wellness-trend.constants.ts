@@ -1,3 +1,5 @@
+import { WellnessTrendItem } from "@/hr/typings/wellness-trend-cards";
+
 export const sample_wellness_trends: WellnessTrendItem[] = [
   {
     id: "positive",

@@ -5,6 +5,7 @@ import AccountSettingsComponent from "../components/account-settings.component";
 import PreferencesComponent from "../components/preferences.component";
 import PrivacyComponent from "../components/privacy.component";
 import TeamDetailsComponent from "../components/team-details.component";
+import { SettingsTab } from "@/settings/typings/tab";
 
 function SettingsPage() {
   const [active_tab, set_active_tab] = useState<SettingsTab>(

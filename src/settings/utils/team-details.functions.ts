@@ -1,4 +1,8 @@
 export const QUERY_KEY_TEAM_DETAILS = ["settings", "team"] as const;
+import {
+  TeamInfo,
+  TeamMemberItem,
+} from "@/settings/typings/team-details.typings";
 
 export const simulate_fetch_team_details = (): Promise<{
   team: TeamInfo;
