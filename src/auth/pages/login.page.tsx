@@ -6,9 +6,10 @@ function Login() {
   return (
     <AuthLayout>
       <AuthFormLayout
+      
         title="Welcome Back"
         subTitle="Log in to continue where you left off and stay connected with your team."
-        Form={LoginFormComponent}
+        Form={<LoginFormComponent />}
       />
     </AuthLayout>
   );

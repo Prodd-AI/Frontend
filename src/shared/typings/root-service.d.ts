@@ -1,8 +1,15 @@
-interface GeneralReturnInt<T = null> {
-  data?: T;
-  error?: string;
-  timstamp: Date;
-  status_code: number;
+type BaseReturnType = {
   message: string;
+  timestamp: string;
+};
+
+type GeneralReturnInt<T> = {
+  data: T;
+  success: boolean;
+} & BaseReturnType;
+
+type GeneralErrorInt = {
+  status_code: number;
+  error: string;
   path: string;
-}
+} & BaseReturnType;

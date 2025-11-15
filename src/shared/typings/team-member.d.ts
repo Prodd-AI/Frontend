@@ -1,15 +1,40 @@
 interface TeamMember {
-  id: string;
-  first_name: string;
-  last_name :string;
-  email: string;
-  user_role: TeamMemberRole;
+  user: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    user_role: TeamMemberRole;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    is_verified: boolean;
+    timezone: string | null;
+    start_work_hour: string | null;
+    end_work_hour: string | null;
+    invite_otp: string | null;
+    is_onboarded: boolean;
+    avatar_url: string | null;
+    organization_id: string | null;
+  };
+  access_token: string;
+  refresh_token: string;
 }
 
-enum TeamMemberRole {
-  SUPER_ADMIN = "SUPER_ADMIN",
-  TEAM_MEMBER = "TEAM_MEMBER",
-  TEAM_LEADER = "TEAM_LEADER",
-  HR = "HR",
-  EXECUTIVE = "EXECUTIVE",
-}
+// enum TeamMemberRole {
+//   SUPER_ADMIN = "super_admin",
+//   TEAM_MEMBER = "tean_member",
+//   TEAM_LEADER = "team_leader",
+//   HR = "hr",
+//   EXECUTIVE = "executive",
+// }
+
+const TeamMemberRole = {
+  SUPER_ADMIN = "super_admin",
+  TEAM_MEMBER = "team_member",
+  TEAM_LEADER = "team_leader",
+  HR = "hr",
+  EXECUTIVE = "executive",
+} as const;
+
+type TeamMemberRole = (typeof TeamMemberRole)[keyof typeof TeamMemberRole];

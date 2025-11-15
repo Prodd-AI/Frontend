@@ -9,15 +9,19 @@ import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { verify_email_schema } from "@/lib/schemas";
 import { VerifyEmailFormData } from "@/auth/typings/auth";
-//import useAuthStore from "@/config/stores/auth.store";
+import useAuthStore from "@/config/stores/auth.store";
 import { useMutation } from "@tanstack/react-query";
-import { verifyEmail } from "@/config/services/auth.service";
+import { resend_otp, verify_email } from "@/config/services/auth.service";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+
+const RESEND_COOLDOWN = 60; // 60 seconds cooldown
 
 function VerifyEmailFormComponent() {
-  const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const {
     control,
@@ -29,38 +33,79 @@ function VerifyEmailFormComponent() {
       code: "",
     },
   });
-  //  const invite_otp = useAuthStore((state) => state.invite_otp);
+  const navigate = useNavigate();
+  const { email, login } = useAuthStore();
 
-  const onSubmit = (values: VerifyEmailFormData) => {
-    console.log("Verify email submit:", values);
-    // TODO: Integrate with API to verify the code
-  };
-  useMutation<
-    GeneralReturnInt<unknown>,
-    unknown,
+  // Cooldown timer effect
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => {
+        setResendCooldown(resendCooldown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
+  // Verify email mutation
+  const { mutate, isPending } = useMutation<
+    GeneralReturnInt<TeamMember>,
+    Error,
     { email: string; otp: string }
   >({
-    mutationFn: (data) => verifyEmail(data),
+    mutationFn: (data) => verify_email(data),
+    onSuccess: (res) => {
+      toast.success("Verification Complete. Redirecting you to your Dashboard");
+      login(res.data, res.data?.access_token);
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
+    },
+    onError(error) {
+      console.error(error);
+    },
   });
 
-  const handleResendCode = async () => {
-    setIsResending(true);
-    console.log("Resending verification code...");
-    // TODO: Integrate with API to resend verification code
+  // Resend OTP mutation
+  const { mutate: resendMutate, isPending: isResending } = useMutation<
+    GeneralReturnInt<string>,
+    Error,
+    { email: string }
+  >({
+    mutationFn: (email) => resend_otp(email),
+    onSuccess: () => {
+      toast.success("Verification code resent successfully!");
+      setResendCooldown(RESEND_COOLDOWN);
+    },
+    onError(error) {
+      console.error(error);
+    },
+  });
 
-    // Simulate API call delay
-    setTimeout(() => {
-      setIsResending(false);
-    }, 2000);
+  const onSubmit = (values: VerifyEmailFormData) => {
+    mutate({
+      otp: values.code,
+      email: email ?? "",
+    });
   };
+
+  const handleResendCode = () => {
+    if (resendCooldown > 0) return;
+    resendMutate({ email: email ?? "" });
+  };
+
+  const isResendDisabled = isResending || resendCooldown > 0;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 items-center">
         <div className="text-center">
           <h3 className="text-lg font-semibold text-[#000000] mb-2">
-            Enter Code
+            Enter Verification Code
           </h3>
+          <p className="text-sm text-gray-600">
+            We sent a 6-digit code to{" "}
+            <span className="font-medium">{email}</span>
+          </p>
         </div>
 
         <div className="flex flex-col gap-2 items-center">
@@ -76,6 +121,7 @@ function VerifyEmailFormComponent() {
                 pattern={REGEXP_ONLY_DIGITS}
                 value={field.value}
                 onChange={field.onChange}
+                disabled={isPending}
               >
                 <InputOTPGroup className="gap-2 w-[350px] lg:w-full sm:w-full">
                   <InputOTPSlot
@@ -107,7 +153,7 @@ function VerifyEmailFormComponent() {
             )}
           />
           {errors.code && (
-            <p className="text-red-500 text-sm">{errors.code.message}</p>
+            <p className="text-red-500 text-sm mt-1">{errors.code.message}</p>
           )}
         </div>
       </div>
@@ -116,8 +162,9 @@ function VerifyEmailFormComponent() {
         <Button
           type="submit"
           className="h-11 sm:h-[2.543rem] lg:w-[70%] lg:mx-auto"
+          disabled={isPending}
         >
-          Verify Email
+          {isPending ? "Verifying..." : "Verify Email"}
         </Button>
 
         <div className="text-center">
@@ -125,10 +172,14 @@ function VerifyEmailFormComponent() {
           <button
             type="button"
             onClick={handleResendCode}
-            disabled={isResending}
-            className="text-[#6619DE] hover:underline text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isResendDisabled}
+            className="text-[#6619DE] hover:underline text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
           >
-            {isResending ? "Resending..." : "Resend Code"}
+            {isResending
+              ? "Resending..."
+              : resendCooldown > 0
+              ? `Resend Code (${resendCooldown}s)`
+              : "Resend Code"}
           </button>
         </div>
       </div>

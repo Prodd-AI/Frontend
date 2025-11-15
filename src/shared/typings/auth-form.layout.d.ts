@@ -1,6 +1,7 @@
 interface AuthFormLayoutPropsInt {
   title?: string;
   subTitle?: string;
-  Form?: React.ComponentType;
+  Form?: React.ReactElement;
   centralizeText?: boolean;
+  authCardClassName?: string;
 }

@@ -9,7 +9,7 @@ function Register() {
       <AuthFormLayout
         title="Get Started in Minutes"
         subTitle="Create your account to join your team and track progress seamlessly"
-        Form={RegisterFormComponent}
+        Form={<RegisterFormComponent />}
       />
     </AuthLayout>
   );

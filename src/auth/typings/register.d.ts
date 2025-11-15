@@ -1,7 +1,7 @@
 type RegisterTeamMemberReturnInt = {
-  created_at: Date;
-  updated_at: Date;
-  deleted_at: Date | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
   is_verified: boolean;
   timezone: string | null;
   start_work_hour: string | null;
@@ -10,4 +10,4 @@ type RegisterTeamMemberReturnInt = {
   is_onboarded: boolean;
   avatar_url: string | null;
   organization_id: number | null;
-} & TeamMember;
+} & Pick<TeamMember["user"], "last_name" | "first_name" | "email">;

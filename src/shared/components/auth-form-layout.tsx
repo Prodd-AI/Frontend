@@ -5,10 +5,11 @@ function AuthFormLayout({
   title,
   subTitle,
   centralizeText,
+  authCardClassName,
 }: AuthFormLayoutPropsInt) {
   return (
     <div className="flex justify-center sm:px-6 md:px-8">
-      <AuthCard centralize={centralizeText}>
+      <AuthCard centralize={centralizeText} className={authCardClassName}>
         <div>
           <h1
             className={`text-2xl sm:text-3xl text-[#251F2D] font-semibold ${
@@ -25,8 +26,8 @@ function AuthFormLayout({
             {subTitle}
           </p>
         </div>
-        {Form && <Form />}
-    </AuthCard>
+        {Form}
+      </AuthCard>
     </div>
   );
 }

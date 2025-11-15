@@ -42,7 +42,7 @@ const forgot_password_schema = z.object({
 // Reset Password Schema
 const reset_password_schema = z
   .object({
-    password: z
+    new_password: z
       .string()
       .min(8, "Password must be at least 8 characters")
       .max(128, "Password is too long")
@@ -50,7 +50,7 @@ const reset_password_schema = z
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
         "Password must contain at least one uppercase letter, one lowercase letter, and one number"
       ),
-    newPassword: z
+    confirm_password: z
       .string()
       .min(8, "Password must be at least 8 characters")
       .max(128, "Password is too long")
@@ -59,9 +59,9 @@ const reset_password_schema = z
         "Password must contain at least one uppercase letter, one lowercase letter, and one number"
       ),
   })
-  .refine((data) => data.password === data.newPassword, {
+  .refine((data) => data.new_password === data.confirm_password, {
     error: "Passwords do not match",
-    path: ["newPassword"],
+    path: ["new_password"],
   });
 
 const verify_email_schema = z.object({

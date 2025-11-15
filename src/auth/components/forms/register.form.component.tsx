@@ -6,81 +6,82 @@ import Oauth from "@/shared/components/oauth.component";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { register_schema } from "@/lib/schemas";
 import { RegisterFormData } from "@/auth/typings/auth";
 import { useMutation } from "@tanstack/react-query";
-import { RegsiterTeamMember } from "@/config/services/auth.service";
+import { regsiter_team_member } from "@/config/services/auth.service";
 import { toast } from "sonner";
 import useAuthStore from "@/config/stores/auth.store";
 
+const calculatePasswordStrength = (password: string) => {
+  const checks = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /\d/.test(password),
+  };
+
+  const score = Object.values(checks).filter(Boolean).length;
+
+  let feedback = "";
+  if (password.length === 0) {
+    feedback = "";
+  } else if (score <= 1) {
+    feedback = "Very weak";
+  } else if (score === 2) {
+    feedback = "Weak";
+  } else if (score === 3) {
+    feedback = "Good";
+  } else {
+    feedback = "Strong";
+  }
+
+  return { score, feedback, checks };
+};
+
 const RegisterFormComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState({
-    score: 0,
-    feedback: "",
-    checks: {
-      length: false,
-      uppercase: false,
-      lowercase: false,
-      number: false,
-    },
-  });
-  const { setInviteOtp } = useAuthStore();
+  const [loadingToastId, setLoadingToastId] = useState<string | number | null>(
+    null
+  );
+  const { setEmail } = useAuthStore();
   const navigate = useNavigate();
   const { mutate, isPending } = useMutation<
     GeneralReturnInt<RegisterTeamMemberReturnInt>,
-    unknown,
+    Error,
     Omit<RegisterFormData, "accepted">
   >({
-    mutationFn: (data) => RegsiterTeamMember(data),
+    mutationFn: (data) => regsiter_team_member(data),
     onSuccess: (response) => {
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+        setLoadingToastId(null);
+      }
+
+      const userEmail = response?.data?.email ?? "";
+
+      if (userEmail) {
+        setEmail(userEmail);
+      }
+
       toast.success("Account created successfully!", {
         description: "Please check your email to verify your account.",
       });
-      setInviteOtp(response?.data?.invite_otp ?? "");
       setTimeout(() => {
         navigate("/auth/verify-email");
       }, 2000);
+      reset();
     },
-    onError: (error: unknown) => {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "An error occurred during registration. Please try again.";
-      toast.error("Registration failed", {
-        description: errorMessage,
-      });
+    onError: (error: Error) => {
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+        setLoadingToastId(null);
+      }
+      console.error(error);
     },
   });
-
-  // Password strength calculation
-  const calculatePasswordStrength = (password: string) => {
-    const checks = {
-      length: password.length >= 8,
-      uppercase: /[A-Z]/.test(password),
-      lowercase: /[a-z]/.test(password),
-      number: /\d/.test(password),
-    };
-
-    const score = Object.values(checks).filter(Boolean).length;
-
-    let feedback = "";
-    if (password.length === 0) {
-      feedback = "";
-    } else if (score <= 1) {
-      feedback = "Very weak";
-    } else if (score === 2) {
-      feedback = "Weak";
-    } else if (score === 3) {
-      feedback = "Good";
-    } else {
-      feedback = "Strong";
-    }
-
-    return { score, feedback, checks };
-  };
 
   const {
     register,
@@ -93,35 +94,27 @@ const RegisterFormComponent = () => {
     resolver: zodResolver(register_schema),
   });
 
-  // Watch password field for real-time strength calculation
   const watchedPassword = watch("password", "");
 
-  // Update password strength when password changes
-  useEffect(() => {
-    const strength = calculatePasswordStrength(watchedPassword);
-    setPasswordStrength(strength);
-  }, [watchedPassword]);
+  const passwordStrength = useMemo(
+    () => calculatePasswordStrength(watchedPassword),
+    [watchedPassword]
+  );
 
   const onSubmit = (values: Omit<RegisterFormData, "accepted">) => {
-    const loadingToast = toast.loading("Creating your account...");
+    if (loadingToastId) {
+      toast.dismiss(loadingToastId);
+    }
 
-    mutate(
-      {
-        last_name: values.last_name,
-        first_name: values.first_name,
-        email: values.email,
-        password: values.password,
-      },
-      {
-        onSuccess: () => {
-          toast.dismiss(loadingToast);
-          reset();
-        },
-        onError: () => {
-          toast.dismiss(loadingToast);
-        },
-      }
-    );
+    const toastId = toast.loading("Creating your account...");
+    setLoadingToastId(toastId);
+
+    mutate({
+      last_name: values.last_name,
+      first_name: values.first_name,
+      email: values.email,
+      password: values.password,
+    });
   };
 
   return (
@@ -333,7 +326,6 @@ const RegisterFormComponent = () => {
               id="accepted"
               className="size-5 sm:size-[27px] bg-[#E0DAE8] mt-1 sm:mt-0"
               checked={field.value}
-              // Radix can pass true | false | "indeterminate"
               onCheckedChange={(v) => field.onChange(Boolean(v))}
               aria-invalid={!!errors.accepted}
               aria-describedby={errors.accepted ? "accepted-error" : undefined}

@@ -2,16 +2,24 @@ import { create } from "zustand";
 
 const useAuthStore = create<AuthState>((set) => ({
   user: null,
+  email: null,
   isAuthenticated: false,
   token: null,
-  invite_otp: null,
-  login: (user: TeamMember, token: string) =>
-    set({ user, isAuthenticated: true, token }),
+  login: (user, token) => set({ user, isAuthenticated: true, token }),
   logout: () => set({ user: null, isAuthenticated: false, token: null }),
-  setInviteOtp: (invite_otp: string) =>
+  setEmail: (email) => {
     set({
-      invite_otp,
-    }),
+      email,
+    });
+  },
+  setUser: (user, token) => {
+    set({ user, token, isAuthenticated: true });
+  },
+  register: (user) => {
+    set({
+      user,
+    });
+  },
 }));
 
 export default useAuthStore;

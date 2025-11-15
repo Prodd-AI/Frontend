@@ -2,6 +2,7 @@ import {
   forgot_password_schema,
   login_schema,
   register_schema,
+  reset_password_schema,
   verify_email_schema,
 } from "@/lib/schemas";
 import z from "zod";
