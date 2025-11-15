@@ -2,6 +2,7 @@ import { FaUserShield } from "react-icons/fa";
 import { MdPeopleAlt } from "react-icons/md";
 import { FaUserTie } from "react-icons/fa";
 import { IconType } from "react-icons/lib";
+import { TeamMemberRole } from "@/shared/typings/team-member";
 export const role_cards: Array<{
   title: string;
   description: string;

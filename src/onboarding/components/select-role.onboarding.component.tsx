@@ -8,6 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { update_user } from "@/config/services/users.service";
 import { toast } from "sonner";
 import { FiArrowUpRight } from "react-icons/fi";
+import { TeamMember, TeamMemberRole } from "@/shared/typings/team-member";
 
 const NAVIGATION_DELAY = 1000;
 

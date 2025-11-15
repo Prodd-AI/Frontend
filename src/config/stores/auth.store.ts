@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { AuthState } from "@/shared/typings/auth.store";
 
 const useAuthStore = create<AuthState>((set) => ({
   user: null,

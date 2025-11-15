@@ -1,5 +1,6 @@
 import AuthCard from "./cards/auth-card";
 
+
 function AuthFormLayout({
   Form,
   title,

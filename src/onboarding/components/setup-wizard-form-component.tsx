@@ -1,8 +1,8 @@
-import useOnboardWizard from "@/shared/hooks/useOnboardWizard";
+import useOnboardWizard from "@/shared/hooks/use-onboard-wizard";
 import OnboardingProgressTracker from "./onboarding-progress-tracker.component";
 import OnboardingWizardFormComponent from "./onboarding-wizard-form.component";
 import OnboardingWizardNavigationComponent from "./onboarding-wizard-navigation";
-import useIsMobile from "@/shared/hooks/useIsMobile";
+import useIsMobile from "@/shared/hooks/use-is-mobile";
 
 function SetupWizardFormComponent({ steps }: SetupWizardFormComponentPropsInt) {
   const {

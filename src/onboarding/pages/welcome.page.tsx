@@ -5,7 +5,7 @@ import frame2 from "/assets/images/Frame 284-1.png";
 import frame3 from "/assets/images/Frame 284.png";
 import { Button } from "@/components/ui/button";
 import { LuArrowUpRight } from "react-icons/lu";
-import useIsMobile from "@/shared/hooks/useIsMobile";
+import useIsMobile from "@/shared/hooks/use-is-mobile";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 

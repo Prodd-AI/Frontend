@@ -14,16 +14,16 @@ function OnboardingProgressTracker({
   if (isMobile) {
     return (
       <div className="w-full space-y-2">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           {steps.map(({ label, id, active }, index) => (
             <div
-              className="flex items-center gap-[2px]"
+              className="flex items-center gap-1"
               key={id}
               onClick={gotoNextWizard(id)}
             >
               <span
-                className={`text-[12px] tracking-[-2%] ${
-                  active ? "text-[#6619DE] font-semibold" : "text-[#6B7280] whitespace-nowrap"
+                className={`text-[12px] tracking-[-2%] whitespace-nowrap ${
+                  active ? "text-[#6619DE] font-semibold" : "text-[#6B7280]"
                 }`}
               >
                 {label}
@@ -31,16 +31,17 @@ function OnboardingProgressTracker({
               {index < steps.length - 1 && (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="12"
+                  width="16"
                   height="2"
-                  viewBox="0 0 12 2"
+                  viewBox="0 0 16 2"
                   fill="none"
+                  className="mx-1 flex-shrink-0"
                 >
                   <line
-                    x1="0.6"
-                    y1="0.600195"
-                    x2="11.4"
-                    y2="0.600195"
+                    x1="0"
+                    y1="1"
+                    x2="16"
+                    y2="1"
                     stroke={active ? "#6619DE" : "#6B7280"}
                     strokeWidth="1.2"
                     strokeLinecap="round"

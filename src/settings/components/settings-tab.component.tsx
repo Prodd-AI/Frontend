@@ -1,19 +1,20 @@
+import { SettingsTab } from "@/settings/typings/tab";
 import { tabs } from "../utils/constants.utils";
-import { useState } from "react";
 
 const SettingsTabComponent = ({
-  initialActiveTab,
+  activeTab,
+  onTabChange,
 }: {
-  initialActiveTab: SettingsTab;
+  activeTab: SettingsTab;
+  onTabChange: (tab: SettingsTab) => void;
 }) => {
-  const [activeTab, setActiveTab] = useState<SettingsTab>(initialActiveTab);
   return (
-    <div className="flex">
+    <div className="flex w-full">
       {tabs.map((tab, index) => (
         <div
           key={tab.value}
-          onClick={() => setActiveTab(tab.value as SettingsTab)}
-          className={`cursor-pointer relative flex items-center justify-center text-[#6B7280] text-sm font-medium transition-all duration-300 py-4 ${
+          onClick={() => onTabChange(tab.value as SettingsTab)}
+          className={`cursor-pointer flex-1 relative flex items-center justify-center text-[#6B7280] text-sm font-medium transition-all duration-300 py-4 ${
             activeTab === tab.value ? "text-primary-color" : ""
           } ${index === 0 ? "pr-4" : "px-4"}`}
         >

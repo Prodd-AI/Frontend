@@ -1,3 +1,5 @@
+import { FlightRiskInfo } from "@/hr/typings/flight-risk-card";
+
 export const sample_flight_risks: FlightRiskInfo[] = [
   {
     id: "alex-chan",

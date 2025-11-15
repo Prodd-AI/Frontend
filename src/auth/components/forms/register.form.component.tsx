@@ -358,7 +358,7 @@ const RegisterFormComponent = () => {
 
       <Button
         type="submit"
-        className={`mt-2 h-11 sm:h-[2.543rem] ${isPending && "opacity-25"}`}
+        className={`mt-2 h-11 sm:h-[2.543rem] md:h-14 ${isPending && "opacity-25"}`}
         disabled={isPending}
       >
         {isPending ? "....." : "Create Account"}

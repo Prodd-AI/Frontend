@@ -9,6 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 function ResetPasswordFormComponent({
   setShowPasswordResetSuccess,
@@ -88,10 +89,20 @@ function ResetPasswordFormComponent({
       </div>
       <Button
         type="submit"
-        className={`h-[40.6px] mt-3 ${isPending && "opacity-50"}`}
+        className={`h-11 sm:h-[2.543rem] md:h-14 mt-3 ${isPending && "opacity-50"}`}
       >
         {isPending ? "Submitting...." : "Submit"}
       </Button>
+
+      <p className="text-center mt-[19px] font-[600] text-[1rem]">
+        Go back to{" "}
+        <Link
+          to="/auth/login"
+          className=" text-[#6619DE] hover:underline transition-all duration-300"
+        >
+          Login
+        </Link>
+      </p>
     </form>
   );
 }

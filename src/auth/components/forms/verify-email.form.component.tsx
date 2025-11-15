@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 const RESEND_COOLDOWN = 60; // 60 seconds cooldown
+import { Link } from "react-router-dom";
+import { TeamMember } from "@/shared/typings/team-member";
 
 function VerifyEmailFormComponent() {
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -161,7 +163,7 @@ function VerifyEmailFormComponent() {
       <div className="flex flex-col gap-4">
         <Button
           type="submit"
-          className="h-11 sm:h-[2.543rem] lg:w-[70%] lg:mx-auto"
+          className="h-11 sm:h-[2.543rem] md:h-14 lg:w-[70%] lg:mx-auto"
           disabled={isPending}
         >
           {isPending ? "Verifying..." : "Verify Email"}
@@ -182,6 +184,16 @@ function VerifyEmailFormComponent() {
               : "Resend Code"}
           </button>
         </div>
+
+        <p className="text-center mt-[19px] font-[600] text-[1rem]">
+          Go back to{" "}
+          <Link
+            to="/auth/login"
+            className=" text-[#6619DE] hover:underline transition-all duration-300"
+          >
+            Login
+          </Link>
+        </p>
       </div>
     </form>
   );

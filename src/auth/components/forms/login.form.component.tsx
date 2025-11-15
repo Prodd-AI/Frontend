@@ -15,6 +15,7 @@ import { useMutation } from "@tanstack/react-query";
 import { login_team_member } from "@/config/services/auth.service";
 import { toast } from "sonner";
 import useAuthStore from "@/config/stores/auth.store";
+import { TeamMember } from "@/shared/typings/team-member";
 
 function LoginFormComponent() {
   const [showPassword, setShowPassword] = useState(false);
@@ -148,7 +149,9 @@ function LoginFormComponent() {
       </div>
       <Button
         type="submit"
-        className={`mt-2 h-11 sm:h-[2.543rem] ${isPending && "opacity-25"}`}
+        className={`mt-2 h-11 sm:h-[2.543rem] md:h-14 ${
+          isPending && "opacity-25"
+        }`}
         disabled={isPending}
       >
         {isPending ? "..." : "Login"}

@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { UseMutateFunction } from "@tanstack/react-query";
 
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 
 interface ForgotPasswordFormComponentPropsInt {
   email: string;
@@ -62,11 +63,23 @@ function ForgotPasswordFormComponent({
       </div>
       <Button
         type="submit"
-        className={`h-[40.7px] w-full ${isPending && "opacity-50"}`}
+        className={`h-11 sm:h-[2.543rem] md:h-14 w-full ${
+          isPending && "opacity-50"
+        }`}
         disabled={isPending}
       >
         {isPending ? "Submitting....." : "Submit"}
       </Button>
+
+      <p className="text-center mt-[19px] font-[600] text-[1rem]">
+        Go back to{" "}
+        <Link
+          to="/auth/login"
+          className=" text-[#6619DE] hover:underline transition-all duration-300"
+        >
+          Login
+        </Link>
+      </p>
     </form>
   );
 }
