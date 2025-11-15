@@ -51,7 +51,7 @@ function ResetPasswordFormComponent() {
           <div className=" text-red-500">{errors.newPassword.message}</div>
         )}
       </div>
-      <Button type="submit" className="h-[40.6px] mt-3">
+      <Button type="submit" className="h-11 sm:h-[2.543rem] md:h-14 mt-3">
         Submit
       </Button>
     </form>

@@ -104,7 +104,7 @@ function VerifyEmailFormComponent() {
       <div className="flex flex-col gap-4">
         <Button
           type="submit"
-          className="h-11 sm:h-[2.543rem] lg:w-[70%] lg:mx-auto"
+          className="h-11 sm:h-[2.543rem] md:h-14 lg:w-[70%] lg:mx-auto"
         >
           Verify Email
         </Button>

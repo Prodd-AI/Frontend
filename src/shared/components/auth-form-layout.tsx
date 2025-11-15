@@ -7,7 +7,7 @@ function AuthFormLayout({
   centralizeText,
 }: AuthFormLayoutPropsInt) {
   return (
-    <div className="flex justify-center sm:px-6 md:px-8">
+    <div className="flex justify-center sm:px-6 md:px-8 w-full max-w-[41.875rem]">
       <AuthCard centralize={centralizeText}>
         <div>
           <h1

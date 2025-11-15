@@ -124,7 +124,7 @@ function LoginFormComponent() {
           Forgot Password?
         </Link>
       </div>
-      <Button type="submit" className="mt-2 h-11 sm:h-[2.543rem]">
+      <Button type="submit" className="mt-2 h-11 sm:h-[2.543rem] md:h-14">
         Login
       </Button>
       <Oauth />

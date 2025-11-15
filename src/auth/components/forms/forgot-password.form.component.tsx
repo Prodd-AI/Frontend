@@ -37,7 +37,7 @@ function ForgotPasswordFormComponent() {
           <div className=" text-red-500">{errors.email.message}</div>
         )}
       </div>
-      <Button type="submit" className=" h-[40.7px] w-full">
+      <Button type="submit" className=" h-11 sm:h-[2.543rem] md:h-14 w-full">
         Submit
       </Button>
     </form>
