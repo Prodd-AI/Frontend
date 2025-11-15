@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { verify_email_schema } from "@/lib/schemas";
 import { VerifyEmailFormData } from "@/auth/typings/auth";
+import { Link } from "react-router-dom";
 
 function VerifyEmailFormComponent() {
   const [isResending, setIsResending] = useState(false);
@@ -120,6 +121,16 @@ function VerifyEmailFormComponent() {
             {isResending ? "Resending..." : "Resend Code"}
           </button>
         </div>
+
+        <p className="text-center mt-[19px] font-[600] text-[1rem]">
+          Go back to{" "}
+          <Link
+            to="/auth/login"
+            className=" text-[#6619DE] hover:underline transition-all duration-300"
+          >
+            Login
+          </Link>
+        </p>
       </div>
     </form>
   );
