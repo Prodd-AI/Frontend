@@ -94,16 +94,12 @@ body {
   --bg-grey-light: #eae7ef;
   --bg-grey-lighter: #e9e6ee4a;
   --card: oklch(1 0 0);
-  --card-background-active: linear-gradient(
-    192.27deg,
-    #955deb 6.73%,
-    #6619de 93.27%
-  );
-  --button-bg-primary: linear-gradient(
-    103.15deg,
-    #6619de 46.92%,
-    #1186da 104.49%
-  );
+  --card-background-active: linear-gradient(192.27deg,
+      #955deb 6.73%,
+      #6619de 93.27%);
+  --button-bg-primary: linear-gradient(103.15deg,
+      #6619de 46.92%,
+      #1186da 104.49%);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
@@ -178,7 +174,89 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom animations for onboarding page */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.8s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.8s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out 0.4s forwards;
+  opacity: 0;
+}   
