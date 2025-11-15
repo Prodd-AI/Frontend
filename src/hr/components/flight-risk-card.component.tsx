@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { FlightRiskCardProps } from "@/hr/typings/flight-risk-card";
 
 export default function FlightRiskCardComponent({
   person,

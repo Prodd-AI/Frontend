@@ -1,3 +1,5 @@
+import { TeamAnalysisInfo } from "@/shared/typings/team-analysis-card";
+
 export const sample_team_analyses: TeamAnalysisInfo[] = [
   {
     id: "eng",

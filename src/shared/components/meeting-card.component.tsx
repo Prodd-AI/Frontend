@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { IoTimeOutline, IoPeopleOutline } from "react-icons/io5";
 import { HiOutlineVideoCamera } from "react-icons/hi2";
 import { badge_by_status } from "../utils/meeting.constants";
+import { MeetingCardProps } from "@/shared/typings/meeting-card";
 
 export default function MeetingCardComponent({
   meeting,

@@ -94,16 +94,12 @@ body {
   --bg-grey-light: #eae7ef;
   --bg-grey-lighter: #e9e6ee4a;
   --card: oklch(1 0 0);
-  --card-background-active: linear-gradient(
-    192.27deg,
-    #955deb 6.73%,
-    #6619de 93.27%
-  );
-  --button-bg-primary: linear-gradient(
-    103.15deg,
-    #6619de 46.92%,
-    #1186da 104.49%
-  );
+  --card-background-active: linear-gradient(192.27deg,
+      #955deb 6.73%,
+      #6619de 93.27%);
+  --button-bg-primary: linear-gradient(103.15deg,
+      #6619de 46.92%,
+      #1186da 104.49%);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
@@ -178,7 +174,281 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Custom animations for onboarding page */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.8s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.8s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out 0.4s forwards;
+  opacity: 0;
+}
+
+/* Custom Toast Styling */
+[data-sonner-toaster] {
+  font-family: "Open Sans", sans-serif !important;
+}
+
+[data-sonner-toast] {
+  font-family: "Open Sans", sans-serif !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  border-width: 1px !important;
+  padding: 16px !important;
+  gap: 12px !important;
+}
+
+[data-sonner-toast][data-styled="true"] {
+  padding: 16px !important;
+}
+
+/* Success Toast - Green */
+[data-sonner-toast][data-type="success"] {
+  background: #e6f4e9 !important;
+  border-color: rgba(37, 172, 66, 0.2) !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: #25ac42 !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-title] {
+  color: #10b981 !important;
+  font-weight: 600 !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-description] {
+  color: #059669 !important;
+}
+
+/* Error Toast - Red */
+[data-sonner-toast][data-type="error"] {
+  background: #fef2f2 !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: #ef4444 !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-title] {
+  color: #dc2626 !important;
+  font-weight: 600 !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-description] {
+  color: #b91c1c !important;
+}
+
+/* Warning Toast - Yellow/Orange */
+[data-sonner-toast][data-type="warning"] {
+  background: #fef3c7 !important;
+  border-color: rgba(227, 143, 43, 0.2) !important;
+}
+
+[data-sonner-toast][data-type="warning"] [data-icon] {
+  color: #e38f2b !important;
+}
+
+[data-sonner-toast][data-type="warning"] [data-title] {
+  color: #d97706 !important;
+  font-weight: 600 !important;
+}
+
+[data-sonner-toast][data-type="warning"] [data-description] {
+  color: #b45309 !important;
+}
+
+/* Loading Toast - Purple */
+[data-sonner-toast][data-type="loading"] {
+  background: #f5f3ff !important;
+  border-color: rgba(102, 25, 222, 0.2) !important;
+}
+
+[data-sonner-toast][data-type="loading"] [data-icon] {
+  color: #6619de !important;
+}
+
+[data-sonner-toast][data-type="loading"] [data-title] {
+  color: #6619de !important;
+  font-weight: 600 !important;
+}
+
+[data-sonner-toast][data-type="loading"] [data-description] {
+  color: #5214b8 !important;
+}
+
+/* Info Toast - Blue/Purple */
+[data-sonner-toast][data-type="info"] {
+  background: #eff6ff !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+[data-sonner-toast][data-type="info"] [data-icon] {
+  color: #3b82f6 !important;
+}
+
+[data-sonner-toast][data-type="info"] [data-title] {
+  color: #2563eb !important;
+  font-weight: 600 !important;
+}
+
+[data-sonner-toast][data-type="info"] [data-description] {
+  color: #1d4ed8 !important;
+}
+
+/* Toast Title and Description */
+[data-sonner-toast] [data-title] {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+
+[data-sonner-toast] [data-description] {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  opacity: 0.9 !important;
+}
+
+/* Toast Close Button */
+[data-sonner-toast] [data-close-button] {
+  background: transparent !important;
+  border: none !important;
+  color: currentColor !important;
+  opacity: 0.5 !important;
+  transition: opacity 0.2s !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  opacity: 1 !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Toast Animation */
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+[data-sonner-toast] {
+  animation: toast-slide-in 0.3s ease-out !important;
+}
+
+
+
+
+/** Loader Styles **/
+
+.loader {
+  box-sizing: border-box;
+  position: relative;
+  width: 48px;
+  height: 48px;
+  animation: spin 1s linear infinite;
+}
+
+.loader:after,
+.loader:before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  border-radius: 50%;
+  background: #9747FF;
+  animation: spin 1s linear infinite;
+  transform-origin: 0px 100%;
+}
+
+.loader:before {
+  transform-origin: 0 50%;
+  background: #251F2D;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

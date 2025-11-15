@@ -1,3 +1,5 @@
+import { TaskReviewItem } from "@/team-leader/typings/task-review";
+
 export const sample_task_reviews: TaskReviewItem[] = [
   {
     id: "alex-jan-8",

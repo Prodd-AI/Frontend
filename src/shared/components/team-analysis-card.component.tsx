@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PiUsersThreeLight } from "react-icons/pi";
 import { GoAlert } from "react-icons/go";
+import { TeamAnalysisCardProps } from "@/shared/typings/team-analysis-card";
 
 export default function TeamAnalysisCardComponent({
   team,
