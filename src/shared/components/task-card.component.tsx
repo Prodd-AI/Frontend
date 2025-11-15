@@ -74,6 +74,11 @@ import type { IconType } from "react-icons/lib";
 import { FaRegUser, FaRegClock } from "react-icons/fa";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import clsx from "clsx";
+import {
+  TaskCardRef,
+  TaskCardPropsInt,
+  TaskStatus,
+} from "@/shared/typings/task-card";
 
 /**
  * Task Card Component

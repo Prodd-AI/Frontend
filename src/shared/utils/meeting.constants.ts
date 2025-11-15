@@ -1,3 +1,5 @@
+import { MeetingInfo } from "@/shared/typings/meeting-card";
+
 export const sample_meetings: MeetingInfo[] = [
   {
     id: "mtg-sprint-planning",

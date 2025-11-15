@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TabComponentProps } from "@/shared/typings/tab";
 
 const TabComponent = ({ items, activeTab, onTabChange }: TabComponentProps) => {
   return (

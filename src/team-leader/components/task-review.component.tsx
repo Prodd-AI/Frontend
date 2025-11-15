@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { IoChevronForward } from "react-icons/io5";
 import { status_styles } from "../utils/constants.utils";
+import { TaskReviewProps } from "@/team-leader/typings/task-review";
 
 function TaskReviewComponent({ item, actions, className }: TaskReviewProps) {
   const progress = Math.round((item.completed_tasks / item.total_tasks) * 100);

@@ -3,6 +3,7 @@ import { IoCheckboxOutline } from "react-icons/io5";
 import { IoTrendingUpOutline } from "react-icons/io5";
 import { GoAlert } from "react-icons/go";
 import { PiHeartbeatLight } from "react-icons/pi";
+import { StatusCardItem } from "@/shared/typings/status-cards";
 
 export const sample_status_cards: StatusCardItem[] = [
   {
