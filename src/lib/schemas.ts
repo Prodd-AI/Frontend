@@ -2,10 +2,14 @@ import z from "zod";
 
 // Registration Validation schema
 const register_schema = z.object({
-  fullName: z
+  first_name: z
     .string()
-    .min(2, "Full name must be at least 2 characters")
-    .max(80, "Full name is too long"),
+    .min(2, "First Name is be at least 3 characters")
+    .max(80, "First Name must not exceed 80 characters"),
+  last_name: z
+    .string()
+    .min(2, "Last Name is be at least 3 characters")
+    .max(80, "Last Name must not exceed 80 characters"),
   email: z.email("Please enter a valid email"),
   password: z
     .string()
@@ -38,7 +42,7 @@ const forgot_password_schema = z.object({
 // Reset Password Schema
 const reset_password_schema = z
   .object({
-    password: z
+    new_password: z
       .string()
       .min(8, "Password must be at least 8 characters")
       .max(128, "Password is too long")
@@ -46,7 +50,7 @@ const reset_password_schema = z
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
         "Password must contain at least one uppercase letter, one lowercase letter, and one number"
       ),
-    newPassword: z
+    confirm_password: z
       .string()
       .min(8, "Password must be at least 8 characters")
       .max(128, "Password is too long")
@@ -55,19 +59,19 @@ const reset_password_schema = z
         "Password must contain at least one uppercase letter, one lowercase letter, and one number"
       ),
   })
-  .refine((data) => data.password === data.newPassword, {
+  .refine((data) => data.new_password === data.confirm_password, {
     error: "Passwords do not match",
-    path: ["newPassword"],
+    path: ["new_password"],
   });
 
-  const verify_email_schema = z.object({
-    code: z.string().length(6, "Code must be exactly 6 digits"),
-  });
-  
+const verify_email_schema = z.object({
+  code: z.string().length(6, "Code must be exactly 6 digits"),
+});
+
 export {
   register_schema,
   login_schema,
   forgot_password_schema,
   reset_password_schema,
-  verify_email_schema
+  verify_email_schema,
 };

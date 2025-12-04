@@ -5,20 +5,16 @@ import frame2 from "/assets/images/Frame 284-1.png";
 import frame3 from "/assets/images/Frame 284.png";
 import { Button } from "@/components/ui/button";
 import { LuArrowUpRight } from "react-icons/lu";
-import useIsMobile from "@/shared/hooks/useIsMobile";
+import useIsMobile from "@/shared/hooks/use-is-mobile";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-function OnboardingPage() {
-  return <AuthLayout children={<OnboardingComponent />} />;
+function WelcomePage() {
+  return <AuthLayout children={<WelcomeComponent />} />;
 }
 
-export default OnboardingPage;
-interface BaseCardInt {
-  img: string;
-  title: string;
-  subTitle: string;
-}
+export default WelcomePage;
+
 const mobile_carousel_cards: BaseCardInt[] = [
   {
     img: "/assets/images/Carousel-img1.png",
@@ -76,7 +72,7 @@ const features_card: BaseCardInt[] = [
     subTitle: "Track tasks, see progress, and stay in control",
   },
 ];
-const OnboardingComponent = () => {
+const WelcomeComponent = () => {
   const isMobile = useIsMobile();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [desktopCurrentSlide, setDesktopCurrentSlide] = useState(0);

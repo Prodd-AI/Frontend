@@ -1,19 +1,18 @@
-import clsx, { ClassValue } from "clsx";
+import clsx from "clsx";
 import React from "react";
-
 const AuthCard = ({
   children,
   className,
   centralize,
 }: {
-  className?: ClassValue;
   children: React.ReactNode;
+  className?: string;
   centralize?: boolean;
 }) => {
   return (
     <div
       className={clsx(
-        "max-w-[41.875rem] min-h-max flex flex-col gap-6.5 w-full sm:rounded-auth-card lg:rounded-auth-card  bg-white p-5 sm:p-8 sm:pt-12 lg:p-8 lg:pt-12 ",
+        "max-w-[41.875rem] min-h-max flex flex-col gap-6.5 w-full sm:rounded-auth-card lg:rounded-auth-card  bg-inherit sm:bg-white lg:bg-white md:bg-white p-5 sm:p-8 sm:pt-12 lg:p-8 lg:pt-12 ",
         className
       )}
     >

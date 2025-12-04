@@ -8,7 +8,7 @@ function VerfiyEmail() {
       <AuthFormLayout
         title="E-Mail Verification"
         subTitle="We have mailed you a 6-digit code, please check your email & enter the code here to complete the verification."
-        Form={VerifyEmailFormComponent}
+        Form={<VerifyEmailFormComponent />}
         centralizeText
       />
     </AuthLayout>

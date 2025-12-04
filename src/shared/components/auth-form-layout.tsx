@@ -1,15 +1,16 @@
 import AuthCard from "./cards/auth-card";
-import { AuthFormLayoutPropsInt } from "@/shared/typings/auth-form.layout";
+
 
 function AuthFormLayout({
   Form,
   title,
   subTitle,
   centralizeText,
+  authCardClassName,
 }: AuthFormLayoutPropsInt) {
   return (
-    <div className="flex justify-center sm:px-6 md:px-8 w-full max-w-[41.875rem] h-max">
-      <AuthCard centralize={centralizeText}>
+    <div className="flex justify-center sm:px-6 md:px-8">
+      <AuthCard centralize={centralizeText} className={authCardClassName}>
         <div>
           <h1
             className={`text-2xl sm:text-3xl text-[#251F2D] font-semibold ${
@@ -26,7 +27,7 @@ function AuthFormLayout({
             {subTitle}
           </p>
         </div>
-        {Form && <Form />}
+        {Form}
       </AuthCard>
     </div>
   );

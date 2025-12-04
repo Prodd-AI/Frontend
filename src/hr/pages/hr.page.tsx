@@ -1,5 +1,7 @@
-function HrPage() {
-  return <div className="p-4">HR Page</div>;
+import withTeamMemberScaffold from "@/shared/components/HOC/team-member-screen-scaffold-hoc";
+function hrPage() {
+  return <div className="">HR Page</div>;
 }
+const WrappedHrPage = withTeamMemberScaffold(hrPage);
 
-export default HrPage;
+export default WrappedHrPage;

@@ -3,75 +3,120 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Oauth from "@/shared/components/oauth.component";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { register_schema } from "@/lib/schemas";
 import { RegisterFormData } from "@/auth/typings/auth";
+import { useMutation } from "@tanstack/react-query";
+import { regsiter_team_member } from "@/config/services/auth.service";
+import { toast } from "sonner";
+import useAuthStore from "@/config/stores/auth.store";
+
+const calculatePasswordStrength = (password: string) => {
+  const checks = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /\d/.test(password),
+  };
+
+  const score = Object.values(checks).filter(Boolean).length;
+
+  let feedback = "";
+  if (password.length === 0) {
+    feedback = "";
+  } else if (score <= 1) {
+    feedback = "Very weak";
+  } else if (score === 2) {
+    feedback = "Weak";
+  } else if (score === 3) {
+    feedback = "Good";
+  } else {
+    feedback = "Strong";
+  }
+
+  return { score, feedback, checks };
+};
+
 const RegisterFormComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState({
-    score: 0,
-    feedback: "",
-    checks: {
-      length: false,
-      uppercase: false,
-      lowercase: false,
-      number: false,
+  const [loadingToastId, setLoadingToastId] = useState<string | number | null>(
+    null
+  );
+  const { setEmail } = useAuthStore();
+  const navigate = useNavigate();
+  const { mutate, isPending } = useMutation<
+    GeneralReturnInt<RegisterTeamMemberReturnInt>,
+    Error,
+    Omit<RegisterFormData, "accepted">
+  >({
+    mutationFn: (data) => regsiter_team_member(data),
+    onSuccess: (response) => {
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+        setLoadingToastId(null);
+      }
+
+      const userEmail = response?.data?.email ?? "";
+
+      if (userEmail) {
+        setEmail(userEmail);
+      }
+
+      toast.success("Account created successfully!", {
+        description: "Please check your email to verify your account.",
+      });
+      setTimeout(() => {
+        navigate("/auth/verify-email");
+      }, 2000);
+      reset();
+    },
+    onError: (error: Error) => {
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+        setLoadingToastId(null);
+      }
+      console.error(error);
     },
   });
-
-  // Password strength calculation
-  const calculatePasswordStrength = (password: string) => {
-    const checks = {
-      length: password.length >= 8,
-      uppercase: /[A-Z]/.test(password),
-      lowercase: /[a-z]/.test(password),
-      number: /\d/.test(password),
-    };
-
-    const score = Object.values(checks).filter(Boolean).length;
-
-    let feedback = "";
-    if (password.length === 0) {
-      feedback = "";
-    } else if (score <= 1) {
-      feedback = "Very weak";
-    } else if (score === 2) {
-      feedback = "Weak";
-    } else if (score === 3) {
-      feedback = "Good";
-    } else {
-      feedback = "Strong";
-    }
-
-    return { score, feedback, checks };
-  };
 
   const {
     register,
     control,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(register_schema),
   });
 
-  // Watch password field for real-time strength calculation
   const watchedPassword = watch("password", "");
 
-  // Update password strength when password changes
-  useEffect(() => {
-    const strength = calculatePasswordStrength(watchedPassword);
-    setPasswordStrength(strength);
-  }, [watchedPassword]);
+  const passwordStrength = useMemo(
+    () => calculatePasswordStrength(watchedPassword),
+    [watchedPassword]
+  );
 
-  const onSubmit = (values: RegisterFormData) => {
-    console.log("Register submit:", values);
+  const onSubmit = (values: Omit<RegisterFormData, "accepted">) => {
+    if (loadingToastId) {
+      toast.dismiss(loadingToastId);
+    }
+
+    const toastId = toast.loading("Creating your account...");
+    setLoadingToastId(toastId);
+
+    mutate({
+      last_name: values.last_name,
+      first_name: values.first_name,
+      email: values.email,
+      password: values.password,
+    });
   };
+
   return (
     <form
       className="flex flex-col gap-4"
@@ -80,24 +125,47 @@ const RegisterFormComponent = () => {
     >
       <div className="flex flex-col gap-2">
         <Label
-          htmlFor="fullName"
+          htmlFor="first_name"
           className="text-[#000000] font-semibold text-sm sm:text-base"
         >
-          Full Name
+          First Name
         </Label>
         <Input
-          id="fullName"
+          id="first_name"
           type="text"
-          autoComplete="name"
-          placeholder="Enter your full name"
-          aria-invalid={!!errors.fullName}
-          aria-describedby={errors.fullName ? "fullName-error" : undefined}
+          autoComplete="first_name"
+          placeholder="Enter your First name"
+          aria-invalid={!!errors.first_name}
+          aria-describedby={errors.first_name ? "first_name-error" : undefined}
           className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
-          {...register("fullName")}
+          {...register("first_name")}
         />
-        {errors.fullName && (
-          <p id="fullName-error" className="text-red-500 text-xs sm:text-sm">
-            {errors.fullName.message}
+        {errors.first_name && (
+          <p id="first_name-error" className="text-red-500 text-xs sm:text-sm">
+            {errors.first_name.message}
+          </p>
+        )}
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label
+          htmlFor="first_name"
+          className="text-[#000000] font-semibold text-sm sm:text-base"
+        >
+          Last Name
+        </Label>
+        <Input
+          id="second_name"
+          type="text"
+          autoComplete="last_name"
+          placeholder="Enter your Last name"
+          aria-invalid={!!errors.last_name}
+          aria-describedby={errors.last_name ? "last_name-error" : undefined}
+          className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
+          {...register("last_name")}
+        />
+        {errors.last_name && (
+          <p id="last_name-error" className="text-red-500 text-xs sm:text-sm">
+            {errors.last_name.message}
           </p>
         )}
       </div>
@@ -249,7 +317,7 @@ const RegisterFormComponent = () => {
         )}
       </div>
 
-      <div className="flex items-start sm:items-center gap-3 text-sm sm:text-base font-medium">
+      <div className="flex items-center  sm:items-center gap-3 text-sm sm:text-base font-medium">
         <Controller
           control={control}
           name="accepted"
@@ -258,7 +326,6 @@ const RegisterFormComponent = () => {
               id="accepted"
               className="size-5 sm:size-[27px] bg-[#E0DAE8] mt-1 sm:mt-0"
               checked={field.value}
-              // Radix can pass true | false | "indeterminate"
               onCheckedChange={(v) => field.onChange(Boolean(v))}
               aria-invalid={!!errors.accepted}
               aria-describedby={errors.accepted ? "accepted-error" : undefined}
@@ -289,16 +356,18 @@ const RegisterFormComponent = () => {
         </div>
       </div>
 
-      <Button type="submit" className="mt-2 h-11 sm:h-[2.543rem] md:h-14">
-        Create Account
+      <Button
+        type="submit"
+        className={`mt-2 h-11 sm:h-[2.543rem] md:h-14 ${isPending && "opacity-25"}`}
+        disabled={isPending}
+      >
+        {isPending ? "....." : "Create Account"}
       </Button>
       <Oauth />
       <div className="text-center mt-[19px] font-[600] text-[1rem]">
         <p>
-          {" "}
           Already have an account?{" "}
           <Link to="/auth/login" className=" text-[#6619DE] hover:underline">
-            {" "}
             Login
           </Link>
         </p>
