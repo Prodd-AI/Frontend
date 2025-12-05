@@ -14,8 +14,8 @@ interface WizardStepActive extends WizardStep {
   active: boolean;
 }
 interface OnboardingWizardCardLayoutPropsInt {
-  heading: string;
-  subHeading: string;
+  heading?: string;
+  subHeading?: string;
   Wizard: React.ReactElement;
   skip?: {
     Component?: React.ReactNode;

@@ -12,8 +12,14 @@ import TeamMemberEntryDash from "@/shared/components/main/teamMemberDashEntry.co
 import Loader from "@/shared/components/loader.component";
 const WelcomePage = lazy(() => import("@/onboarding/pages/welcome.page"));
 const router = createBrowserRouter([
-  { path: "/", element: <TeamMemberEntryDash /> },
-  { path: "/welcome", element: <WelcomePage /> },
+  {
+    path: "/",
+    element: <TeamMemberEntryDash />
+  },
+  {
+    path: "/welcome",
+    element: <WelcomePage />
+  },
   { path: "/dash/hr", children: hr_routes },
   { path: "/dash/team-member", children: team_member_routes },
   { path: "/dash/team-leader", children: team_leader_routes },
@@ -37,3 +43,4 @@ export function AppRouter() {
     </Suspense>
   );
 }
+

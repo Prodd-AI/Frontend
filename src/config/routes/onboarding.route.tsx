@@ -1,3 +1,4 @@
+import TeamLeadSetup from "@/onboarding/pages/team-lead/set.team-lead.page";
 import { lazy } from "react";
 import type { RouteObject } from "react-router-dom";
 
@@ -14,5 +15,9 @@ export const onboarding_routes: RouteObject[] = [
   {
     path : "hr-setup",
     element : <HrSetup />
+  },
+  {
+    path : "team-lead-setup",
+    element : <TeamLeadSetup />
   }
 ];

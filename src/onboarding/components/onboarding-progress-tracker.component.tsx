@@ -22,32 +22,16 @@ function OnboardingProgressTracker({
               onClick={gotoNextWizard(id)}
             >
               <span
-                className={`text-[12px] tracking-[-2%] whitespace-nowrap ${
-                  active ? "text-[#6619DE] font-semibold" : "text-[#6B7280]"
-                }`}
+                className={`text-[12px] tracking-[-2%] whitespace-nowrap ${active ? "text-[#6619DE] font-semibold" : "text-[#6B7280]"
+                  }`}
               >
                 {label}
               </span>
               {index < steps.length - 1 && (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="2"
-                  viewBox="0 0 16 2"
-                  fill="none"
-                  className="mx-1 flex-shrink-0"
-                >
-                  <line
-                    x1="0"
-                    y1="1"
-                    x2="16"
-                    y2="1"
-                    stroke={active ? "#6619DE" : "#6B7280"}
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeDasharray="2 2"
-                  />
-                </svg>
+                <div
+                  className={`h-[3px] w-[16px] mx-1 rounded-full transition-all duration-300 ${steps[index + 1]?.active ? "bg-[#6619DE]" : "bg-[#E5E7EB]"
+                    }`}
+                />
               )}
             </div>
           ))}
@@ -67,14 +51,13 @@ function OnboardingProgressTracker({
     );
   }
   return (
-    <div className="w-full h-[2.875rem] flex items-center justify-between">
+    <div className="w-full h-[2.875rem] flex items-center">
       {steps.map(({ Icon, label, active, id }, index) => (
-        <div key={id} className="flex items-center gap-[11px]">
+        <div key={id} className="flex items-center gap-[11px] flex-1">
           <div className="flex items-center gap-[11px]">
             <div
-              className={`size-[46px] rounded-full flex justify-center items-center cursor-pointer transition-all ease-out ${
-                active ? "bg-[#6619DE]" : "bg-[#F1EDF6]"
-              }`}
+              className={`size-[46px] rounded-full flex justify-center items-center cursor-pointer transition-all ease-out ${active ? "bg-[#6619DE]" : "bg-[#F1EDF6]"
+                }`}
               onClick={gotoNextWizard(id)}
             >
               <Icon
@@ -83,32 +66,18 @@ function OnboardingProgressTracker({
               />
             </div>
             <h5
-              className={`text-[0.974rem] leading-[15px] font-semibold whitespace-nowrap ${
-                active ? "text-[#6619DE]" : "text-[#6B7280]"
-              }`}
+              className={`text-[0.974rem] leading-[15px] font-semibold whitespace-nowrap ${active ? "text-[#6619DE]" : "text-[#6B7280]"
+                }`}
             >
               {label}
             </h5>
           </div>
 
           {index < steps.length - 1 && (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="56"
-              height="2"
-              viewBox="0 0 56 2"
-              fill="none"
-              className="mx-2"
-            >
-              <line
-                y1="1"
-                x2="56"
-                y2="1"
-                stroke={active ? "#6619DE" : "#6B7280"}
-                strokeWidth="2"
-                strokeDasharray="3 3"
-              />
-            </svg>
+            <div
+              className={`h-[4px] flex-1 mx-2 rounded-full transition-all duration-300 ${steps[index + 1]?.active ? "bg-[#6619DE]" : "bg-[#E5E7EB]"
+                }`}
+            />
           )}
         </div>
       ))}
