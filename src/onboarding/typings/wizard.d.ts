@@ -2,12 +2,13 @@ interface WizardStep {
   id: string;
   label: string;
   Icon: IconType;
-  Component?: React.ReactNode;
+  Component?: () => React.ReactNode;
   formMetaData?: {
     heading?: string;
     subHeading?: string;
   };
   skip?: boolean;
+  cbFn?: () => void | Promise<void>;
 }
 
 interface WizardStepActive extends WizardStep {
@@ -32,6 +33,7 @@ interface OnboardingWizardFormComponentPropsInt {
   currentStepId: string;
   handleSkip?: () => void;
   isMobile: boolean;
+  error : string | null
 }
 
 interface OnboardingWizardNavigationComponentPropsInt {
@@ -40,6 +42,7 @@ interface OnboardingWizardNavigationComponentPropsInt {
   completedSteps: string[];
   currentStepId: string;
   activeSteps: WizardStepActive[];
+  loading ?: boolean
 }
 
 interface SetupWizardFormComponentPropsInt {

@@ -15,24 +15,20 @@ function OnboardingProgressTracker({
     return (
       <div className="w-full space-y-2">
         <div className="flex items-center justify-between">
-          {steps.map(({ label, id, active }, index) => (
+          {steps.map(({ label, id, active }) => (
             <div
               className="flex items-center gap-1"
               key={id}
               onClick={gotoNextWizard(id)}
             >
               <span
-                className={`text-[12px] tracking-[-2%] whitespace-nowrap ${active ? "text-[#6619DE] font-semibold" : "text-[#6B7280]"
-                  }`}
+                className={`text-[12px] tracking-[-2%] whitespace-nowrap ${
+                  active ? "text-[#6619DE] font-semibold" : "text-[#6B7280]"
+                }`}
               >
                 {label}
               </span>
-              {index < steps.length - 1 && (
-                <div
-                  className={`h-[3px] w-[16px] mx-1 rounded-full transition-all duration-300 ${steps[index + 1]?.active ? "bg-[#6619DE]" : "bg-[#E5E7EB]"
-                    }`}
-                />
-              )}
+             
             </div>
           ))}
         </div>
@@ -56,8 +52,9 @@ function OnboardingProgressTracker({
         <div key={id} className="flex items-center gap-[11px] flex-1">
           <div className="flex items-center gap-[11px]">
             <div
-              className={`size-[46px] rounded-full flex justify-center items-center cursor-pointer transition-all ease-out ${active ? "bg-[#6619DE]" : "bg-[#F1EDF6]"
-                }`}
+              className={`size-[46px] rounded-full flex justify-center items-center cursor-pointer transition-all ease-out ${
+                active ? "bg-[#6619DE]" : "bg-[#F1EDF6]"
+              }`}
               onClick={gotoNextWizard(id)}
             >
               <Icon
@@ -66,8 +63,9 @@ function OnboardingProgressTracker({
               />
             </div>
             <h5
-              className={`text-[0.974rem] leading-[15px] font-semibold whitespace-nowrap ${active ? "text-[#6619DE]" : "text-[#6B7280]"
-                }`}
+              className={`text-[0.974rem] leading-[15px] font-semibold whitespace-nowrap ${
+                active ? "text-[#6619DE]" : "text-[#6B7280]"
+              }`}
             >
               {label}
             </h5>
@@ -75,8 +73,9 @@ function OnboardingProgressTracker({
 
           {index < steps.length - 1 && (
             <div
-              className={`h-[4px] flex-1 mx-2 rounded-full transition-all duration-300 ${steps[index + 1]?.active ? "bg-[#6619DE]" : "bg-[#E5E7EB]"
-                }`}
+              className={`h-[4px] flex-1 mx-2 rounded-full transition-all duration-300 ${
+                steps[index + 1]?.active ? "bg-[#6619DE]" : "bg-[#E5E7EB]"
+              }`}
             />
           )}
         </div>

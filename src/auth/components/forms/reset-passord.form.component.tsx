@@ -1,5 +1,5 @@
 import { ResetPasswordFormData } from "@/auth/typings/auth";
-import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { reset_password } from "@/config/services/auth.service";
@@ -87,12 +87,14 @@ function ResetPasswordFormComponent({
           <div className=" text-red-500">{errors.confirm_password.message}</div>
         )}
       </div>
-      <Button
+      <LoadingButton
         type="submit"
-        className={`h-11 sm:h-[2.543rem] md:h-14 mt-3 ${isPending && "opacity-50"}`}
+        loading={isPending}
+        loadingText="Submitting..."
+        className="h-11 sm:h-[2.543rem] md:h-14 mt-3"
       >
-        {isPending ? "Submitting...." : "Submit"}
-      </Button>
+        Submit
+      </LoadingButton>
 
       <p className="text-center mt-[19px] font-[600] text-[1rem]">
         Go back to{" "}

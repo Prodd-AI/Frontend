@@ -54,9 +54,9 @@ function LoginFormComponent() {
           description: "You have been successfully signed in.",
         });
 
-        // setTimeout(() => {
-        //   navigate("/");
-        // }, 1500);
+        setTimeout(() => {
+          navigate("/");
+        }, 500);
 
         reset();
       } else {

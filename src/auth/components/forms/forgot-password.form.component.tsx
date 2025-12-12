@@ -1,5 +1,5 @@
 import { ForgotPasswordFormData } from "@/auth/typings/auth";
-import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { forgot_password_schema } from "@/lib/schemas";
@@ -61,15 +61,14 @@ function ForgotPasswordFormComponent({
           <div className=" text-red-500">{errors.email.message}</div>
         )}
       </div>
-      <Button
+      <LoadingButton
         type="submit"
-        className={`h-11 sm:h-[2.543rem] md:h-14 w-full ${
-          isPending && "opacity-50"
-        }`}
-        disabled={isPending}
+        loading={isPending}
+        loadingText="Submitting..."
+        className="h-11 sm:h-[2.543rem] md:h-14 w-full"
       >
-        {isPending ? "Submitting....." : "Submit"}
-      </Button>
+        Submit
+      </LoadingButton>
 
       <p className="text-center mt-[19px] font-[600] text-[1rem]">
         Go back to{" "}
