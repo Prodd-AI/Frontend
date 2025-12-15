@@ -7,7 +7,7 @@ declare module "@/shared/typings/auth.store" {
     token: string | null;
     email: string | null;
     login: (user: TeamMember, token: string) => void;
-    register: (user: TeamMember) => void;
+    register: (user: TeamMember["user"]) => void;
     logout: () => void;
     setEmail: (email: string) => void;
     setUser: (user: TeamMember, token: string) => void;

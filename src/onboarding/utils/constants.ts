@@ -20,7 +20,7 @@ export const role_cards: Array<{
     title: "Team Lead",
     description:
       "Oversee team by assigning tasks, scheduling calls, & reviewing progress & performance.",
-    value: "team_leader",
+    value: "team_lead",
     Icon: FaUserShield,
   },
   {

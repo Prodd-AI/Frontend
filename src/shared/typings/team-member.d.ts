@@ -25,7 +25,7 @@ declare module "@/shared/typings/team-member" {
   const TeamMemberRole = {
     SUPER_ADMIN = "super_admin",
     TEAM_MEMBER = "team_member",
-    TEAM_LEADER = "team_leader",
+    TEAM_LEADER = "team_lead",
     HR = "hr",
     EXECUTIVE = "executive",
   } as const;

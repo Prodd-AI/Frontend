@@ -4,9 +4,11 @@ import { Navigate } from "react-router-dom";
 function TeamMemberDashEntry() {
   //determine team member role and redirect based on the user role
   const user = useAuthStore((state) => state.user);
+
   if (!user) {
     return <Navigate to="/auth/login" />;
   }
+
   if (!user.user.user_role) {
     return <Navigate to="/onboarding/select-role" />;
   }
@@ -15,8 +17,8 @@ function TeamMemberDashEntry() {
   switch (user_role) {
     case "hr":
       return <Navigate to="/dash/hr" />;
-    case "team_leader":
-      return <Navigate to="/dash/team-leader" />;
+    case "team_lead":
+      return <Navigate to="/dash/team-lead" />;
     case "team_member":
       return <Navigate to="/dash/team-member" />;
 

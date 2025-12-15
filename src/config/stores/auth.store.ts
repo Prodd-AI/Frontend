@@ -16,11 +16,12 @@ const useAuthStore = create<AuthState>((set) => ({
   setUser: (user, token) => {
     set({ user, token, isAuthenticated: true });
   },
-  register: (user) => {
-    set({
-      user,
-    });
-  },
+  register: (userData) =>
+    set((state) => ({
+      user: state.user
+        ? { ...state.user, user: { ...state.user.user, ...userData } }
+        : null,
+    })),
 }));
 
 export default useAuthStore;
