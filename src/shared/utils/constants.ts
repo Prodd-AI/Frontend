@@ -1,10 +1,8 @@
 const server_url =
-  import.meta.env.VITE_SERVER_URL ||
-  "https://api.prodai.teknesisbrand.com/api/v1/";
+  import.meta.env.VITE_SERVER_URL || "https://api.prodily.tech/api/v1/";
 
-
-  // Common timezones with their abbreviations
-   const COMMON_TIMEZONES = [
+// Common timezones with their abbreviations
+const COMMON_TIMEZONES = [
   { value: "Africa/Lagos", label: "WAT - West Africa Time", abbr: "WAT" },
   { value: "America/New_York", label: "EST - Eastern Time", abbr: "EST" },
   { value: "America/Chicago", label: "CST - Central Time", abbr: "CST" },
@@ -32,10 +30,4 @@ const ACCEPTED_IMAGE_TYPES = [
   "image/webp",
 ];
 
-
-export {
-  MAX_FILE_SIZE,
-  ACCEPTED_IMAGE_TYPES,
-  COMMON_TIMEZONES,
-  server_url
-}
+export { MAX_FILE_SIZE, ACCEPTED_IMAGE_TYPES, COMMON_TIMEZONES, server_url };
