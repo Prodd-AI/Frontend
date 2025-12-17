@@ -122,7 +122,7 @@ function withTeamMemberScaffold<P extends object>(
 
                 <div className="flex flex-col ml-[11px]">
                   <h4 className="text-[#251F2D] font-bold text-[1rem  ]">{`${user?.user.first_name} ${user?.user.last_name}`}</h4>
-                  <p className="text-[#6B7280] text-[1rem] font-[400]">
+                  <p className="text-[#6F7277] text-[1rem] font-[400]">
                     {user?.user.email}
                   </p>
                 </div>
@@ -130,13 +130,7 @@ function withTeamMemberScaffold<P extends object>(
             </div>
           </div>
         </div>
-        {isRefreshing ? (
-          <div className=" h-full w-full flex justify-center items-center">
-            <Loader />
-          </div>
-        ) : (
-          <WrappedComponent {...(componentProps as P)} />
-        )}
+        <WrappedComponent {...(componentProps as P)} />
       </div>
     );
   };

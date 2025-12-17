@@ -5,10 +5,12 @@ import { TeamMember } from "@/shared/typings/team-member";
 const user_api_client = new ApiService(server_url + "auth");
 
 const update_user = (data: Partial<TeamMember["user"]>) => {
-  const { user_role, ...rest } = data;
+  const { user_role, avatar_url,...rest } = data;
+  
   const transformedData = {
     ...rest,
     ...(user_role !== undefined && { role: user_role }),
+    ...(avatar_url !== "" && {avatar_url})
   };
 
   return user_api_client.patch<

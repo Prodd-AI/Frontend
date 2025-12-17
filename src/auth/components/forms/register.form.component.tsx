@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +12,7 @@ import { register_schema } from "@/lib/schemas";
 import { RegisterFormData } from "@/auth/typings/auth";
 import { useMutation } from "@tanstack/react-query";
 import { regsiter_team_member } from "@/config/services/auth.service";
-import { toast } from "sonner";
-import useAuthStore from "@/config/stores/auth.store";
+import Banner from "@/shared/components/banner.component";
 
 const calculatePasswordStrength = (password: string) => {
   const checks = {
@@ -21,6 +20,7 @@ const calculatePasswordStrength = (password: string) => {
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     number: /\d/.test(password),
+    special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
   };
 
   const score = Object.values(checks).filter(Boolean).length;
@@ -43,11 +43,17 @@ const calculatePasswordStrength = (password: string) => {
 
 const RegisterFormComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [loadingToastId, setLoadingToastId] = useState<string | number | null>(
-    null
-  );
-  const { setEmail } = useAuthStore();
   const navigate = useNavigate();
+  const [banner, setBanner] = useState<{
+    message: string;
+    variant: "success" | "critical";
+    isOpen: boolean;
+    title?: string;
+  }>({
+    message: "",
+    variant: "success",
+    isOpen: false,
+  });
   const { mutate, isPending } = useMutation<
     GeneralReturnInt<RegisterTeamMemberReturnInt>,
     Error,
@@ -55,31 +61,33 @@ const RegisterFormComponent = () => {
   >({
     mutationFn: (data) => regsiter_team_member(data),
     onSuccess: (response) => {
-      if (loadingToastId) {
-        toast.dismiss(loadingToastId);
-        setLoadingToastId(null);
-      }
-
       const userEmail = response?.data?.email ?? "";
 
-      if (userEmail) {
-        setEmail(userEmail);
-      }
-
-      toast.success("Account created successfully!", {
-        description: "Please check your email to verify your account.",
+      setBanner({
+        message: response.message,
+        variant: "success",
+        isOpen: true,
+        title: "Account created successfully!",
       });
       setTimeout(() => {
-        navigate("/auth/verify-email");
+        navigate(`/auth/verify-email?email=${encodeURIComponent(userEmail)}`);
       }, 2000);
       reset();
     },
-    onError: (error: Error) => {
-      if (loadingToastId) {
-        toast.dismiss(loadingToastId);
-        setLoadingToastId(null);
+    onError: (error: unknown) => {
+      let errorMessage = "Something went wrong, please try again later.";
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
       }
-      console.error(error);
+
+      setBanner({
+        message: errorMessage,
+        variant: "critical",
+        isOpen: true,
+      });
     },
   });
 
@@ -102,13 +110,6 @@ const RegisterFormComponent = () => {
   );
 
   const onSubmit = (values: Omit<RegisterFormData, "accepted">) => {
-    if (loadingToastId) {
-      toast.dismiss(loadingToastId);
-    }
-
-    const toastId = toast.loading("Creating your account...");
-    setLoadingToastId(toastId);
-
     mutate({
       last_name: values.last_name,
       first_name: values.first_name,
@@ -123,6 +124,17 @@ const RegisterFormComponent = () => {
       onSubmit={handleSubmit(onSubmit)}
       noValidate
     >
+      <Banner
+        open={banner.isOpen}
+        description={banner.message}
+        variant={banner.variant}
+        isDismiss
+        title={banner.title}
+        onDismiss={() =>
+          setBanner({ message: "", variant: "success", isOpen: false })
+        }
+      />
+
       <div className="flex flex-col gap-2">
         <Label
           htmlFor="first_name"
@@ -312,6 +324,18 @@ const RegisterFormComponent = () => {
                 </span>
                 One number
               </div>
+              <div
+                className={`text-xs flex items-center gap-2 ${
+                  passwordStrength.checks.special
+                    ? "text-green-600"
+                    : "text-gray-500"
+                }`}
+              >
+                <span className="text-[10px]">
+                  {passwordStrength.checks.special ? "✓" : "○"}
+                </span>
+                One special character (!@#$%...)
+              </div>
             </div>
           </div>
         )}
@@ -356,13 +380,14 @@ const RegisterFormComponent = () => {
         </div>
       </div>
 
-      <Button
+      <LoadingButton
         type="submit"
-        className={`mt-2 h-11 sm:h-[2.543rem] md:h-14 ${isPending && "opacity-25"}`}
-        disabled={isPending}
+        loading={isPending}
+        loadingText="Creating Account..."
+        className="mt-2 h-11 sm:h-[2.543rem] md:h-14"
       >
-        {isPending ? "....." : "Create Account"}
-      </Button>
+        Create Account
+      </LoadingButton>
       <Oauth />
       <div className="text-center mt-[19px] font-[600] text-[1rem]">
         <p>

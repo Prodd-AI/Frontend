@@ -8,19 +8,19 @@ import {
   QueryCache,
   MutationCache,
 } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { getErrorMessage } from "./shared/utils/error-message.utils.ts";
+// import { toast } from "sonner";
+// import { getErrorMessage } from "./shared/utils/error-message.utils.ts";
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
-    onError: (error: unknown) => {
-      toast.error(getErrorMessage(error));
-    },
+    // onError: (error: unknown) => {
+    //   toast.error(getErrorMessage(error));
+    // },
   }),
   mutationCache: new MutationCache({
-    onError: (error: unknown) => {
-      toast.error(getErrorMessage(error));
-    },
+    // onError: (error: unknown) => {
+    //   toast.error(getErrorMessage(error));
+    // },
   }),
 });
 

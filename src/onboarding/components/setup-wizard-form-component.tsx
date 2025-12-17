@@ -13,6 +13,8 @@ function SetupWizardFormComponent({ steps }: SetupWizardFormComponentPropsInt) {
     handlePrevStep,
     completedSteps,
     handleSkip,
+    loading,
+    error,
   } = useOnboardWizard(steps);
   const isMobile = useIsMobile();
   return (
@@ -28,6 +30,7 @@ function SetupWizardFormComponent({ steps }: SetupWizardFormComponentPropsInt) {
         currentStepId={currentStepId}
         handleSkip={handleSkip}
         isMobile={isMobile}
+        error={error}
       />
 
       <OnboardingWizardNavigationComponent
@@ -36,6 +39,7 @@ function SetupWizardFormComponent({ steps }: SetupWizardFormComponentPropsInt) {
         completedSteps={completedSteps}
         currentStepId={currentStepId}
         activeSteps={activeSteps}
+        loading={loading}
       />
     </div>
   );
