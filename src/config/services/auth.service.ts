@@ -66,7 +66,10 @@ const reset_password = (data: {
     data
   );
 };
-
+const logout = () =>{
+  const refresh_token_id = localStorage.getItem("refresh_token_id") ?? ""
+  return auth_service.post("logout",refresh_token_id,true)
+}
 export {
   regsiter_team_member,
   login_team_member,
@@ -75,4 +78,5 @@ export {
   refresh_auth_with_team_member_profile,
   forgot_password,
   reset_password,
+  logout
 };

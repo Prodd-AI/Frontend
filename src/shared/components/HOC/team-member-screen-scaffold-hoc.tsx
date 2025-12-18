@@ -1,7 +1,8 @@
-import { ComponentType, useEffect, useRef, useState } from "react";
+import { ComponentType } from "react";
 import Logo from "../Logo.component";
 import { Bell } from "lucide-react";
 import { Navigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import useAuthStore from "@/config/stores/auth.store";
 import { refresh_auth_with_team_member_profile } from "@/config/services/auth.service";
 import Loader from "../loader.component";
@@ -12,6 +13,9 @@ import HRBadgeIcon from "@/components/ui/hr-badge-icon";
  * Higher Order Component that wraps a component with the team member screen scaffold
  * Provides authentication check, header with logo, notifications, and user profile
  * Automatically shows HR badge for users with HR role
+ *
+ * Uses TanStack Query with side effects handled directly in queryFn for clean,
+ * effect-free implementation.
  */
 function withTeamMemberScaffold<P extends object>(
   WrappedComponent: ComponentType<P>
@@ -19,56 +23,40 @@ function withTeamMemberScaffold<P extends object>(
   return function TeamMemberScaffoldWrapper(
     props: P & WithTeamMemberScaffoldProps
   ) {
-    const [isRefreshing, setIsRefreshing] = useState(true);
-    const { user, isAuthenticated, setUser } = useAuthStore();
-    const hasFetchedProfile = useRef(false);
+    const { user, isAuthenticated } = useAuthStore();
 
-    useEffect(() => {
-      if (isAuthenticated && user) {
-        hasFetchedProfile.current = true;
-        setIsRefreshing(false);
-        return;
-      }
-
-      if (hasFetchedProfile.current) {
-        setIsRefreshing(false);
-        return;
-      }
-
-      const fetchUserProfile = async () => {
-        try {
-          const refresh_token_id = localStorage.getItem("refresh_token_id");
-          if (!refresh_token_id) {
-            useAuthStore.getState().logout();
-            setIsRefreshing(false);
-            return;
-          }
-
-          const res = await refresh_auth_with_team_member_profile({
-            refresh_token_id,
-          });
-          if (res.data?.user) {
-            setUser(res.data, res.data.access_token);
-
-            localStorage.setItem("refresh_token_id", res.data.refresh_token);
-            hasFetchedProfile.current = true;
-          }
-        } catch (err) {
-          console.error("Failed to fetch user profile:", err);
-
-          useAuthStore.getState().logout();
-        } finally {
-          setIsRefreshing(false);
+    const { isLoading, isError } = useQuery({
+      queryKey: ["auth", "session"],
+      queryFn: async () => {
+        const refresh_token_id = localStorage.getItem("refresh_token_id");
+        if (!refresh_token_id) {
+          throw new Error("No refresh token found");
         }
-      };
 
-      fetchUserProfile();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        const res = await refresh_auth_with_team_member_profile({
+          refresh_token_id,
+        });
+
+        if (res.data?.user) {
+          useAuthStore.getState().setUser(res.data, res.data.access_token);
+          localStorage.setItem("refresh_token_id", res.data.refresh_token);
+        }
+
+        return res.data;
+      },
+      enabled: !isAuthenticated || !user,
+      retry: false,
+      staleTime: Infinity,
+    });
 
     const { HeaderChild, ...componentProps } = props;
 
-    if (isRefreshing) {
+    if (isError) {
+      useAuthStore.getState().logout();
+      return <Navigate to="/auth/login" />;
+    }
+
+    if (isLoading) {
       return (
         <div className="h-screen w-full flex justify-center items-center">
           <Loader />

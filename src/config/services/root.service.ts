@@ -1,3 +1,9 @@
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
+} from "axios";
 import useAuthStore from "@/config/stores/auth.store";
 
 /**
@@ -5,11 +11,11 @@ import useAuthStore from "@/config/stores/auth.store";
  */
 export interface ApiRequestConfig {
   /** Custom headers to merge with default headers */
-  headers?: HeadersInit;
+  headers?: Record<string, string>;
   /** Request timeout in milliseconds */
   timeout?: number;
-  /** Custom fetch options (mode, cache, credentials, etc.) */
-  fetchOptions?: Omit<RequestInit, "method" | "headers" | "body">;
+  /** Additional axios request config options */
+  axiosConfig?: Omit<AxiosRequestConfig, "method" | "headers" | "data" | "params" | "timeout">;
 }
 
 /**
@@ -19,9 +25,9 @@ export interface ApiServiceConfig {
   /** Default timeout for all requests (ms) */
   timeout?: number;
   /** Request interceptor */
-  onRequest?: (url: string, options: RequestInit) => Promise<void> | void;
+  onRequest?: (config: AxiosRequestConfig) => Promise<void> | void;
   /** Response interceptor */
-  onResponse?: (response: Response) => Promise<void> | void;
+  onResponse?: (response: AxiosResponse) => Promise<void> | void;
   /** Error interceptor */
   onError?: (error: Error) => Promise<void> | void;
 }
@@ -35,7 +41,7 @@ export interface ApiServiceConfig {
  * - URL management and parameter handling
  * - Error handling and logging
  * - Request timeout handling
- * - Custom headers and fetch options per request
+ * - Custom headers and axios options per request
  * - Request/response interceptors
  *
  * Note: Retry logic is handled by TanStack Query for better integration with React state management.
@@ -44,13 +50,13 @@ export interface ApiServiceConfig {
  * ```typescript
  * const api = new ApiService('https://api.example.com', {
  *   timeout: 10000,
- *   onRequest: (url, options) => console.log('Request:', url),
+ *   onRequest: (config) => console.log('Request:', config.url),
  * });
  * const users = await api.get<User[]>('/users', undefined, true);
  * ```
  */
 export class ApiService {
-  private readonly base_url: string;
+  private readonly axiosInstance: AxiosInstance;
   private readonly config: ApiServiceConfig;
 
   /**
@@ -61,26 +67,85 @@ export class ApiService {
    * @param config - Optional global configuration for the API service
    */
   constructor(base_url: string, config: ApiServiceConfig = {}) {
-    this.base_url = base_url.endsWith("/") ? base_url.slice(0, -1) : base_url;
+    const cleanedBaseUrl = base_url.endsWith("/") ? base_url.slice(0, -1) : base_url;
+    
     this.config = {
       timeout: config.timeout || 30000, // Default 30 seconds
       ...config,
     };
+
+    // Create axios instance with base configuration
+    this.axiosInstance = axios.create({
+      baseURL: cleanedBaseUrl,
+      timeout: this.config.timeout,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    // Setup request interceptor
+    this.axiosInstance.interceptors.request.use(
+      async (axiosConfig) => {
+        // Call custom request interceptor if provided
+        if (this.config.onRequest) {
+          await this.config.onRequest(axiosConfig);
+        }
+        return axiosConfig;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    // Setup response interceptor
+    this.axiosInstance.interceptors.response.use(
+      async (response) => {
+        // Call custom response interceptor if provided
+        if (this.config.onResponse) {
+          await this.config.onResponse(response);
+        }
+        return response;
+      },
+      async (error: AxiosError) => {
+        // Handle errors
+        const errorMessage = this.extractErrorMessage(error);
+        const customError = new Error(errorMessage);
+
+        // Call custom error interceptor if provided
+        if (this.config.onError) {
+          await this.config.onError(customError);
+        }
+
+        return Promise.reject(customError);
+      }
+    );
   }
 
   /**
-   * Converts a relative path into a complete URL by combining it with the base URL.
+   * Extracts a meaningful error message from an Axios error.
    *
-   * Think of this as your URL builder - it takes care of all the slash management
-   * so you don't have to worry about whether to include them or not.
-   *
-   * @param url - The relative path (e.g., '/users' or 'users/123')
-   * @returns The complete URL ready for making requests
+   * @param error - The Axios error object
+   * @returns A user-friendly error message
    * @private
    */
-  private urlMapper(url: string): string {
-    const cleaned_url = url.endsWith("/") ? url.slice(1) : url;
-    return `${this.base_url}/${cleaned_url}`;
+  private extractErrorMessage(error: AxiosError): string {
+    if (error.response) {
+      // Server responded with error status
+      const status = error.response.status;
+      const statusText = error.response.statusText;
+      const data = error.response.data as { message?: string; error?: string; detail?: string } | undefined;
+
+      // Try to get error message from response data
+      const message = data?.message || data?.error || data?.detail;
+      return message || `HTTP ${status}: ${statusText}`;
+    } else if (error.request) {
+      // Request was made but no response received
+      if (error.code === "ECONNABORTED") {
+        return `Request timeout after ${this.config.timeout}ms`;
+      }
+      return "No response received from server";
+    } else {
+      // Something else happened
+      return error.message || "An unexpected error occurred";
+    }
   }
 
   /**
@@ -95,33 +160,31 @@ export class ApiService {
   private getAccessToken(): string {
     return useAuthStore.getState().token || "";
   }
+
   /**
-   * Builds the request configuration object for different HTTP methods.
+   * Builds the axios request configuration object.
    *
-   * This is where the magic happens! It sets up headers, authentication,
-   * and request body based on what kind of request you're making.
+   * This sets up headers, authentication, timeout, and other options
+   * based on the request requirements.
    *
-   * @template T - The type of data being sent in the request
-   * @param method - HTTP method (GET, POST, PUT, DELETE)
-   * @param data - The data to send (for POST/PUT requests)
-   * @param requireAuth - Whether this request needs authentication (default: true)
+   * @param requireAuth - Whether this request needs authentication
    * @param customConfig - Custom configuration for this specific request
-   * @returns Configured RequestInit object ready for fetch()
-   * @throws {Error} When data is missing for POST/PUT requests
+   * @returns Configured AxiosRequestConfig object
    * @private
    */
-  private options<T>(
-    method: "POST" | "GET" | "PUT" | "DELETE" | "PATCH",
-    data: T,
+  private buildRequestConfig(
     requireAuth: boolean = false,
     customConfig?: ApiRequestConfig
-  ) {
-    const headers: HeadersInit = {
+  ): AxiosRequestConfig {
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
 
     if (requireAuth) {
-      headers.Authorization = `Bearer ${this.getAccessToken()}`;
+      const token = this.getAccessToken();
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
     }
 
     // Merge custom headers if provided
@@ -129,169 +192,27 @@ export class ApiService {
       ? { ...headers, ...customConfig.headers }
       : headers;
 
-    const base_options: RequestInit = {
-      method,
+    const requestConfig: AxiosRequestConfig = {
       headers: finalHeaders,
-      ...customConfig?.fetchOptions, // Merge custom fetch options
+      timeout: customConfig?.timeout,
+      ...customConfig?.axiosConfig,
     };
 
-    switch (method) {
-      case "GET":
-        return base_options;
-      case "POST":
-      case "PUT":
-      case "PATCH":
-        if (!data) {
-          throw new Error(`Data must be provided for ${method} requests`);
-        }
-        return {
-          ...base_options,
-          body: JSON.stringify(data),
-        };
-      case "DELETE":
-        return data
-          ? {
-              ...base_options,
-              body: JSON.stringify(data),
-            }
-          : base_options;
-      default:
-        throw new Error(`Unsupported HTTP method: ${method}`);
-    }
+    return requestConfig;
   }
+
   /**
-   * Creates a fetch request with timeout support.
+   * Determines the appropriate response type based on content type.
    *
-   * @param url - The URL to fetch
-   * @param options - Fetch options
-   * @param timeout - Timeout in milliseconds
-   * @returns Promise that resolves to the Response or rejects on timeout
+   * @param response - The axios response
+   * @returns The response data in the appropriate format
    * @private
    */
-  private async fetchWithTimeout(
-    url: string,
-    options: RequestInit,
-    timeout: number
-  ): Promise<Response> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-      return response;
-    } catch (error) {
-      clearTimeout(timeoutId);
-      if (error instanceof Error && error.name === "AbortError") {
-        throw new Error(`Request timeout after ${timeout}ms`);
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * The universal request handler that deals with all HTTP requests.
-   *
-   * This method is like your personal assistant for API calls - it handles
-   * the response, figures out what type of content you're getting back,
-   * and converts it to the right format. Whether it's JSON, a PDF, or an image,
-   * this method has got you covered!
-   *
-   * Features:
-   * - Automatic timeout handling
-   * - Request/response interceptors
-   * - Smart content type detection
-   *
-   * Note: This method integrates with the global error handling system in main.tsx.
-   * Errors are automatically caught by TanStack Query and displayed as toast notifications.
-   * TanStack Query handles retry logic for better integration with React state management.
-   *
-   * @template T - The expected return type
-   * @param url - The complete URL to make the request to
-   * @param options - Fetch options (headers, method, body, etc.)
-   * @param customConfig - Custom configuration for this specific request
-   * @returns Promise that resolves to the response data in the expected format
-   * @throws {Error} When the request fails or server returns an error (caught by global error handler)
-   */
-  async requestHandler<T>(
-    url: string,
-    options: RequestInit = {},
-    customConfig?: ApiRequestConfig
-  ): Promise<T> {
-    const timeout = customConfig?.timeout || this.config.timeout || 30000;
-
-    // Request interceptor
-    if (this.config.onRequest) {
-      await this.config.onRequest(url, options);
-    }
-
-    const response = await this.fetchWithTimeout(url, options, timeout);
-
-    // Response interceptor
-    if (this.config.onResponse) {
-      await this.config.onResponse(response);
-    }
-
-    // Check if the response is ok (status 200-299)
-    if (!response.ok) {
-      // Try to get error message from response body
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
-      try {
-        const errorData = await response.json();
-        // Common API error message fields
-        errorMessage =
-          errorData.message ||
-          errorData.error ||
-          errorData.detail ||
-          errorMessage;
-      } catch {
-        // If response body isn't JSON, use the default error message
-      }
-
-      const error = new Error(errorMessage);
-
-      // Error interceptor
-      if (this.config.onError) {
-        await this.config.onError(error);
-      }
-
-      throw error;
-    }
-
-    // Handle different content types
-    const contentType = response.headers.get("Content-Type");
-
-    // If no content type, assume JSON
-    if (!contentType) {
-      return response.json() as Promise<T>;
-    }
-
-    // List of binary content types that should return as Blob
-    const binaryContentTypes = [
-      "text/csv",
-      "application/pdf",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "image/png",
-      "image/jpeg",
-      "image/jpg",
-      "image/gif",
-      "image/webp",
-    ];
-
-    const isBinaryContent = binaryContentTypes.some((type) =>
-      contentType.toLowerCase().includes(type)
-    );
-
-    if (isBinaryContent) {
-      return response.blob() as Promise<T>;
-    }
-
-    // Default to JSON for most API responses
-    return response.json() as Promise<T>;
+  private handleResponseType<T>(response: AxiosResponse): T {
+    // Axios automatically handles response parsing based on content type
+    // For JSON, it parses automatically
+    // For binary content (Blob), axios handles it when responseType is set
+    return response.data as T;
   }
 
   /**
@@ -316,8 +237,11 @@ export class ApiService {
     path: string,
     includeToken: boolean = false,
     params?: Record<string, string>
-  ) {
-    let url = this.urlMapper(path);
+  ): string {
+    const baseUrl = this.axiosInstance.defaults.baseURL || "";
+    const cleanedPath = path.startsWith("/") ? path : `/${path}`;
+    let url = `${baseUrl}${cleanedPath}`;
+
     const searchParams = new URLSearchParams(params);
     if (includeToken) {
       const token = this.getAccessToken();
@@ -325,10 +249,12 @@ export class ApiService {
         searchParams.set("token", token);
       }
     }
+
     const queryString = searchParams.toString();
     if (queryString) {
       url += `?${queryString}`;
     }
+
     return url;
   }
 
@@ -368,9 +294,12 @@ export class ApiService {
     requireAuth: boolean = false,
     config?: ApiRequestConfig
   ): Promise<T> {
-    const url = this.urlGenerator(path, false, params);
-    const options = this.options("GET", undefined, requireAuth, config);
-    return this.requestHandler<T>(url, options, config);
+    const requestConfig = this.buildRequestConfig(requireAuth, config);
+    const response = await this.axiosInstance.get<T>(path, {
+      ...requestConfig,
+      params,
+    });
+    return this.handleResponseType<T>(response);
   }
 
   /**
@@ -402,9 +331,9 @@ export class ApiService {
     requireAuth: boolean = false,
     config?: ApiRequestConfig
   ): Promise<T> {
-    const url = this.urlMapper(path);
-    const options = this.options("POST", data, requireAuth, config);
-    return this.requestHandler<T>(url, options, config);
+    const requestConfig = this.buildRequestConfig(requireAuth, config);
+    const response = await this.axiosInstance.post<T>(path, data, requestConfig);
+    return this.handleResponseType<T>(response);
   }
 
   /**
@@ -436,9 +365,9 @@ export class ApiService {
     requireAuth: boolean = false,
     config?: ApiRequestConfig
   ): Promise<T> {
-    const url = this.urlMapper(path);
-    const options = this.options("PUT", data, requireAuth, config);
-    return this.requestHandler<T>(url, options, config);
+    const requestConfig = this.buildRequestConfig(requireAuth, config);
+    const response = await this.axiosInstance.put<T>(path, data, requestConfig);
+    return this.handleResponseType<T>(response);
   }
 
   /**
@@ -457,10 +386,10 @@ export class ApiService {
    *
    * @example
    * ```typescript
-   * // Update only user's email with credentials included
+   * // Update only user's email
    * const updatedUser = await api.patch<User, Partial<UpdateUserData>>('/users/123', {
    *   email: 'newemail@example.com'
-   * }, true, { fetchOptions: { credentials: 'include' } });
+   * }, true);
    * ```
    */
   async patch<T, U>(
@@ -469,9 +398,9 @@ export class ApiService {
     requireAuth: boolean = false,
     config?: ApiRequestConfig
   ): Promise<T> {
-    const url = this.urlMapper(path);
-    const options = this.options("PATCH", data, requireAuth, config);
-    return this.requestHandler<T>(url, options, config);
+    const requestConfig = this.buildRequestConfig(requireAuth, config);
+    const response = await this.axiosInstance.patch<T>(path, data, requestConfig);
+    return this.handleResponseType<T>(response);
   }
 
   /**
@@ -504,8 +433,11 @@ export class ApiService {
     requireAuth: boolean = false,
     config?: ApiRequestConfig
   ): Promise<T> {
-    const url = this.urlMapper(path);
-    const options = this.options("DELETE", data, requireAuth, config);
-    return this.requestHandler<T>(url, options, config);
+    const requestConfig = this.buildRequestConfig(requireAuth, config);
+    const response = await this.axiosInstance.delete<T>(path, {
+      ...requestConfig,
+      data,
+    });
+    return this.handleResponseType<T>(response);
   }
 }
