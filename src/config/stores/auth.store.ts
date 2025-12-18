@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { AuthState } from "@/shared/typings/auth.store";
-import { logout as logoutService } from "@/config/services/auth.service";
 
 const useAuthStore = create<AuthState>((set) => ({
   user: null,
@@ -10,6 +9,9 @@ const useAuthStore = create<AuthState>((set) => ({
   login: (user, token) => set({ user, isAuthenticated: true, token }),
   logout: async () => {
     try {
+      const { logout: logoutService } = await import(
+        "@/config/services/auth.service"
+      );
       await logoutService();
     } catch (error) {
       console.error("Logout API failed:", error);
@@ -35,4 +37,5 @@ const useAuthStore = create<AuthState>((set) => ({
 }));
 
 export default useAuthStore;
+
 
