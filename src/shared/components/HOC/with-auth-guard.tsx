@@ -1,5 +1,6 @@
-import { ComponentType, useEffect, useRef, useState } from "react";
+import { ComponentType } from "react";
 import { Navigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import useAuthStore from "@/config/stores/auth.store";
 import { refresh_auth_with_team_member_profile } from "@/config/services/auth.service";
 import Loader from "../loader.component";
@@ -12,56 +13,45 @@ import Loader from "../loader.component";
  * 1. Check if user is already authenticated in store
  * 2. If not, attempt to restore session using refresh token from localStorage
  * 3. Redirect to login if no valid session can be established
+ *
+ * Uses TanStack Query with side effects handled directly in queryFn for clean,
+ * effect-free implementation.
  */
 function withAuthGuard<P extends object>(WrappedComponent: ComponentType<P>) {
   return function AuthGuardWrapper(props: P) {
-    const [isRefreshing, setIsRefreshing] = useState(true);
-    const { user, isAuthenticated, setUser } = useAuthStore();
-    const hasFetchedProfile = useRef(false);
+    const { user, isAuthenticated } = useAuthStore();
 
-    useEffect(() => {
-      if (isAuthenticated && user) {
-        hasFetchedProfile.current = true;
-        setIsRefreshing(false);
-        return;
-      }
-
-      if (hasFetchedProfile.current) {
-        setIsRefreshing(false);
-        return;
-      }
-
-      const restoreSession = async () => {
-        try {
-          const refresh_token_id = localStorage.getItem("refresh_token_id");
-          if (!refresh_token_id) {
-            useAuthStore.getState().logout();
-            setIsRefreshing(false);
-            return;
-          }
-
-          const res = await refresh_auth_with_team_member_profile({
-            refresh_token_id,
-          });
-
-          if (res.data?.user) {
-            setUser(res.data, res.data.access_token);
-            localStorage.setItem("refresh_token_id", res.data.refresh_token);
-            hasFetchedProfile.current = true;
-          }
-        } catch (err) {
-          console.error("Failed to restore session:", err);
-          useAuthStore.getState().logout();
-        } finally {
-          setIsRefreshing(false);
+    const { isLoading, isError } = useQuery({
+      queryKey: ["auth", "session"],
+      queryFn: async () => {
+        const refresh_token_id = localStorage.getItem("refresh_token_id");
+        if (!refresh_token_id) {
+          throw new Error("No refresh token found");
         }
-      };
 
-      restoreSession();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        const res = await refresh_auth_with_team_member_profile({
+          refresh_token_id,
+        });
 
-    if (isRefreshing) {
+        if (res.data?.user) {
+          useAuthStore.getState().setUser(res.data, res.data.access_token);
+          localStorage.setItem("refresh_token_id", res.data.refresh_token);
+        }
+
+        return res.data;
+      },
+      enabled: !isAuthenticated || !user,
+      retry: false,
+      staleTime: Infinity,
+    });
+
+    if (isError) {
+      useAuthStore.getState().logout();
+      
+      return <Navigate to="/auth/login" />;
+    }
+
+    if (isLoading) {
       return (
         <div className="h-screen w-full flex justify-center items-center">
           <Loader />
