@@ -21,7 +21,7 @@ Prod AI is a productivity and culture management platform that leverages autonom
 
 - **Team Lead**: wizzywizpad@gmail.com
 - **Team Member**: Saviour Ise
-- **HR**: yhungdew@gmail.com
+- **HR**: Yoma
 
 ### Reusable components
 
