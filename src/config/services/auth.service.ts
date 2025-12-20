@@ -55,6 +55,7 @@ const forgot_password = (data: { email: string }) => {
     data
   );
 };
+//reset password
 
 const reset_password = (data: {
   new_password: string;
@@ -66,6 +67,8 @@ const reset_password = (data: {
     data
   );
 };
+
+// logout
 const logout = () =>{
   const refresh_token_id = localStorage.getItem("refresh_token_id") ?? ""
   return auth_service.post("logout",refresh_token_id,true)

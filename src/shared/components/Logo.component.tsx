@@ -1,7 +1,7 @@
 function Logo() {
   return (
     <div className="flex items-center gap-3">
-      <div className=" relative lg:size-[51.2px] size-[1.601rem]">
+      <div className="relative size-[26px] sm:size-[32px] ">
         <img
           src="/assets/icons/logo.svg"
           alt="Prod AI logo"
@@ -9,7 +9,7 @@ function Logo() {
         />
       </div>
 
-      <h2 className=" font-semibold text-[#251F2D] lg:text-[2.2rem] text-[1.136rem]">
+      <h2 className=" font-semibold text-[#251F2D] text-[18px] sm:text-[22px]">
         Prod AI
       </h2>
     </div>
