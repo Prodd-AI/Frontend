@@ -312,10 +312,13 @@ const DailyMoodCheckIn = forwardRef<
       <div
         className={clsx(
           className,
-          "w-[50.625rem] h-[33.313rem] bg-[#F8F8F9] rounded-[20px] shadow flex flex-col p-[35px]",
-          "transition-all duration-500 ease-in-out",
-          "hover:shadow-lg"
+          "w-[50.625rem] h-[33.313rem] bg-[#F8F8F9] rounded-[20px] flex flex-col p-[35px]",
+          "transition-all duration-500 ease-in-out"
         )}
+        style={{
+          boxShadow:
+            "0px 4px 4px -4px rgba(12, 12, 13, 0.05), 0px 16px 16px -8px rgba(12, 12, 13, 0.1)",
+        }}
       >
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
