@@ -41,7 +41,9 @@ function OnboardingWizardNavigationComponent({
         loadingText="Saving..."
         className="min-w-[160px] h-11 font-medium transition-all"
       >
-        Save & Continue
+        {currentStepId === activeSteps[activeSteps.length - 1]?.id
+          ? "Go to Dashboard"
+          : "Next"}
       </LoadingButton>
     </div>
   );

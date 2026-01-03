@@ -21,6 +21,10 @@ function withAuthGuard<P extends object>(WrappedComponent: ComponentType<P>) {
   return function AuthGuardWrapper(props: P) {
     const { user, isAuthenticated } = useAuthStore();
 
+    const removeAuthGuard =
+      import.meta.env.VITE_REMOVE_AUTH_GUARD === "true" ||
+      import.meta.env.VITE_REMOVE_AUTH_GUARD === "1";
+
     const { isLoading, isError } = useQuery({
       queryKey: ["auth", "session"],
       queryFn: async () => {
@@ -40,14 +44,14 @@ function withAuthGuard<P extends object>(WrappedComponent: ComponentType<P>) {
 
         return res.data;
       },
-      enabled: !isAuthenticated || !user,
+      enabled: !isAuthenticated || !user || !removeAuthGuard,
       retry: false,
       staleTime: Infinity,
     });
 
-    if (isError) {
+    if (isError && !removeAuthGuard) {
       useAuthStore.getState().logout();
-      
+
       return <Navigate to="/auth/login" />;
     }
 
@@ -57,6 +61,10 @@ function withAuthGuard<P extends object>(WrappedComponent: ComponentType<P>) {
           <Loader />
         </div>
       );
+    }
+
+    if (removeAuthGuard) {
+      return <WrappedComponent {...props} />;
     }
 
     if (!isAuthenticated || !user) {
