@@ -1,28 +1,50 @@
 import { Button } from "@/components/ui/button";
-import { RiCalendarScheduleLine } from "react-icons/ri";
-import { RxPerson } from "react-icons/rx";
+import { useState } from "react";
 import withTeamMemberScaffold from "@/shared/components/HOC/team-member-screen-scaffold-hoc";
-import AssignTask from "../components/assign-task.component";
+import useUrlSearchParams from "@/shared/hooks/use-url-search-params";
 import WelcomeBackHeader from "@/shared/components/welcome-back-header.component";
 import NudgeBanner from "@/shared/components/nudge-banner.component";
-import { useState } from "react";
-import DailyMoodCheckIn from "@/shared/components/daily-mood-check-in.component";
-import WeeklyStreakComponent from "@/shared/components/weekly-streak.component";
-import TodaysProgress from "@/shared/components/todays-progress.component";
-import TabComponent from "@/shared/components/tab.component";
-import { MdOutlineCenterFocusStrong } from "react-icons/md";
-import { IoCheckmarkOutline } from "react-icons/io5";
-import { LuClock2 } from "react-icons/lu";
+import AssignTask from "../components/assign-task.component";
+import ScheduleMeetingButton from "../components/schedule-meeting-button.component";
+import MyTeamButton from "../components/my-team-button.component";
+import PersonalDashboardSection from "../components/personal-dashboard-section.component";
+import TeamDashboardSection from "../components/team-dashboard-section.component";
+import PersonalTabsSection from "../components/personal-tabs-section.component";
+import TeamTabsSection from "../components/team-tabs-section.component";
+
 function Page() {
   const [openNudgeBanner, setOpenNudgeBanner] = useState(true);
+  const { getParam, updateParam, setParams } = useUrlSearchParams();
+  const currentView = getParam("view") || "team";
+  const isPersonalView = currentView === "personal";
+  const personalTab = getParam("personalTab") || "todays_focus";
+  const teamTab = getParam("teamTab") || "team_task";
+
+  const handleViewTeamDashboard = () => {
+    setParams({ view: "team", teamTab: "team_task" });
+  };
+
+  const handleViewPersonalDashboard = () => {
+    setParams({ view: "personal", personalTab: "todays_focus" });
+  };
+
   return (
-    <div className="p-2 sm:p-4">
+    <div className="p-2 sm:p-4 sm:pb-20">
       <WelcomeBackHeader
-        heading="Glad to have you back! 🤗"
-        subHeading="Here’s your team’s pulse and tasks at a glance — lead with clarity, collaborate with ease"
+        heading={
+          isPersonalView
+            ? "Glad to have you back! 🤗"
+            : "Team Dashboard and Insight"
+        }
+        subHeading={
+          isPersonalView
+            ? "Here's your team's pulse and tasks at a glance — lead with clarity, collaborate with ease"
+            : "Manage your team's tasks and wellbeing"
+        }
         badge
         className="mt-4 sm:mt-0"
       />
+
       <NudgeBanner
         className="mt-[25px] sm:mt-[1.7rem]"
         heading="Feeling overwhelmed? Try the 4-7-8 breathing technique. 🧘‍♀️"
@@ -39,125 +61,38 @@ function Page() {
           </Button>
         }
       />
-      <section className=" grid grid-cols-2 mt-9 gap-4">
-        <DailyMoodCheckIn onSubmit={() => null} className="w-full h-full" />
-        <div className=" flex flex-col gap-3.5">
-          <WeeklyStreakComponent
-            className="w-full"
-            numberOfTaskCompleted={2}
-            totalNumberOfTaskForTheDay={2}
-            numberOfTaskCompletedForTheDay={2}
-            days={[
-              {
-                day: 1,
-                status: "completed",
-                tasksCompleted: 2,
-                totalTasks: 2,
-              },
-              {
-                day: 2,
-                status: "completed",
-                tasksCompleted: 2,
-                totalTasks: 2,
-              },
-              {
-                day: 3,
-                status: "completed",
-                tasksCompleted: 2,
-                totalTasks: 2,
-              },
-              {
-                day: 4,
-                status: "completed",
-                tasksCompleted: 2,
-                totalTasks: 2,
-              },
-              {
-                day: 5,
-                status: "completed",
-                tasksCompleted: 2,
-                totalTasks: 2,
-              },
-              {
-                day: 6,
-                status: "completed",
-                tasksCompleted: 2,
-                totalTasks: 2,
-              },
-              {
-                day: 7,
-                status: "completed",
-                tasksCompleted: 2,
-                totalTasks: 2,
-              },
-            ]}
-          />
-          <TodaysProgress
-            title="Today's Progress"
-            numberOfTaskCompleted={2}
-            totalNumberOfTask={4}
-            avgMood={3}
-            className="w-full"
-          />
-        </div>
-      </section>
-      <TabComponent
-        className=" mt-[48px]"
-        items={[
-          {
-            label: "Today’s Focus",
-            value: "todays_focus",
-            icon: <MdOutlineCenterFocusStrong />,
-            content: <div>Tasks content goes here</div>,
-          },
-          {
-            label: "Tasks",
-            value: "tasks",
-            icon: <IoCheckmarkOutline />,
-            content: <div>Mood content goes here</div>,
-          },
-          {
-            label: "Recent Moods",
-            value: "recent_moods",
-            icon: <LuClock2 />,
-            content: <div>Streak content goes here</div>,
-          },
-        ]}
-        activeTab="tasks"
-        onTabChange={(tab) => console.log(tab)}
-      />
+
+      {isPersonalView ? <PersonalDashboardSection /> : <TeamDashboardSection />}
+
+      {isPersonalView ? (
+        <PersonalTabsSection
+          activeTab={personalTab}
+          onTabChange={(tab) => updateParam("personalTab", tab)}
+          onViewTeamDashboard={handleViewTeamDashboard}
+        />
+      ) : (
+        <TeamTabsSection
+          activeTab={teamTab}
+          onTabChange={(tab) => updateParam("teamTab", tab)}
+          onViewPersonalDashboard={handleViewPersonalDashboard}
+        />
+      )}
     </div>
   );
 }
-const WrappedHrPage = withTeamMemberScaffold(Page);
 
-const ScheduleMeeting = () => {
-  return (
-    <Button variant="outline">
-      <RiCalendarScheduleLine />
-      Schedule Meeting
-    </Button>
-  );
-};
-const MyTeam = () => {
-  return (
-    <Button variant="outline">
-      {" "}
-      <RxPerson />
-      My Team
-    </Button>
-  );
-};
+const WrappedHrPage = withTeamMemberScaffold(Page);
 
 const TeamLeadPage = () => (
   <WrappedHrPage
     HeaderChild={
       <>
         <AssignTask />
-        <ScheduleMeeting />
-        <MyTeam />
+        <ScheduleMeetingButton />
+        <MyTeamButton />
       </>
     }
   />
 );
+
 export default TeamLeadPage;
