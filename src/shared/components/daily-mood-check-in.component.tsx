@@ -79,18 +79,12 @@ import { Button } from "@/components/ui/button";
 import { Moods } from "@/shared/typings/daily-mood-check-in";
 import { DailyMoodCheckInPropsInt } from "@/shared/typings/daily-mood-check-in";
 import { DailyMoodCheckInRef } from "@/shared/typings/daily-mood-check-in";
+import { MOOD_EMOJIS } from "../utils/constants";
 
 /**
  * Emoji mapping for each mood type.
  * These emojis are displayed on the selectable mood cards.
  */
-const mood_emojis = {
-  great: "😊",
-  good: "🙂",
-  okay: "😐",
-  notGreat: "😞",
-  rough: "😣",
-};
 
 const mood_emojis_cards: {
   emoji: string;
@@ -98,27 +92,27 @@ const mood_emojis_cards: {
   type: Moods;
 }[] = [
   {
-    emoji: mood_emojis.great,
+    emoji: MOOD_EMOJIS.great,
     title: "Great",
     type: "Great",
   },
   {
-    emoji: mood_emojis.good,
+    emoji: MOOD_EMOJIS.good,
     title: "Good",
     type: "Good",
   },
   {
-    emoji: mood_emojis.okay,
+    emoji: MOOD_EMOJIS.okay,
     title: "Okay",
     type: "Okay",
   },
   {
-    emoji: mood_emojis.notGreat,
+    emoji: MOOD_EMOJIS.notGreat,
     title: "Not Great",
     type: "Not Great",
   },
   {
-    emoji: mood_emojis.rough,
+    emoji: MOOD_EMOJIS.rough,
     title: "Rough",
     type: "Rough",
   },
