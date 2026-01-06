@@ -11,6 +11,7 @@ import { settings_routes } from "./settings.route";
 import TeamMemberEntryDash from "@/shared/components/main/teamMemberDashEntry.component";
 import Loader from "@/shared/components/loader.component";
 import withAuthGuard from "@/shared/components/HOC/with-auth-guard";
+import { TeamDashboard } from "@/shared/components/team-insight-metric-card";
 
 const WelcomePage = lazy(() => import("@/onboarding/pages/welcome.page"));
 
@@ -20,6 +21,12 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <GuardedTeamMemberEntryDash />,
+  },
+  {
+    path : "test",
+    element : <div>
+      <TeamDashboard />
+    </div>
   },
   {
     path: "/welcome",

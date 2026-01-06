@@ -1,4 +1,6 @@
-const server_url =
+import { MoodType } from "@/shared/typings/mood-trend";
+
+const SERVER_URL =
   import.meta.env.VITE_SERVER_URL || "https://api.prodily.tech/api/v1/";
 
 // Common timezones with their abbreviations
@@ -29,5 +31,11 @@ const ACCEPTED_IMAGE_TYPES = [
   "image/gif",
   "image/webp",
 ];
-
-export { MAX_FILE_SIZE, ACCEPTED_IMAGE_TYPES, COMMON_TIMEZONES, server_url };
+const MOOD_EMOJIS: Record<MoodType, string> = {
+  great: "☺️",
+  good: "🙂",
+  okay: "😐",
+  notGreat: "😞",
+  rough: "😣",
+};
+export { MAX_FILE_SIZE, ACCEPTED_IMAGE_TYPES, COMMON_TIMEZONES, SERVER_URL,MOOD_EMOJIS };

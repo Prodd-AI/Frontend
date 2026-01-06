@@ -1,21 +1,50 @@
 import { Button } from "@/components/ui/button";
-import { RiCalendarScheduleLine } from "react-icons/ri";
-import { RxPerson } from "react-icons/rx";
+import { useState } from "react";
 import withTeamMemberScaffold from "@/shared/components/HOC/team-member-screen-scaffold-hoc";
-import AssignTask from "../components/assign-task.component";
+import useUrlSearchParams from "@/shared/hooks/use-url-search-params";
 import WelcomeBackHeader from "@/shared/components/welcome-back-header.component";
 import NudgeBanner from "@/shared/components/nudge-banner.component";
-import { useState } from "react";
+import AssignTask from "../components/assign-task.component";
+import ScheduleMeetingButton from "../components/schedule-meeting-button.component";
+import MyTeamButton from "../components/my-team-button.component";
+import PersonalDashboardSection from "../components/personal-dashboard-section.component";
+import TeamDashboardSection from "../components/team-dashboard-section.component";
+import PersonalTabsSection from "../components/personal-tabs-section.component";
+import TeamTabsSection from "../components/team-tabs-section.component";
+
 function Page() {
   const [openNudgeBanner, setOpenNudgeBanner] = useState(true);
+  const { getParam, updateParam, setParams } = useUrlSearchParams();
+  const currentView = getParam("view") || "team";
+  const isPersonalView = currentView === "personal";
+  const personalTab = getParam("personalTab") || "todays_focus";
+  const teamTab = getParam("teamTab") || "team_task";
+
+  const handleViewTeamDashboard = () => {
+    setParams({ view: "team", teamTab: "team_task" });
+  };
+
+  const handleViewPersonalDashboard = () => {
+    setParams({ view: "personal", personalTab: "todays_focus" });
+  };
+
   return (
-    <div className="p-2 sm:p-4">
+    <div className="p-2 sm:p-4 sm:pb-20">
       <WelcomeBackHeader
-        heading="Glad to have you back! 🤗"
-        subHeading="Here’s your team’s pulse and tasks at a glance — lead with clarity, collaborate with ease"
+        heading={
+          isPersonalView
+            ? "Glad to have you back! 🤗"
+            : "Team Dashboard and Insight"
+        }
+        subHeading={
+          isPersonalView
+            ? "Here's your team's pulse and tasks at a glance — lead with clarity, collaborate with ease"
+            : "Manage your team's tasks and wellbeing"
+        }
         badge
         className="mt-4 sm:mt-0"
       />
+
       <NudgeBanner
         className="mt-[25px] sm:mt-[1.7rem]"
         heading="Feeling overwhelmed? Try the 4-7-8 breathing technique. 🧘‍♀️"
@@ -32,38 +61,38 @@ function Page() {
           </Button>
         }
       />
+
+      {isPersonalView ? <PersonalDashboardSection /> : <TeamDashboardSection />}
+
+      {isPersonalView ? (
+        <PersonalTabsSection
+          activeTab={personalTab}
+          onTabChange={(tab) => updateParam("personalTab", tab)}
+          onViewTeamDashboard={handleViewTeamDashboard}
+        />
+      ) : (
+        <TeamTabsSection
+          activeTab={teamTab}
+          onTabChange={(tab) => updateParam("teamTab", tab)}
+          onViewPersonalDashboard={handleViewPersonalDashboard}
+        />
+      )}
     </div>
   );
 }
-const WrappedHrPage = withTeamMemberScaffold(Page);
 
-const ScheduleMeeting = () => {
-  return (
-    <Button variant="outline">
-      <RiCalendarScheduleLine />
-      Schedule Meeting
-    </Button>
-  );
-};
-const MyTeam = () => {
-  return (
-    <Button variant="outline">
-      {" "}
-      <RxPerson />
-      My Team
-    </Button>
-  );
-};
+const WrappedHrPage = withTeamMemberScaffold(Page);
 
 const TeamLeadPage = () => (
   <WrappedHrPage
     HeaderChild={
       <>
         <AssignTask />
-        <ScheduleMeeting />
-        <MyTeam />
+        <ScheduleMeetingButton />
+        <MyTeamButton />
       </>
     }
   />
 );
+
 export default TeamLeadPage;
