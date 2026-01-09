@@ -19,7 +19,7 @@ import { RxHamburgerMenu } from "react-icons/rx";
  * effect-free implementation.
  *
  * WCAG 2.1 AA Compliant:
- * - Semantic HTML landmarks (header, main, nav)
+ * - Semantic HTML landmarks (headder, main, nav)
  * - Skip link for keyboard navigation
  * - Focus management for mobile menu
  * - Proper ARIA attributes for interactive elements
@@ -179,7 +179,7 @@ function withTeamMemberScaffold<P extends object>(
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-white focus:text-[#6619DE] focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:font-semibold focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
-        >
+        >d
           Skip to main content
         </a>
 

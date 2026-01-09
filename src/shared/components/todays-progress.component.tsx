@@ -58,9 +58,13 @@ function TodaysProgress({
   return (
     <div
       className={clsx(
-        `w-[33.563rem] h-[18rem] border bg-[#F8F8F9] shadow rounded-[20px] px-[1.25rem] py-[1.875rem] transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-[1.02]`,
+        `w-[33.563rem] h-[18rem]  bg-[#F8F8F9] rounded-[20px] px-[1.25rem] py-[1.875rem]`,
         className
       )}
+      style={{
+        boxShadow:
+          "0px 4px 4px -4px rgba(12, 12, 13, 0.05), 0px 16px 16px -8px rgba(12, 12, 13, 0.1)",
+      }}
     >
       <div className="flex items-center gap-2 transition-colors duration-200">
         <TbWaveSawTool
@@ -87,7 +91,7 @@ function TodaysProgress({
             }}
           ></div>
         </div>
-        <div className="flex gap-[14px]">
+        <div className="flex gap-[14px] mt-3">
           <div className=" flex justify-center items-center bg-[#EDE2FE] flex-col w-[14.625rem] h-[5.563rem] rounded-[14px] transition-all duration-300 ease-in-out hover:bg-[#DDD6FE] hover:shadow-md hover:scale-105 cursor-pointer">
             <span className="text-[#6619DE] font-bold text-[1.75rem] p-0 transition-all duration-200 hover:scale-110">
               {numberOfTaskCompleted}

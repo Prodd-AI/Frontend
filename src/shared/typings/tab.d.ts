@@ -11,6 +11,8 @@ declare module "@/shared/typings/tab" {
     items: TabItem[];
     activeTab: string;
     onTabChange: (tab: string) => void;
+    ToggleViewComponent?: React.ComponentType;
     className?: string;
+
   }
 }

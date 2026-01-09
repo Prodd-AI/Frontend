@@ -252,8 +252,9 @@ const TaskCard = forwardRef<TaskCardRef, TaskCardPropsInt>(
         }}
       >
         <div
-          className={`flex  ${collapsedStyle ? "justify-start gap-6" : "justify-between"
-            }`}
+          className={`flex  ${
+            collapsedStyle ? "justify-start gap-6" : "justify-between"
+          }`}
         >
           <div>
             <h1
@@ -280,15 +281,15 @@ const TaskCard = forwardRef<TaskCardRef, TaskCardPropsInt>(
                 priority === "high"
                   ? "bg-red-100 text-red-700 border border-red-200 hover:bg-red-200"
                   : priority === "medium"
-                    ? "bg-amber-100 text-amber-700 border border-amber-200 hover:bg-amber-200"
-                    : "bg-green-100 text-green-700 border border-green-200 hover:bg-green-200"
+                  ? "bg-amber-100 text-amber-700 border border-amber-200 hover:bg-amber-200"
+                  : "bg-green-100 text-green-700 border border-green-200 hover:bg-green-200"
               )}
             >
               {priority === "high"
                 ? "High"
                 : priority === "medium"
-                  ? "Medium"
-                  : "Low"}
+                ? "Medium"
+                : "Low"}
             </span>
             <span
               className={clsx(
@@ -297,15 +298,15 @@ const TaskCard = forwardRef<TaskCardRef, TaskCardPropsInt>(
                 status === "completed"
                   ? "bg-emerald-100 text-emerald-700 border border-emerald-200 hover:bg-emerald-200"
                   : status === "pending"
-                    ? "bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200"
-                    : "bg-red-100 text-red-700 border border-red-200 hover:bg-red-200"
+                  ? "bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200"
+                  : "bg-red-100 text-red-700 border border-red-200 hover:bg-red-200"
               )}
             >
               {status === "completed"
                 ? "Completed"
                 : status === "pending"
-                  ? "Pending"
-                  : "Cancelled"}
+                ? "Pending"
+                : "Cancelled"}
             </span>
           </div>
         </div>
@@ -350,8 +351,8 @@ const TaskCard = forwardRef<TaskCardRef, TaskCardPropsInt>(
               disabled || isUpdating
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                 : status === "completed"
-                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                  : "bg-[#F3F4F6] text-gray-700 hover:bg-gray-200"
+                ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                : "bg-[#F3F4F6] text-gray-700 hover:bg-gray-200"
             )}
             onClick={handleStatusToggle}
             disabled={disabled || isUpdating || !onStatusChange}
@@ -366,7 +367,7 @@ const TaskCard = forwardRef<TaskCardRef, TaskCardPropsInt>(
                 <input
                   type="radio"
                   checked={status === "completed"}
-                  onChange={() => { }} // Controlled by button click
+                  onChange={() => {}} // Controlled by button click
                   className="transition-colors duration-200"
                 />
                 {status === "completed" ? "Mark Incomplete" : "Mark Complete"}

@@ -1,9 +1,9 @@
 import type { LoginFormData, RegisterFormData } from "@/auth/typings/auth";
 
 import { ApiService } from "./root.service";
-import { server_url } from "@/shared/utils/constants";
+import { SERVER_URL } from "@/shared/utils/constants";
 import { TeamMember } from "@/shared/typings/team-member";
-const auth_service = new ApiService(server_url + "auth");
+const auth_service = new ApiService(SERVER_URL + "auth");
 
 //Register Team Member
 const regsiter_team_member = (data: Omit<RegisterFormData, "accepted">) => {

@@ -16,9 +16,7 @@ function WelcomeBackHeader({
       )}
     >
       <div className="flex flex-col gap-2 sm:gap-[11px]">
-        {" "}
         <div className="flex flex-col-reverse sm:flex-row  items-start sm:items-center gap-2.5 sm:gap-16">
-          {" "}
           <h2 className="text-[1.375rem] sm:text-[2.25rem] font-semibold text-[#393343]">
             {heading}
           </h2>

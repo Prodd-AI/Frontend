@@ -66,6 +66,9 @@ import {
   useImperativeHandle,
   useCallback,
 } from "react";
+import type { DayData } from "@/shared/typings/weekly-streak";
+
+const DEFAULT_DAYS: DayData[] = [];
 import clsx from "clsx";
 import { FaRegCalendar } from "react-icons/fa";
 import { FiPlus } from "react-icons/fi";
@@ -165,7 +168,7 @@ const WeeklyStreak = forwardRef<WeeklyStreakRef, WeeklyStreakPropsInt>(
     const [updatingDays, setUpdatingDays] = useState<Set<number>>(new Set());
 
     // Use prop days if provided, otherwise empty array
-    const days = propDays || [];
+    const days = propDays ?? DEFAULT_DAYS;
 
     /**
      * Handles day toggle when user clicks on a day.
@@ -250,10 +253,14 @@ const WeeklyStreak = forwardRef<WeeklyStreakRef, WeeklyStreakPropsInt>(
     return (
       <div
         className={clsx(
-          "w-[33.563rem] h-[16.438rem] bg-[#F8F8F9] rounded-[20px] shadow p-[20px]",
-          "transition-all duration-300 ease-in-out hover:shadow-lg",
+          "w-[33.563rem] h-[16.438rem] bg-[#F8F8F9] rounded-[20px] p-[20px]",
+          "transition-all duration-300 ease-in-out",
           className
         )}
+        style={{
+          boxShadow:
+            "0px 4px 4px -4px rgba(12, 12, 13, 0.05), 0px 16px 16px -8px rgba(12, 12, 13, 0.1)",
+        }}
       >
         <div className="flex items-center w-fit gap-2">
           <FaRegCalendar
