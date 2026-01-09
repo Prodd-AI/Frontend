@@ -38,6 +38,10 @@ function withTeamMemberScaffold<P extends object>(
     const menuToggleRef = useRef<HTMLButtonElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
 
+    const removeAuthGuard =
+      import.meta.env.VITE_REMOVE_AUTH_GUARD === "true" ||
+      import.meta.env.VITE_REMOVE_AUTH_GUARD === "1";
+
     const { isLoading, isError } = useQuery({
       queryKey: ["auth", "session"],
       queryFn: async () => {
@@ -143,7 +147,7 @@ function withTeamMemberScaffold<P extends object>(
       };
     }, [isMenuOpen]);
 
-    if (isError) {
+    if (isError && !removeAuthGuard) {
       useAuthStore.getState().logout();
       return <Navigate to="/auth/login" />;
     }
@@ -163,6 +167,9 @@ function withTeamMemberScaffold<P extends object>(
     }
 
     if (!isAuthenticated || !user) {
+      if (removeAuthGuard) {
+        return <WrappedComponent {...props} />;
+      }
       return <Navigate to="/auth/login" />;
     }
 
@@ -179,8 +186,8 @@ function withTeamMemberScaffold<P extends object>(
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-white focus:text-[#6619DE] focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:font-semibold focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
-        >d
-          Skip to main content
+        >
+          d Skip to main content
         </a>
 
         {/* Header with logo, HR badge, notifications, and user profile */}

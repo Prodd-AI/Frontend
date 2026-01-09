@@ -15,12 +15,23 @@ import {
   progressReviewsData,
 } from "@/team-leader/mock-data/index.mock";
 import { TeamTabsSectionProps } from "@/team-leader/typings/team-leader";
+import { useEffect, useState } from "react";
 
 const TeamTabsSection = ({
   activeTab,
   onTabChange,
   onViewPersonalDashboard,
+  hasViewPersonalDashboard = true,
 }: TeamTabsSectionProps) => {
+  const [currentTab, setCurrentTab] = useState<string>(activeTab);
+  const handleTabChange = (tab: string) => {
+    onTabChange ? onTabChange(tab) : setCurrentTab(tab);
+  };
+
+  useEffect(() => {
+    setCurrentTab(activeTab);
+  }, [activeTab]);
+
   return (
     <TabComponent
       className="mt-[38px]"
@@ -50,17 +61,21 @@ const TeamTabsSection = ({
           content: <ReviewsTabContent reviews={progressReviewsData} />,
         },
       ]}
-      activeTab={activeTab}
-      onTabChange={onTabChange}
-      ToggleViewComponent={() => (
-        <Button
-          className="bg-[#E5E5E5] text-[#494451] font-semibold"
-          variant="ghost"
-          onClick={onViewPersonalDashboard}
-        >
-          View Personal Dashboard <MdOutlineRemoveRedEye />
-        </Button>
-      )}
+      activeTab={currentTab}
+      onTabChange={(tab) => handleTabChange(tab)}
+      ToggleViewComponent={
+        hasViewPersonalDashboard
+          ? () => (
+              <Button
+                className="bg-[#E5E5E5] text-[#494451] font-semibold"
+                variant="ghost"
+                onClick={onViewPersonalDashboard}
+              >
+                View Personal Dashboard <MdOutlineRemoveRedEye />
+              </Button>
+            )
+          : undefined
+      }
     />
   );
 };

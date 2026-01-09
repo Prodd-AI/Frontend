@@ -68,13 +68,16 @@ declare module "@/team-leader/typings/team-leader" {
 
   export interface PersonalTabsSectionProps {
     activeTab: string;
-    onTabChange: (tab: string) => void;
-    onViewTeamDashboard: () => void;
+    onTabChange?: (tab: string) => void;
+    onViewTeamDashboard?: () => void;
+    hasViewTeamDashboard?: boolean;
+    showAssignButton?: boolean;
   }
 
   export interface TeamTabsSectionProps {
     activeTab: string;
-    onTabChange: (tab: string) => void;
-    onViewPersonalDashboard: () => void;
+    onTabChange?: (tab: string) => void;
+    onViewPersonalDashboard?: () => void;
+    hasViewPersonalDashboard?: boolean;
   }
 }

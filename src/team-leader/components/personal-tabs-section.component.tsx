@@ -11,12 +11,24 @@ import TodaysFocusExample from "@/shared/components/todays-focus.example";
 import TasksTabContent from "./tasks-tab-content.component";
 import { personalTasksData } from "@/team-leader/mock-data/index.mock";
 import { PersonalTabsSectionProps } from "@/team-leader/typings/team-leader";
+import { useEffect, useState } from "react";
 
 const PersonalTabsSection = ({
   activeTab,
   onTabChange,
   onViewTeamDashboard,
+  hasViewTeamDashboard = true,
+  showAssignButton = true,
 }: PersonalTabsSectionProps) => {
+  const [currentTab, setCurrentTab] = useState<string>(activeTab);
+  const handleTabChange = (tab: string) => {
+    onTabChange ? onTabChange(tab) : setCurrentTab(tab);
+  };
+
+  useEffect(() => {
+    setCurrentTab(activeTab);
+  }, [activeTab]);
+
   return (
     <TabComponent
       className="mt-[38px]"
@@ -36,7 +48,7 @@ const PersonalTabsSection = ({
               tasks={personalTasksData}
               title="Today's Tasks"
               description="Stay focused and organized with your daily task list."
-              showAssignButton={true}
+              showAssignButton={showAssignButton}
             />
           ),
         },
@@ -47,17 +59,21 @@ const PersonalTabsSection = ({
           content: <MoodTrendsExample />,
         },
       ]}
-      activeTab={activeTab}
-      onTabChange={onTabChange}
-      ToggleViewComponent={() => (
-        <Button
-          className="bg-[#E5E5E5] text-[#494451] font-semibold"
-          variant="ghost"
-          onClick={onViewTeamDashboard}
-        >
-          View Team Dashboard <MdOutlineRemoveRedEye />
-        </Button>
-      )}
+      activeTab={currentTab}
+      onTabChange={(tab) => handleTabChange(tab)}
+      ToggleViewComponent={
+        hasViewTeamDashboard
+          ? () => (
+              <Button
+                className="bg-[#E5E5E5] text-[#494451] font-semibold"
+                variant="ghost"
+                onClick={onViewTeamDashboard}
+              >
+                View Team Dashboard <MdOutlineRemoveRedEye />
+              </Button>
+            )
+          : undefined
+      }
     />
   );
 };

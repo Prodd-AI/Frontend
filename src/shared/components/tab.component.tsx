@@ -12,7 +12,11 @@ const TabComponent = ({
   return (
     <Tabs value={activeTab} className={clsx("w-full", className)}>
       <div className="flex items-center justify-between">
-        <TabsList className="bg-[#EAEBEB] h-12 p-1.5 rounded-[12px] w-fit gap-1">
+        <TabsList
+          className={`bg-[#EAEBEB] h-16 p-1.5 rounded-[12px] gap-1 ${
+            ToggleViewComponent ? "w-fit" : "w-full"
+          }`}
+        >
           {items.map((item) => (
             <TabsTrigger
               key={item.value}
