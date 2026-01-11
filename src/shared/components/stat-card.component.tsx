@@ -10,7 +10,7 @@ interface StatCardProps {
   emoji?: string;
   className?: string;
   iconClassName?: string;
-  delay?: number;
+  
 }
 
 export function StatCard({
@@ -22,7 +22,7 @@ export function StatCard({
   emoji,
   className,
   iconClassName,
-  delay = 0,
+
 }: StatCardProps) {
   return (
     <div
@@ -30,7 +30,7 @@ export function StatCard({
         "bg-card rounded-xl p-5 shadow-card hover:shadow-card-hover transition-all duration-300 opacity-0 animate-fade-in",
         className
       )}
-      style={{ animationDelay: `${delay}ms` }}
+
     >
       <div className="flex items-start justify-between mb-4">
         <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>

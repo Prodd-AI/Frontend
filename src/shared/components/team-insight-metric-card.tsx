@@ -6,12 +6,12 @@ import clsx, { ClassValue } from "clsx";
 interface TeamInsightMetricCardPropsInt {
   className?: ClassValue;
 }
-export function TeamDashboard({ className }: TeamInsightMetricCardPropsInt) {
+function TeamInsightMetricCard({ className }: TeamInsightMetricCardPropsInt) {
   return (
     <div
       className={clsx(
         `w-full  mx-auto p-6 bg-[#F8F8F9] rounded-[20px]`,
-        
+
         className
       )}
     >
@@ -23,7 +23,7 @@ export function TeamDashboard({ className }: TeamInsightMetricCardPropsInt) {
           value={5}
           subtitle="Total team members you lead"
           icon={<Users className="w-5 h-5 text-primary" />}
-          delay={0}
+
         />
 
         <StatCard
@@ -35,7 +35,7 @@ export function TeamDashboard({ className }: TeamInsightMetricCardPropsInt) {
               +3
             </span>
           }
-          delay={100}
+
         />
 
         <StatCard
@@ -44,7 +44,7 @@ export function TeamDashboard({ className }: TeamInsightMetricCardPropsInt) {
           subtitle="Above last week"
           icon={<TrendingUp className="w-5 h-5 text-primary" />}
           emoji="😌"
-          delay={200}
+
         />
 
         <StatCard
@@ -52,9 +52,10 @@ export function TeamDashboard({ className }: TeamInsightMetricCardPropsInt) {
           value={1}
           subtitle="Needs attention"
           icon={<AlertTriangle className="w-5 h-5 text-warning" />}
-          delay={300}
+
         />
       </div>
     </div>
   );
 }
+export default TeamInsightMetricCard
