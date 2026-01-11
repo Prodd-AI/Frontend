@@ -2,9 +2,9 @@ import OnboardingWizardCardLayout from "@/onboarding/components/onboarding-wizar
 import AuthLayout from "@/shared/components/auth.layout.component";
 import { GoCheckCircle } from "react-icons/go";
 import SetupWizardFormComponent from "@/onboarding/components/setup-wizard-form-component";
-import WelcomeTeamLeadOnBoard from "@/onboarding/forms/team-lead/welcome.onboard.component";
+import WelcomeTeamLeadOnBoard from "@/onboarding/wizards/team-lead/welcome.onboard.component";
 import { LiaUserEditSolid } from "react-icons/lia";
-import SetupProfile from "@/onboarding/forms/team-lead/setup-profile.component";
+import SetupProfile from "@/onboarding/wizards/team-lead/setup-profile.component";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -14,9 +14,10 @@ import {
 } from "@/onboarding/schemas/team-lead.schema";
 import { useNavigate } from "react-router-dom";
 import { update_user } from "@/config/services/users.service";
-import { IoCheckmarkDone } from "react-icons/io5";
-import CompleteTeamLeadOnBoard from "@/onboarding/forms/team-lead/complete.onboard.component";
+import { IoCheckmarkDone, IoPeople } from "react-icons/io5";
+import CompleteTeamLeadOnBoard from "@/onboarding/wizards/team-lead/complete.onboard.component";
 import useAuthStore from "@/config/stores/auth.store";
+import TeamOverview from "@/onboarding/wizards/team-lead/team-overview.team-lead.wizard";
 
 function TeamLeadSetup() {
   const user = useAuthStore((state) => state.user);
@@ -58,6 +59,12 @@ function TeamLeadSetup() {
         const formData = setup_profile_form.getValues();
         await update_user(formData);
       },
+    },
+    {
+      id: "team_overview",
+      label: "Team Overview",
+      Icon: IoPeople,
+      Component : () => <TeamOverview />
     },
     {
       id: "complete_onboard",

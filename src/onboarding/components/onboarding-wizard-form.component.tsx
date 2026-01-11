@@ -11,7 +11,7 @@ function OnboardingWizardFormComponent({
 }: OnboardingWizardFormComponentPropsInt) {
   return (
     <div className="mt-8">
-      {error && <Banner open={true} variant="critical" description={error} />}
+      {error && <Banner open={true} variant="critical" description={error} className="mb-2" />}
       <div className="mt-4">
         {data.map((step) => {
           const isCurrentStep = currentStepId === step.id;
