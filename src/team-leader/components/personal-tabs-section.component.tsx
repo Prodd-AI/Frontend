@@ -11,6 +11,7 @@ import TodaysFocusExample from "@/shared/components/todays-focus.example";
 import TasksTabContent from "./tasks-tab-content.component";
 import { personalTasksData } from "@/team-leader/mock-data/index.mock";
 import { PersonalTabsSectionProps } from "@/team-leader/typings/team-leader";
+import AssignTask from "./assign-task.component";
 
 const PersonalTabsSection = ({
   activeTab,
@@ -36,7 +37,7 @@ const PersonalTabsSection = ({
               tasks={personalTasksData}
               title="Today's Tasks"
               description="Stay focused and organized with your daily task list."
-              showAssignButton={true}
+              AssignButton={AssignTask}
             />
           ),
         },

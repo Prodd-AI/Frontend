@@ -15,14 +15,14 @@ import { VerifyEmailFormData } from "@/auth/typings/auth";
 import useAuthStore from "@/config/stores/auth.store";
 import { useMutation } from "@tanstack/react-query";
 import { resend_otp, verify_email } from "@/config/services/auth.service";
-import { useNavigate, useSearchParams, Navigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 
 const RESEND_COOLDOWN = 60;
 import { Link } from "react-router-dom";
 import { TeamMember } from "@/shared/typings/team-member";
 import Banner from "@/shared/components/banner.component";
 
-function VerifyEmailFormComponent() {
+function VerifyEmailFormComponent({ email }: { email: string }) {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [banner, setBanner] = useState<{
     message: string;
@@ -44,10 +44,7 @@ function VerifyEmailFormComponent() {
     },
   });
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const email = searchParams.get("email") ?? "";
   const { login } = useAuthStore();
-
   // Cooldown timer effect
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -109,7 +106,7 @@ function VerifyEmailFormComponent() {
       });
     },
   });
-
+  console.log(email);
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isValidEmail = email && emailRegex.test(email);
 
@@ -143,16 +140,6 @@ function VerifyEmailFormComponent() {
         isDismiss
       />
       <div className="flex flex-col gap-4 items-center">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-[#000000] mb-2">
-            Enter Verification Code
-          </h3>
-          <p className="text-sm text-gray-600">
-            We sent a 6-digit code to{" "}
-            <span className="font-medium">{email}</span>
-          </p>
-        </div>
-
         <div className="flex flex-col gap-2 items-center">
           <Label htmlFor="verification-code" className="sr-only">
             Verification Code

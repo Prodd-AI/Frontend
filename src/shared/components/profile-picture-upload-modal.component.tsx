@@ -10,20 +10,24 @@ import { Button } from "@/components/ui/button";
 import Banner from "@/shared/components/banner.component";
 import { MdOutlinePhotoCamera, MdCloudUpload } from "react-icons/md";
 import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "../utils/constants";
+import { uploadProfileImage } from "@/config/services/upload.service";
 
-// Placeholder API function - replace with actual API call
 const uploadProfilePicture = async (file: File): Promise<UploadResponse> => {
-  // Simulate API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Simulate success - create a local URL for preview
-      const imageUrl = URL.createObjectURL(file);
-      resolve({ success: true, imageUrl });
-
-      // Uncomment below to simulate error
-      // resolve({ success: false, error: "Failed to upload image. Please try again." });
-    }, 2000);
-  });
+  try {
+    const response = await uploadProfileImage(file);
+    if (response.data?.url) {
+      return { success: true, imageUrl: response.data.url };
+    }
+    return {
+      success: false,
+      error: "Failed to upload image. Please try again.",
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: "An unexpected error occurred." };
+  }
 };
 
 function ProfilePictureUploadModal({

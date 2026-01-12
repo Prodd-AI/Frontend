@@ -15,10 +15,8 @@ import { login_team_member } from "@/config/services/auth.service";
 import useAuthStore from "@/config/stores/auth.store";
 import { TeamMember } from "@/shared/typings/team-member";
 import Banner from "@/shared/components/banner.component";
-
 function LoginFormComponent() {
   const [showPassword, setShowPassword] = useState(false);
-  
   const [banner, setBanner] = useState<{
     open: boolean;
     variant: "success" | "critical" | "warning" | "info";
@@ -32,9 +30,11 @@ function LoginFormComponent() {
     register,
     formState: { errors },
     reset,
+    getValues,
   } = useForm<LoginFormData>({
     resolver: zodResolver(login_schema),
   });
+  const email = getValues("email") || "";
   const { mutate, isPending } = useMutation<
     GeneralReturnInt<TeamMember>,
     GeneralErrorInt,
@@ -75,12 +75,22 @@ function LoginFormComponent() {
             open: true,
             variant: "critical",
             title: "Login failed",
-            description: "An unexpected error occurred. Please try again."
+            description: "An unexpected error occurred. Please try again.",
           });
           return;
         }
         if (error.message.includes("Email is not verified")) {
-          navigate("/auth/verify-email");
+          setBanner({
+            open: true,
+            variant: "critical",
+            title: "Login failed",
+            description: error.message,
+          });
+
+          setTimeout(() => {
+            navigate(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+          }, 1000);
+
           return;
         }
         if (error.message.includes("Invalid credentials")) {
@@ -88,7 +98,7 @@ function LoginFormComponent() {
             open: true,
             variant: "critical",
             title: "Login failed",
-            description: error.message
+            description: error.message,
           });
           return;
         }
@@ -96,14 +106,15 @@ function LoginFormComponent() {
           open: true,
           variant: "critical",
           title: "Login failed",
-          description: error.message || "An unexpected error occurred. Please try again."
+          description:
+            error.message || "An unexpected error occurred. Please try again.",
         });
       } else {
         setBanner({
           open: true,
           variant: "critical",
           title: "Login failed",
-          description: "An unexpected error occurred. Please try again."
+          description: "An unexpected error occurred. Please try again.",
         });
       }
     },
@@ -202,8 +213,9 @@ function LoginFormComponent() {
         </div>
         <Button
           type="submit"
-          className={`mt-2 h-11 sm:h-[2.543rem] md:h-14 ${isPending && "opacity-25"
-            }`}
+          className={`mt-2 h-11 sm:h-[2.543rem] md:h-14 ${
+            isPending && "opacity-25"
+          }`}
           disabled={isPending}
         >
           {isPending ? "..." : "Login"}
@@ -213,7 +225,10 @@ function LoginFormComponent() {
           <p>
             {" "}
             Dont have an account?{" "}
-            <Link to="/auth/register" className=" text-[#6619DE] hover:underline">
+            <Link
+              to="/auth/register"
+              className=" text-[#6619DE] hover:underline"
+            >
               {" "}
               Create account
             </Link>
