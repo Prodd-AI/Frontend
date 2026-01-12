@@ -1,18 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import withTeamMemberScaffold from "@/shared/components/HOC/team-member-screen-scaffold-hoc";
 import useUrlSearchParams from "@/shared/hooks/use-url-search-params";
 import WelcomeBackHeader from "@/shared/components/welcome-back-header.component";
 import NudgeBanner from "@/shared/components/nudge-banner.component";
-import AssignTask from "../components/assign-task.component";
-import ScheduleMeetingButton from "../components/schedule-meeting-button.component";
-import MyTeamButton from "../components/my-team-button.component";
 import PersonalDashboardSection from "../components/personal-dashboard-section.component";
 import TeamDashboardSection from "../components/team-dashboard-section.component";
 import PersonalTabsSection from "../components/personal-tabs-section.component";
 import TeamTabsSection from "../components/team-tabs-section.component";
 
-function Page() {
+function TeamLeaderPage() {
   const [openNudgeBanner, setOpenNudgeBanner] = useState(true);
   const { getParam, updateParam, setParams } = useUrlSearchParams();
   const currentView = getParam("view") || "team";
@@ -81,18 +77,4 @@ function Page() {
   );
 }
 
-const WrappedHrPage = withTeamMemberScaffold(Page);
-
-const TeamLeadPage = () => (
-  <WrappedHrPage
-    HeaderChild={
-      <>
-        <AssignTask />
-        <ScheduleMeetingButton />
-        <MyTeamButton />
-      </>
-    }
-  />
-);
-
-export default TeamLeadPage;
+export default TeamLeaderPage;

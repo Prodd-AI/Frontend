@@ -1,6 +1,6 @@
 import { lazy } from "react";
 import type { RouteObject } from "react-router-dom";
-import DashboardLayout from "@/layout/dashboard.layout";
+import TeamMemberScreenLayout from "@/shared/components/layouts/team-member-screen-layout.component";
 
 const TeamMemberPage = lazy(
   () => import("@/team-member/pages/team-member.page")
@@ -8,11 +8,13 @@ const TeamMemberPage = lazy(
 
 export const team_member_routes: RouteObject[] = [
   {
-    index: true,
-    element: (
-      <DashboardLayout>
-        <TeamMemberPage />
-      </DashboardLayout>
-    ),
+    element: <TeamMemberScreenLayout />,
+    children: [
+      {
+        index: true,
+        element: <TeamMemberPage />,
+      },
+     
+    ],
   },
 ];
