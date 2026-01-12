@@ -1,4 +1,5 @@
 import { TaskPriority, TaskStatus } from "@/shared/typings/task-card";
+import { ComponentType } from "react";
 
 declare module "@/team-leader/typings/team-leader" {
   // Task data interface
@@ -43,8 +44,7 @@ declare module "@/team-leader/typings/team-leader" {
     tasks: TaskData[];
     title?: string;
     description?: string;
-    showAssignButton?: boolean;
-    onAssignTask?: () => void;
+    AssignButton?: ComponentType;
     showHeader?: boolean;
   }
 

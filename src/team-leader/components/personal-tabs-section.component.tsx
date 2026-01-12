@@ -12,6 +12,7 @@ import TasksTabContent from "./tasks-tab-content.component";
 import { personalTasksData } from "@/team-leader/mock-data/index.mock";
 import { PersonalTabsSectionProps } from "@/team-leader/typings/team-leader";
 import { useEffect, useState } from "react";
+import AssignTask from "./assign-task.component";
 
 const PersonalTabsSection = ({
   activeTab,
@@ -49,6 +50,7 @@ const PersonalTabsSection = ({
               title="Today's Tasks"
               description="Stay focused and organized with your daily task list."
               showAssignButton={showAssignButton}
+              AssignButton={AssignTask}
             />
           ),
         },

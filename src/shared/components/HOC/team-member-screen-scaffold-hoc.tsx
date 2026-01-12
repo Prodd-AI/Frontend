@@ -192,7 +192,7 @@ function withTeamMemberScaffold<P extends object>(
 
         {/* Header with logo, HR badge, notifications, and user profile */}
         <header
-          className="p-[22px] sm:px-[2.75rem] flex justify-between items-center min-h-[96px] bg-[#F8F8F98A] backdrop-blur-[16.8px]"
+          className="p-[22px] sm:px-[2.75rem] flex justify-between items-center min-h-[96px] bg-[#F8F8F98A] backdrop-blur-[16.8px] sticky top-0 z-50"
           role="banner"
         >
           <div className="flex items-center gap-[1.75rem]">
@@ -223,9 +223,8 @@ function withTeamMemberScaffold<P extends object>(
               <button
                 type="button"
                 className="relative p-2 rounded-lg hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
-                aria-label={`Notifications${
-                  notificationCount > 0 ? `, ${notificationCount} unread` : ""
-                }`}
+                aria-label={`Notifications${notificationCount > 0 ? `, ${notificationCount} unread` : ""
+                  }`}
               >
                 <Bell size={32} aria-hidden="true" />
                 {isNotification && (
@@ -293,9 +292,8 @@ function withTeamMemberScaffold<P extends object>(
           role="dialog"
           aria-modal="true"
           aria-label="Navigation menu"
-          className={`fixed top-0 right-0 h-full w-[300px] bg-white z-50 sm:hidden transform transition-transform duration-300 ease-out shadow-2xl ${
-            isMenuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+          className={`fixed top-0 right-0 h-full w-[300px] bg-white z-50 sm:hidden transform transition-transform duration-300 ease-out shadow-2xl ${isMenuOpen ? "translate-x-0" : "translate-x-full"
+            }`}
           inert={!isMenuOpen ? true : undefined}
         >
           {/* Close button */}

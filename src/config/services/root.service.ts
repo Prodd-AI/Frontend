@@ -70,7 +70,7 @@ export class ApiService {
     const cleanedBaseUrl = base_url.endsWith("/") ? base_url.slice(0, -1) : base_url;
     
     this.config = {
-      timeout: config.timeout || 30000, // Default 30 seconds
+      timeout: config.timeout || 300000, // Default 5 minutes
       ...config,
     };
 
@@ -175,9 +175,9 @@ export class ApiService {
   private buildRequestConfig(
     requireAuth: boolean = false,
     customConfig?: ApiRequestConfig
-  ): AxiosRequestConfig {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
+    ): AxiosRequestConfig {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
     };
 
     if (requireAuth) {
