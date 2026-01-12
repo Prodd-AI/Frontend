@@ -1,0 +1,3 @@
+interface RouteHandle {
+  headerChild?: ReactNode;
+}

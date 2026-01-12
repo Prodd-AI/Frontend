@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import type { RouteObject } from "react-router-dom";
+import TeamMemberScreenLayout from "@/shared/components/layouts/team-member-screen-layout.component";
 
 const TeamMemberPage = lazy(
   () => import("@/team-member/pages/team-member.page")
@@ -7,11 +8,13 @@ const TeamMemberPage = lazy(
 
 export const team_member_routes: RouteObject[] = [
   {
-    index: true,
-    element: <TeamMemberPage />,
-  },
-  {
-    path: "view-team",
-    element: <></>,
+    element: <TeamMemberScreenLayout />,
+    children: [
+      {
+        index: true,
+        element: <TeamMemberPage />,
+      },
+     
+    ],
   },
 ];
