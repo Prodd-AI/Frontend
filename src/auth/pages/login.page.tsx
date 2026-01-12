@@ -4,7 +4,7 @@ import LoginFormComponent from "@/auth/components/forms/login.form.component";
 
 function Login() {
   return (
-    <AuthLayout>
+    <AuthLayout className="bg-black">
       <AuthFormLayout
       
         title="Welcome Back"

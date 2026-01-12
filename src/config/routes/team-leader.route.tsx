@@ -5,11 +5,9 @@ const TeamLeaderPage = lazy(
   () => import("@/team-leader/pages/team-leader.page")
 );
 
-
 export const team_leader_routes: RouteObject[] = [
   {
     index: true,
     element: <TeamLeaderPage />,
   },
-  
 ];
