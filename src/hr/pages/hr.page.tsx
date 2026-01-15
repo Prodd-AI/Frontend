@@ -1,7 +1,5 @@
-import withTeamMemberScaffold from "@/shared/components/HOC/team-member-screen-scaffold-hoc";
-function hrPage() {
+function HrPage() {
   return <div className="">HR Page</div>;
 }
-const WrappedHrPage = withTeamMemberScaffold(hrPage);
 
-export default WrappedHrPage;
+export default HrPage;
