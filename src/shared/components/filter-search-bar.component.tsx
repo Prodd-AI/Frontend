@@ -17,7 +17,7 @@ export function FilterBar() {
       </div>
 
       <Select defaultValue="member">
-        <SelectTrigger className="w-[160px] bg-card border-border shadow-card">
+        <SelectTrigger className="w-[160px] border-transparent  bg-[#ECEEF3] shadow-card">
           <SelectValue placeholder="Member" />
         </SelectTrigger>
         <SelectContent>
@@ -28,7 +28,7 @@ export function FilterBar() {
       </Select>
 
       <Select defaultValue="30days">
-        <SelectTrigger className="w-[160px] bg-card border-border shadow-card">
+        <SelectTrigger className="w-[160px] border-transparent  bg-[#ECEEF3] shadow-card">
           <SelectValue placeholder="Select period" />
         </SelectTrigger>
         <SelectContent>
@@ -39,11 +39,11 @@ export function FilterBar() {
         </SelectContent>
       </Select>
 
-      <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+      <div className="relative rounded-md flex-1 min-w-[200px] max-w-[300px] bg-[#ECEEF3]">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Search team member..."
-          className="pl-10 bg-muted/50 border-transparent placeholder:text-muted-foreground/60"
+          className="pl-10 bg-[#ECEEF3] border-transparent placeholder:text-muted-foreground/60"
         />
       </div>
     </div>

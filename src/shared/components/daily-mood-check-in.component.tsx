@@ -1,70 +1,3 @@
-/**
- * @fileoverview Daily Mood Check-in Component
- *
- * A reusable React component for collecting employee mood data with beautiful UI
- * and smooth animations. This component is part of the employee wellness tracking system.
- *
- * ## Quick Start for Team Members
- *
- * 1. Import the component and types:
- * ```tsx
- * import DailyMoodCheckIn, { type DailyMoodCheckInRef, type Moods } from '@/shared/components/daily-mood-check-in.component';
- * ```
- *
- * 2. Set up state and ref in your parent component:
- * ```tsx
- * const [isSubmitting, setIsSubmitting] = useState(false);
- * const [isSubmitted, setIsSubmitted] = useState(false);
- * const moodRef = useRef<DailyMoodCheckInRef>(null);
- * ```
- *
- * 3. Create submission handler:
- * ```tsx
- * const handleSubmit = async (mood: Moods, description: string) => {
- *   setIsSubmitting(true);
- *   try {
- *     await yourApiCall(mood, description);
- *     setIsSubmitted(true);
- *     // Reset after success
- *     setTimeout(() => {
- *       moodRef.current?.reset();
- *       setIsSubmitted(false);
- *     }, 2000);
- *   } catch (error) {
- *     // Handle error
- *   } finally {
- *     setIsSubmitting(false);
- *   }
- * };
- * ```
- *
- * 4. Use the component:
- * ```tsx
- * <DailyMoodCheckIn
- *   ref={moodRef}
- *   onSubmit={handleSubmit}
- *   isSubmitting={isSubmitting}
- *   isSubmitted={isSubmitted}
- * />
- * ```
- *
- * ## API Integration Notes
- * - Always handle loading states with `isSubmitting`
- * - Show success feedback with `isSubmitted`
- * - Use the ref's `reset()` method after successful submission
- * - The component validates that a mood is selected before calling `onSubmit`
- *
- * ## Design System Compliance
- * - Uses design tokens from the theme
- * - Follows accessibility guidelines
- * - Implements consistent animation patterns
- * - Responsive by default
- *
- * @author Wizzy
- * @since 2025-08-30
- * @version 1.0.0
- */
-
 import {
   memo,
   useCallback,
@@ -80,11 +13,6 @@ import { Moods } from "@/shared/typings/daily-mood-check-in";
 import { DailyMoodCheckInPropsInt } from "@/shared/typings/daily-mood-check-in";
 import { DailyMoodCheckInRef } from "@/shared/typings/daily-mood-check-in";
 import { MOOD_EMOJIS } from "../utils/constants";
-
-/**
- * Emoji mapping for each mood type.
- * These emojis are displayed on the selectable mood cards.
- */
 
 const mood_emojis_cards: {
   emoji: string;
@@ -118,118 +46,6 @@ const mood_emojis_cards: {
   },
 ];
 
-/**
- * Daily Mood Check-in Component
- *
- * A comprehensive React component for collecting user mood data with a beautiful UI,
- * smooth animations, and flexible parent-controlled submission logic.
- *
- * ## Features
- * - 🎨 Beautiful UI with 5 emoji mood options
- * - ⚡ Smooth transitions and hover effects
- * - 📝 Optional description textarea
- * - 🔄 Parent-controlled submission states
- * - 🎯 TypeScript support with full type safety
- * - ♿ Keyboard accessible
- * - 📱 Responsive design
- *
- * ## Architecture
- * This component follows the principle of separation of concerns:
- * - **Component responsibility**: UI rendering, user interactions, animations
- * - **Parent responsibility**: Business logic, API calls, state management
- *
- * ## Basic Usage
- * ```tsx
- * import { useRef, useState } from 'react';
- * import DailyMoodCheckIn, { DailyMoodCheckInRef, Moods } from './daily-mood-check-in.component';
- *
- * function MyPage() {
- *   const [isSubmitting, setIsSubmitting] = useState(false);
- *   const [isSubmitted, setIsSubmitted] = useState(false);
- *   const moodRef = useRef<DailyMoodCheckInRef>(null);
- *
- *   const handleSubmit = async (mood: Moods, description: string) => {
- *     setIsSubmitting(true);
- *     try {
- *       await submitToAPI(mood, description);
- *       setIsSubmitted(true);
- *
- *       // Reset after 2 seconds
- *       setTimeout(() => {
- *         moodRef.current?.reset();
- *         setIsSubmitted(false);
- *       }, 2000);
- *     } catch (error) {
- *       console.error('Failed to submit:', error);
- *     } finally {
- *       setIsSubmitting(false);
- *     }
- *   };
- *
- *   return (
- *     <DailyMoodCheckIn
- *       ref={moodRef}
- *       onSubmit={handleSubmit}
- *       isSubmitting={isSubmitting}
- *       isSubmitted={isSubmitted}
- *     />
- *   );
- * }
- * ```
- *
- * ## Advanced Usage with Error Handling
- * ```tsx
- * const handleSubmit = async (mood: Moods, description: string) => {
- *   setError(null);
- *   setIsSubmitting(true);
- *
- *   try {
- *     await submitMoodData(mood, description);
- *     setIsSubmitted(true);
- *     toast('Mood submitted successfully!');
- *   } catch (error) {
- *     setError('Failed to submit mood. Please try again.');
- *     // Don't reset form so user can retry
- *   } finally {
- *     setIsSubmitting(false);
- *   }
- * };
- * ```
- *
- * ## Imperative API
- * The component exposes imperative methods through ref:
- * ```tsx
- * // Reset form programmatically
- * moodRef.current?.reset();
- *
- * // Get current data without re-render
- * const currentData = moodRef.current?.getCurrentData();
- * console.log(currentData); // { mood: "Great", description: "Feeling awesome!" }
- * ```
- *
- * @param props - Component props (see DailyMoodCheckInPropsInt)
- * @param ref - React ref for imperative control (see DailyMoodCheckInRef)
- * @returns JSX.Element - The rendered mood check-in component
- *
- * @example
- * // Simple usage
- * <DailyMoodCheckIn onSubmit={(mood, desc) => console.log(mood, desc)} />
- *
- * @example
- * // With custom styling and states
- * <DailyMoodCheckIn
- *   className="my-custom-styles"
- *   title="How are you today?"
- *   subTitle="Your wellbeing matters to us"
- *   onSubmit={handleMoodSubmit}
- *   isSubmitting={isLoading}
- *   isSubmitted={wasSubmitted}
- * />
- *
- * @version 1.0.0
- * @author Wizzy
- * @since 2025-08-30
- */
 const DailyMoodCheckIn = forwardRef<
   DailyMoodCheckInRef,
   DailyMoodCheckInPropsInt
@@ -249,50 +65,24 @@ const DailyMoodCheckIn = forwardRef<
     const [mood, setMood] = useState<Moods | null>(null);
     const [description, setDescription] = useState("");
 
-    /**
-     * Handles emoji/mood selection by the user.
-     * Updates the internal mood state when a user clicks on an emoji card.
-     *
-     * @param emoji - The selected mood value
-     */
     const handleSelectEmoji = useCallback((emoji: Moods) => {
       setMood(emoji);
     }, []);
 
-    /**
-     * Handles form submission when the submit button is clicked.
-     * Validates that a mood is selected and calls the parent's onSubmit callback.
-     * Prevents submission if already submitting or if no mood is selected.
-     */
     const handleSubmit = useCallback(() => {
       if (!mood || isSubmitting || isSubmitted) return;
       onSubmit(mood, description);
     }, [mood, description, onSubmit, isSubmitting, isSubmitted]);
 
-    /**
-     * Resets the component to its initial state.
-     * Clears both the selected mood and description text.
-     * This method is exposed to parent components via ref.
-     */
     const reset = useCallback(() => {
       setMood(null);
       setDescription("");
     }, []);
 
-    /**
-     * Gets the current form data without causing re-renders.
-     * Useful for accessing form state imperatively from parent components.
-     *
-     * @returns Object containing current mood selection and description text
-     */
     const getCurrentData = useCallback(() => {
       return { mood, description };
     }, [mood, description]);
 
-    /**
-     * Exposes imperative methods to parent component through ref.
-     * This allows parent components to programmatically control the form.
-     */
     useImperativeHandle(
       ref,
       () => ({
@@ -398,28 +188,6 @@ const DailyMoodCheckIn = forwardRef<
   }
 );
 
-/**
- * Set display name for better debugging experience in React DevTools.
- */
 DailyMoodCheckIn.displayName = "DailyMoodCheckIn";
 
-/**
- * Default export - Memoized version of the DailyMoodCheckIn component.
- * The component is wrapped with React.memo for performance optimization.
- */
 export default memo(DailyMoodCheckIn);
-
-/**
- * Type exports for TypeScript consumers.
- *
- * @example
- * ```tsx
- * import DailyMoodCheckIn, { type DailyMoodCheckInRef, type Moods } from './daily-mood-check-in.component';
- *
- * const moodRef = useRef<DailyMoodCheckInRef>(null);
- *
- * const handleSubmit = (mood: Moods, description: string) => {
- *   // Handle submission...
- * };
- * ```
- */

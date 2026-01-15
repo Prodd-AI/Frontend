@@ -2,50 +2,6 @@ import { clsx } from "clsx";
 import { TbWaveSawTool } from "react-icons/tb";
 import { TodaysProgresssPropsInt } from "@/shared/typings/todays-progress";
 
-/**
- * TodaysProgress - A visual progress dashboard component that displays daily task completion metrics and mood tracking.
- *
- * This component provides an intuitive interface for users to view their daily productivity metrics including:
- * - Task completion progress with animated progress bar
- * - Total completed vs remaining tasks ratio
- * - Average mood rating for the day
- * - Interactive hover effects and smooth transitions
- *
- * The component features a clean, modern design with purple/blue gradient themes and responsive animations
- * that enhance user engagement through visual feedback.
- *
- * @example
- * ```tsx
- * // Basic usage
- * <TodaysProgress
- *   numberOfTaskCompleted={7}
- *   totalNumberOfTask={10}
- *   avgMood={8.5}
- * />
- *
- * // With custom title and styling
- * <TodaysProgress
- *   title="Weekly Progress"
- *   numberOfTaskCompleted={25}
- *   totalNumberOfTask={30}
- *   avgMood={7.2}
- *   className="my-4 shadow-xl"
- * />
- * ```
- *
- * @param {Object} props - Component props
- * @param {string} [props.title="Today's Progress"] - The title displayed at the top of the component
- * @param {number} props.numberOfTaskCompleted - Number of tasks completed (used for progress calculation)
- * @param {number} props.totalNumberOfTask - Total number of tasks assigned (used for progress calculation)
- * @param {number} props.avgMood - Average mood rating (typically 1-10 scale)
- * @param {ClassValue} [props.className] - Additional CSS classes for custom styling
- *
- * @returns {JSX.Element} A styled progress dashboard with animated elements
- *
- * @author Wizzy
- * @version 1.0.0
- * @since 2025-09-03
- */
 function TodaysProgress({
   title = "Today's Progress",
   numberOfTaskCompleted,
