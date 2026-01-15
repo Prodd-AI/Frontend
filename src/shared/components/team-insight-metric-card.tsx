@@ -10,8 +10,8 @@ function TeamInsightMetricCard({ className }: TeamInsightMetricCardPropsInt) {
   return (
     <div
       className={clsx(
-        `w-full  mx-auto p-6 bg-[#F8F8F9] rounded-[20px]`,
-
+        `w-full  mx-auto p-6 bg-[#F8F8F9] rounded-[12px]`,
+        "shadow-[0px_4px_4px_-4px_rgba(12,12,13,0.05),0px_16px_16px_-8px_rgba(12,12,13,0.1)]",
         className
       )}
     >
@@ -23,19 +23,17 @@ function TeamInsightMetricCard({ className }: TeamInsightMetricCardPropsInt) {
           value={5}
           subtitle="Total team members you lead"
           icon={<Users className="w-5 h-5 text-primary" />}
-
         />
 
         <StatCard
           title="Completed task"
           value={1}
-          icon={<CheckCheck className="w-5 h-5 text-success" />}
+          icon={<CheckCheck className="w-5 h-5 text-[#0B7322] text-success" />}
           badge={
-            <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium rounded-full bg-success/10 text-success">
+            <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-success/10 text-[#10B981] bg-[#E6F4E9]">
               +3
             </span>
           }
-
         />
 
         <StatCard
@@ -44,18 +42,16 @@ function TeamInsightMetricCard({ className }: TeamInsightMetricCardPropsInt) {
           subtitle="Above last week"
           icon={<TrendingUp className="w-5 h-5 text-primary" />}
           emoji="😌"
-
         />
 
         <StatCard
           title="Flight Risk"
-          value={1}
+          value={4}
           subtitle="Needs attention"
-          icon={<AlertTriangle className="w-5 h-5 text-warning" />}
-
+          icon={<AlertTriangle className="w-5 h-5 text-[#EF4444]" />}
         />
       </div>
     </div>
   );
 }
-export default TeamInsightMetricCard
+export default TeamInsightMetricCard;

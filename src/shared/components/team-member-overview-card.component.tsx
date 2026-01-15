@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import clsx from "clsx";
 import { User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-interface ProfileStatusCardProps {
+interface TeamMemberOverviewCardPropsInt {
+  id: number;
   name?: string;
   role?: string;
   status?: "At risk" | "On track" | "Completed";
@@ -14,8 +16,12 @@ interface ProfileStatusCardProps {
   weekStreak?: string;
   lastActive?: string;
 }
-
-const ProfileStatusCard = ({
+const statusColor = {
+  "At risk": "text-red-500",
+  "On track": "text-green-500",
+  Completed: "text-blue-500",
+};
+const TeamMemberOverviewCard = ({
   name = "Maria Rodriguez",
   role = "Frontend Developer",
   status = "At risk",
@@ -24,17 +30,17 @@ const ProfileStatusCard = ({
   totalTasks = 10,
   weekStreak = "2 weeks",
   lastActive = "1 day ago",
-}: ProfileStatusCardProps) => {
-  const statusColor = {
-    "At risk": "text-red-500",
-    "On track": "text-green-500",
-    Completed: "text-blue-500",
+  id,
+}: TeamMemberOverviewCardPropsInt) => {
+  const navigate = useNavigate();
+  const handleViewTeamMemberDetails = (id: number) => () => {
+    if (!id) return;
+    navigate(`${id}`);
   };
-
   return (
     <div
       className={clsx(
-        `bg-card rounded-2xl p-6 w-full max-w-sm border`,
+        `bg-card rounded-2xl p-6 flex-1 min-w-[280px] max-w-sm border`,
         "shadow-[0px_4px_4px_-4px_rgba(12,12,13,0.05),0px_16px_16px_-8px_rgba(12,12,13,0.10)]"
       )}
     >
@@ -98,9 +104,11 @@ const ProfileStatusCard = ({
       </p>
 
       {/* View Details Button */}
-      <Button className="w-full">View Details</Button>
+      <Button className="w-full" onClick={handleViewTeamMemberDetails(id)}>
+        View Details
+      </Button>
     </div>
   );
 };
 
-export default ProfileStatusCard;
+export default TeamMemberOverviewCard;
