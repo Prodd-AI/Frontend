@@ -2,50 +2,6 @@ import { clsx } from "clsx";
 import { GrGroup } from "react-icons/gr";
 import { TeamParticipationSliderPropsInt } from "@/shared/typings/team-participation";
 
-/**
- * TeamParticipationSlider - A visual component that displays team engagement metrics and participation rates.
- *
- * This component provides a clear overview of team activity by showing:
- * - Real-time team participation percentage with animated progress bar
- * - Active vs total team members ratio
- * - Visual progress indicator with smooth gradient transitions
- * - Interactive hover effects for enhanced user experience
- *
- * The component features a clean, professional design with blue/gray gradient themes and smooth animations
- * that help team leaders quickly assess team engagement levels.
- *
- * @example
- * ```tsx
- * // Basic usage
- * <TeamParticipationSlider
- *   totalTeamMembers={12}
- *   activeTeamMembers={9}
- *   teamParticipationPercentage={75}
- * />
- *
- * // With custom title and styling
- * <TeamParticipationSlider
- *   title="Weekly Team Engagement"
- *   totalTeamMembers={25}
- *   activeTeamMembers={20}
- *   teamParticipationPercentage={80}
- *   className="mb-6 shadow-2xl"
- * />
- * ```
- *
- * @param {Object} props - Component props
- * @param {string} [props.title="Team Participation"] - The title displayed at the top of the component
- * @param {number} props.totalTeamMembers - Total number of team members in the organization
- * @param {number} props.activeTeamMembers - Number of currently active/participating team members
- * @param {number} props.teamParticipationPercentage - Participation rate as percentage (0-100)
- * @param {ClassValue} [props.className] - Additional CSS classes for custom styling
- *
- * @returns {JSX.Element} A styled team participation dashboard with animated progress indicator
- *
- * @author wizzy
- * @version 1.0.0
- * @since 2025-09-03
- */
 function TeamParticipationSlider({
   className,
   title = "Team Participation",

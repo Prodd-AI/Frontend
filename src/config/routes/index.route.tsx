@@ -8,10 +8,9 @@ import { auth_routes } from "@/config/routes/auth.route";
 import { onboarding_routes } from "@/config/routes/onboarding.route";
 import NotFoundPage from "@/shared/pages/not-found.page";
 import { settings_routes } from "./settings.route";
-import TeamMemberEntryDash from "@/shared/components/main/teamMemberDashEntry.component";
+import TeamMemberEntryDash from "@/shared/pages/teamMemberDashEntry.page";
 import Loader from "@/shared/components/loader.component";
 import withAuthGuard from "@/shared/components/HOC/with-auth-guard";
-
 
 const WelcomePage = lazy(() => import("@/onboarding/pages/welcome.page"));
 
@@ -22,7 +21,6 @@ const router = createBrowserRouter([
     path: "/",
     element: <GuardedTeamMemberEntryDash />,
   },
-
   {
     path: "/welcome",
     element: <WelcomePage />,

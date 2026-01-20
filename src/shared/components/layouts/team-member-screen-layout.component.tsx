@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback, } from "react";
-import { Outlet, Navigate, useMatches } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Outlet, Navigate, useMatches, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Logo from "../Logo.component";
 import { Bell, X } from "lucide-react";
@@ -9,8 +9,6 @@ import Loader from "../loader.component";
 import AviPlaceholder from "../avi-placeholder.component";
 import HRBadgeIcon from "@/components/ui/hr-badge-icon";
 import { RxHamburgerMenu } from "react-icons/rx";
-
-
 
 /**
  * Layout component that provides the team member screen scaffold
@@ -36,9 +34,9 @@ function TeamMemberScreenLayout() {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   const matches = useMatches();
-  const currentMatch = matches[matches.length - 1];
+  const currentMatch = matches[matches.length - 2];
   const headerChild = (currentMatch?.handle as RouteHandle)?.headerChild;
-
+  const pathname = currentMatch.pathname;
   const { isLoading, isError } = useQuery({
     queryKey: ["auth", "session"],
     queryFn: async () => {
@@ -164,8 +162,7 @@ function TeamMemberScreenLayout() {
   const notificationCount = isNotification ? 1 : 0;
 
   return (
-    <div className="h-svh overflow-auto bg-linear-to-br from-[#E4D6FA] via-[#F8F8F9] to-[#F8F8F9]">
-
+    <div className="bg-gradient-to-b from-[#E4D6FA]/60 to-[#F8F8F9] min-h-screen">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-white focus:text-[#6619DE] focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:font-semibold focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
@@ -174,87 +171,92 @@ function TeamMemberScreenLayout() {
       </a>
 
       <header
-        className="p-[22px] sm:px-[2.75rem] flex justify-between items-center min-h-[96px] bg-[#F8F8F98A] backdrop-blur-[16.8px] sticky top-0 z-50"
+        className="bg-[#F8F8F98A] backdrop-blur-[16.8px] sticky top-0 z-50"
         role="banner"
       >
-        <div className="flex items-center gap-[1.75rem]">
-          <Logo />
-          {isHR && (
-            <div
-              className="bg-linear-0 from-[#6619DE] to-[#934DFF] w-[116px] h-[26px] rounded-[5px] flex justify-center items-center gap-[5.4px] text-[0.7rem] text-[#F3F4F6]"
-              role="status"
-              aria-label="HR Manager role badge"
-            >
-              <HRBadgeIcon aria-hidden="true" />
-              <span>HR Manager</span>
-            </div>
-          )}
-        </div>
+        <div className="max-w-[1920px] mx-auto p-[22px] sm:px-[2.75rem] flex justify-between items-center min-h-[96px]">
+          <div className="flex items-center gap-[1.75rem]">
+            <Link to={pathname}>
+              <Logo />
+            </Link>
 
-        <div className="flex items-center gap-[1.75rem]">
-          {/* Desktop Navigation */}
-          <nav
-            className="hidden sm:flex items-center gap-[1.75rem]"
-            aria-label="Main navigation"
-          >
-            {headerChild}
-          </nav>
-
-          <div className="flex items-center gap-[30px] sm:gap-[4rem]">
-            {/* Notification Bell Button */}
-            <button
-              type="button"
-              className="relative p-2 rounded-lg hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
-              aria-label={`Notifications${
-                notificationCount > 0 ? `, ${notificationCount} unread` : ""
-              }`}
-            >
-              <Bell size={32} aria-hidden="true" />
-              {isNotification && (
-                <span
-                  className="size-[14px] bg-[#EF4444] rounded-full absolute top-1 right-1"
-                  aria-hidden="true"
-                />
-              )}
-            </button>
-
-            {/* User Profile Section */}
-            <div className="flex items-center">
-              {user.user.avatar_url ? (
-                <img
-                  src={user.user.avatar_url}
-                  alt={`${userFullName}'s profile picture`}
-                  className="size-10 rounded-full object-cover"
-                />
-              ) : (
-                <AviPlaceholder
-                  aria-label={`${userFullName}'s avatar placeholder`}
-                />
-              )}
-
-              <div className="hidden sm:flex flex-col ml-[11px]">
-                <h1 className="text-[#251F2D] font-bold text-base">
-                  {userFullName}
-                </h1>
-                <p className="text-[#5A5D61] text-sm font-normal">
-                  {user?.user.email}
-                </p>
+            {isHR && (
+              <div
+                className="bg-linear-0 from-[#6619DE] to-[#934DFF] w-[116px] h-[26px] rounded-[5px] flex justify-center items-center gap-[5.4px] text-[0.7rem] text-[#F3F4F6]"
+                role="status"
+                aria-label="HR Manager role badge"
+              >
+                <HRBadgeIcon aria-hidden="true" />
+                <span>HR Manager</span>
               </div>
-            </div>
+            )}
+          </div>
 
-            {/* Mobile Hamburger Menu Button */}
-            <button
-              ref={menuToggleRef}
-              type="button"
-              className="sm:hidden p-2 rounded-lg hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
-              onClick={() => setIsMenuOpen(true)}
-              aria-label="Open navigation menu"
-              aria-expanded={isMenuOpen}
-              aria-controls="mobile-menu-panel"
-              aria-haspopup="dialog"
+          <div className="flex items-center gap-[1.75rem]">
+            {/* Desktop Navigation */}
+            <nav
+              className="hidden sm:flex items-center gap-[1.75rem]"
+              aria-label="Main navigation"
             >
-              <RxHamburgerMenu size={28} aria-hidden="true" />
-            </button>
+              {headerChild}
+            </nav>
+
+            <div className="flex items-center gap-[30px] sm:gap-[4rem]">
+              {/* Notification Bell Button */}
+              <button
+                type="button"
+                className="relative p-2 rounded-lg hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
+                aria-label={`Notifications${
+                  notificationCount > 0 ? `, ${notificationCount} unread` : ""
+                }`}
+              >
+                <Bell size={32} aria-hidden="true" />
+                {isNotification && (
+                  <span
+                    className="size-[14px] bg-[#EF4444] rounded-full absolute top-1 right-1"
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+
+              {/* User Profile Section */}
+              <div className="flex items-center">
+                {user.user.avatar_url ? (
+                  <img
+                    src={user.user.avatar_url}
+                    alt={`${userFullName}'s profile picture`}
+                    className="size-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <AviPlaceholder
+                    aria-label={`${userFullName}'s avatar placeholder`}
+                  />
+                )}
+
+                <div className="hidden sm:flex flex-col ml-[11px]">
+                  <h1 className="text-[#251F2D] font-bold text-base">
+                    {userFullName}
+                  </h1>
+                  <p className="text-[#5A5D61] text-sm font-normal">
+                    {user?.user.email}
+                  </p>
+                </div>
+              </div>
+
+              {/* Mobile Hamburger Menu Button */}
+              <button
+                ref={menuToggleRef}
+                type="button"
+                className="sm:hidden p-2 rounded-lg hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
+                onClick={() => setIsMenuOpen(true)}
+                aria-label="Open navigation menu"
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-menu-panel"
+                aria-haspopup="dialog"
+              >
+                <RxHamburgerMenu size={28} aria-hidden="true" />
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -326,7 +328,11 @@ function TeamMemberScreenLayout() {
       </div>
 
       {/* Main Content Area */}
-      <main id="main-content" className="px-2 sm:px-[2.75rem]" tabIndex={-1}>
+      <main
+        id="main-content"
+        className="max-w-[1920px] mx-auto px-2 sm:px-[2.75rem]"
+        tabIndex={-1}
+      >
         <Outlet />
       </main>
     </div>

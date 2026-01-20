@@ -8,23 +8,38 @@ import MyTeamButton from "@/team-leader/components/my-team-button.component";
 const TeamLeaderPage = lazy(
   () => import("@/team-leader/pages/team-leader.page")
 );
+const ViewTeamMembers = lazy(
+  () => import("@/team-leader/pages/view-team-members.page")
+);
+
+const ViewTeamMember = lazy(
+  () => import("@/team-leader/pages/view-team-member.page")
+);
 
 export const team_leader_routes: RouteObject[] = [
   {
     element: <TeamMemberScreenLayout />,
+    handle: {
+      headerChild: (
+        <>
+          <AssignTask />
+          <ScheduleMeetingButton />
+          <MyTeamButton />
+        </>
+      ),
+    },
     children: [
       {
         index: true,
         element: <TeamLeaderPage />,
-        handle: {
-          headerChild: (
-            <>
-              <AssignTask />
-              <ScheduleMeetingButton />
-              <MyTeamButton />
-            </>
-          ),
-        },
+      },
+      {
+        path: "view-team",
+        element: <ViewTeamMembers />,
+      },
+      {
+        path: "view-team/:id",
+        element: <ViewTeamMember />,
       },
     ],
   },
