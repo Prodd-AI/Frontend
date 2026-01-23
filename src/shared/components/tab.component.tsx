@@ -10,7 +10,7 @@ const TabComponent = ({
 }: TabComponentProps) => {
   return (
     <Tabs defaultValue={activeTab} className={clsx("w-full", className)}>
-      <TabsList className="bg-[#EAEBEB] h-12 p-1.5 rounded-[12px] w-fit gap-1">
+      <TabsList className="bg-[#EAEBEB] h-12 p-1.5 rounded-[12px] w-full gap-1">
         {items.map((item) => (
           <TabsTrigger
             key={item.value}

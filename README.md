@@ -46,6 +46,8 @@ Prod AI is a productivity and culture management platform that leverages autonom
 - **Status card**
 - **Flight risk card**
 - **Wellness trend card**
+- **Payroll card**
+- **Timesheet weekly overview**
 
 ### General pages
 

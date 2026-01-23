@@ -8,8 +8,8 @@ const SelectRole = lazy(() => import("@/onboarding/pages/select-role.page"));
 const HrSetup = lazy(() => import("@/onboarding/pages/hr/setup.hr.page"));
 
 const GuardedSelectRole = withAuthGuard(SelectRole);
-const GuardedHrSetup = withAuthGuard(HrSetup);
-const GuardedTeamLeadSetup = withAuthGuard(TeamLeadSetup);
+//const GuardedHrSetup = withAuthGuard(HrSetup);
+//const GuardedTeamLeadSetup = withAuthGuard(TeamLeadSetup);
 
 export const onboarding_routes: RouteObject[] = [
   {
@@ -18,10 +18,12 @@ export const onboarding_routes: RouteObject[] = [
   },
   {
     path: "hr-setup",
-    element: <GuardedHrSetup />,
+    // element: <GuardedHrSetup />,
+    element: <HrSetup />,
   },
   {
     path: "team-lead-setup",
-    element: <GuardedTeamLeadSetup />,
+    // element: <GuardedTeamLeadSetup />,
+    element: <TeamLeadSetup />,
   },
 ];
