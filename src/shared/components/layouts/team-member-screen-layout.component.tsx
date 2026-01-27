@@ -2,7 +2,12 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Outlet, Navigate, useMatches, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Logo from "../Logo.component";
-import { Bell, X } from "lucide-react";
+import { Bell, X, Settings, LogOut } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import useAuthStore from "@/config/stores/auth.store";
 import { refresh_auth_with_team_member_profile } from "@/config/services/auth.service";
 import Loader from "../loader.component";
@@ -93,7 +98,7 @@ function TeamMemberScreenLayout() {
 
     const menuPanel = menuPanelRef.current;
     const focusableElements = menuPanel.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
     const firstFocusable = focusableElements[0];
     const lastFocusable = focusableElements[focusableElements.length - 1];
@@ -219,29 +224,64 @@ function TeamMemberScreenLayout() {
                 )}
               </button>
 
-              {/* User Profile Section */}
-              <div className="flex items-center">
-                {user.user.avatar_url ? (
-                  <img
-                    src={user.user.avatar_url}
-                    alt={`${userFullName}'s profile picture`}
-                    className="size-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <AviPlaceholder
-                    aria-label={`${userFullName}'s avatar placeholder`}
-                  />
-                )}
+              {/* User Profile Section with Popover */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center cursor-pointer rounded-lg p-1 hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
+                    aria-label="Open user menu"
+                    aria-haspopup="menu"
+                  >
+                    {user.user.avatar_url ? (
+                      <img
+                        src={user.user.avatar_url}
+                        alt={`${userFullName}'s profile picture`}
+                        className="size-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <AviPlaceholder
+                        aria-label={`${userFullName}'s avatar placeholder`}
+                      />
+                    )}
 
-                <div className="hidden sm:flex flex-col ml-[11px]">
-                  <h1 className="text-[#251F2D] font-bold text-base">
-                    {userFullName}
-                  </h1>
-                  <p className="text-[#5A5D61] text-sm font-normal">
-                    {user?.user.email}
-                  </p>
-                </div>
-              </div>
+                    <div className="hidden sm:flex flex-col ml-[11px] text-left">
+                      <h1 className="text-[#251F2D] font-bold text-base">
+                        {userFullName}
+                      </h1>
+                      <p className="text-[#5A5D61] text-sm font-normal">
+                        {user?.user.email}
+                      </p>
+                    </div>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  sideOffset={8}
+                  className="w-56 p-3 bg-white rounded-xl shadow-xl border border-gray-100"
+                >
+                  <div className="flex flex-col gap-1">
+                    <Link
+                      to="/settings"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#251F2D] hover:bg-[#F3EBFF] transition-colors group"
+                    >
+                      <Settings
+                        size={18}
+                        className="text-[#6619DE] group-hover:rotate-90 transition-transform duration-300"
+                      />
+                      <span className="text-sm font-medium">Settings</span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => useAuthStore.getState().logout()}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#EF4444] hover:bg-red-50 transition-colors w-full"
+                    >
+                      <LogOut size={18} />
+                      <span className="text-sm font-medium">Logout</span>
+                    </button>
+                  </div>
+                </PopoverContent>
+              </Popover>
 
               {/* Mobile Hamburger Menu Button */}
               <button
