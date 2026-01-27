@@ -5,19 +5,24 @@ import { GoCheckCircle } from "react-icons/go";
 import { IoPeopleOutline, IoPersonAddOutline } from "react-icons/io5";
 import { MdOutlineHomeWork } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import CompanyInfo from "@/onboarding/forms/hr/company-info.component";
+import TeamSetup from "@/onboarding/forms/hr/team-setup.component";
+import InviteMember from "@/onboarding/forms/hr/invite-member.component";
+import Complete from "@/onboarding/forms/hr/complete.component";
 
 function HrSetup() {
   const navigate = useNavigate();
+  // ... rest of the component
 
   const steps: WizardStep[] = [
     {
       id: "company_info",
       label: "Company Info",
       Icon: MdOutlineHomeWork,
-      Component: () => <>CompanyInfo</>,
+      Component: () => <CompanyInfo />,
       formMetaData: {
         heading: "Company Information",
-        subHeading: "Add your company details",
+        subHeading: "",
       },
       skip: true,
     },
@@ -25,18 +30,18 @@ function HrSetup() {
       id: "team_setup",
       label: "Team Setup",
       Icon: IoPeopleOutline,
-      Component: () => <>TeamSetup</>,
+      Component: () => <TeamSetup />,
       formMetaData: {
         heading: "Setup Team",
         subHeading: "Create teams to organize your workforce",
       },
-      skip: false,
+      skip: true,
     },
     {
       id: "invite_members",
       label: "Invite Members",
       Icon: IoPersonAddOutline,
-      Component: () => <>Invite Member</>,
+      Component: () => <InviteMember />,
       formMetaData: {
         heading: "Invite Team Members",
         subHeading: "Send invitations to your team",
@@ -47,7 +52,7 @@ function HrSetup() {
       id: "complete",
       label: "Complete",
       Icon: GoCheckCircle,
-      Component: () => <>Complete</>,
+      Component: () => <Complete />,
       skip: false,
       cbFn: () => {
         navigate("/");
@@ -56,7 +61,6 @@ function HrSetup() {
   ];
   return (
     <AuthLayout>
-      <></>
       <OnboardingWizardCardLayout
         heading="Set Up Your Organization"
         subHeading="Add your company details, invite team leads, and create teams to get started."
