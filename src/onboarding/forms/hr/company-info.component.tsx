@@ -1,17 +1,10 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { UseFormReturn, Controller } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
 
 export interface CompanyInfoFormData {
   name: string;
-  size: string;
+  size: number;
   industry: string;
 }
 
@@ -29,7 +22,6 @@ interface CompanyInfoProps {
 function CompanyInfo({ form }: CompanyInfoProps) {
   const {
     register,
-    control,
     formState: { errors },
   } = form;
 
@@ -66,26 +58,12 @@ function CompanyInfo({ form }: CompanyInfoProps) {
           >
             Company Size
           </Label>
-          <Controller
-            name="size"
-            control={control}
-            render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger
-                  id="companySize"
-                  className="!w-full !border !border-[#6B728021] !rounded-[10px] !h-11 sm:!h-12 md:!h-14"
-                >
-                  <SelectValue placeholder="Select company size" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1-10">1-10 Employees</SelectItem>
-                  <SelectItem value="11-50">11-50 Employees</SelectItem>
-                  <SelectItem value="51-200">51-200 Employees</SelectItem>
-                  <SelectItem value="201-500">201-500 Employees</SelectItem>
-                  <SelectItem value="500+">500+ Employees</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
+          <Input
+            id="companySize"
+            type="number"
+            className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
+            placeholder="Enter number of employees"
+            {...register("size", { valueAsNumber: true })}
           />
           {errors.size && (
             <div className="text-red-500 text-xs sm:text-sm">

@@ -11,7 +11,6 @@ import { Plus, X } from "lucide-react";
 import { UseFormReturn, useFieldArray, Controller } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { getTeams } from "@/config/services/teams.service";
-import Banner from "@/shared/components/banner.component";
 
 export interface InviteMemberFormData {
   first_name: string;
@@ -36,7 +35,7 @@ interface InviteMemberProps {
   onDismissBanner?: () => void;
 }
 
-function InviteMember({ form, banner, onDismissBanner }: InviteMemberProps) {
+function InviteMember({ form }: InviteMemberProps) {
   const {
     control,
     formState: { errors },
@@ -65,18 +64,7 @@ function InviteMember({ form, banner, onDismissBanner }: InviteMemberProps) {
   };
 
   return (
-    <div className="flex flex-col gap-8 mt-4">
-      {banner?.open && (
-        <Banner
-          open={banner.open}
-          variant={banner.variant}
-          title={banner.title}
-          description={banner.description}
-          isDismiss
-          onDismiss={onDismissBanner}
-          className="mb-4"
-        />
-      )}
+    <div className="flex flex-col gap-8 mt-4">  
       {fields.map((field, index) => (
         <div
           key={field.id}

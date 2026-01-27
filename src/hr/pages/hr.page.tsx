@@ -289,7 +289,7 @@ function HrPage() {
   );
 
   return (
-    <div className="p-4 md:p-6 space-y-8">
+    <div className="py-4 md:py-6 space-y-8">
       {/* Header & Filters */}
       <div className="flex flex-col gap-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

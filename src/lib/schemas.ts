@@ -74,7 +74,10 @@ const company_info_schema = z.object({
     .string()
     .min(1, "Company name is required")
     .max(100, "Company name must not exceed 100 characters"),
-  size: z.string().min(1, "Company size is required"),
+  size: z
+    .number("Company size must be a number")
+    .min(1, "Company size is required and must be at least 1")
+    .int("Company size must be a whole number"),
   industry: z
     .string()
     .min(1, "Industry is required")
@@ -111,7 +114,7 @@ const invite_member_schema = z.object({
     .max(80, "Last name must not exceed 80 characters"),
   email: z.email("Please enter a valid email"),
   user_role: z.enum(["team_lead", "team_member"], {
-    errorMap: () => ({ message: "Please select a valid role" }),
+    message: "Please select a valid role",
   }),
   team_id: z.string().min(1, "Team is required"),
 });

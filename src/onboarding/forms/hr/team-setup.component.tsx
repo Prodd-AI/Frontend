@@ -2,7 +2,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, X } from "lucide-react";
 import { UseFormReturn, useFieldArray } from "react-hook-form";
-import Banner from "@/shared/components/banner.component";
 
 export interface TeamFormData {
   name: string;
@@ -25,7 +24,7 @@ interface TeamSetupProps {
   onDismissBanner?: () => void;
 }
 
-function TeamSetup({ form, banner, onDismissBanner }: TeamSetupProps) {
+function TeamSetup({ form }: TeamSetupProps) {
   const {
     control,
     formState: { errors },
@@ -42,17 +41,6 @@ function TeamSetup({ form, banner, onDismissBanner }: TeamSetupProps) {
 
   return (
     <div className="flex flex-col gap-6 mt-4">
-      {banner?.open && (
-        <Banner
-          open={banner.open}
-          variant={banner.variant}
-          title={banner.title}
-          description={banner.description}
-          isDismiss
-          onDismiss={onDismissBanner}
-          className="mb-4"
-        />
-      )}
       {fields.map((field, index) => (
         <div
           key={field.id}

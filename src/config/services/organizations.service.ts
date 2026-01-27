@@ -9,7 +9,7 @@ const getOrganization = () => {
 
 interface CreateOrganizationData {
   name: string;
-  size: string;
+  size: string | number;
   industry: string;
 }
 

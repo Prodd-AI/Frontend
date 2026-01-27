@@ -40,7 +40,7 @@ function HrSetup() {
     resolver: zodResolver(company_info_schema),
     defaultValues: {
       name: "",
-      size: "",
+      size: 0,
       industry: "",
     },
   });
@@ -86,7 +86,7 @@ function HrSetup() {
   const { mutate: createOrg } = useMutation<
     GeneralReturnInt<unknown>,
     GeneralErrorInt,
-    CompanyInfoFormData
+    { name: string; size: string; industry: string }
   >({
     mutationFn: (data) => createOrganization(data),
     onSuccess: (response) => {
@@ -195,8 +195,14 @@ function HrSetup() {
           throw new Error("Please fill in all required fields correctly.");
         }
         const formData = companyInfoForm.getValues();
+        // Convert size number to string for API
+        const apiData: { name: string; size: string; industry: string } = {
+          name: formData.name,
+          size: String(formData.size),
+          industry: formData.industry,
+        };
         await new Promise<void>((resolve, reject) => {
-          createOrg(formData, {
+          createOrg(apiData, {
             onSuccess: () => resolve(),
             onError: (error) => reject(error),
           });
