@@ -11,14 +11,20 @@ import CompanyInfo, {
 import TeamSetup, {
   TeamsSetupFormData,
 } from "@/onboarding/forms/hr/team-setup.component";
-import InviteMember from "@/onboarding/forms/hr/invite-member.component";
+import InviteMember, {
+  InviteMembersSetupFormData,
+} from "@/onboarding/forms/hr/invite-member.component";
 import Complete from "@/onboarding/forms/hr/complete.component";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { company_info_schema, teams_setup_schema } from "@/lib/schemas";
+import {
+  company_info_schema,
+  teams_setup_schema,
+  invite_members_setup_schema,
+} from "@/lib/schemas";
 import { useMutation } from "@tanstack/react-query";
 import { createOrganization } from "@/config/services/organizations.service";
-import { createTeam } from "@/config/services/teams.service";
+import { createTeam, addTeamMembers } from "@/config/services/teams.service";
 import { useState } from "react";
 
 function HrSetup() {
@@ -47,10 +53,33 @@ function HrSetup() {
   }>({ open: false, variant: "info", title: "", description: "" });
   // teamSetupBanner is used in the Component closure below
 
+  const [inviteMembersBanner, setInviteMembersBanner] = useState<{
+    open: boolean;
+    variant: "success" | "critical" | "warning" | "info";
+    title: string;
+    description: string;
+  }>({ open: false, variant: "info", title: "", description: "" });
+  // inviteMembersBanner is used in the Component closure below
+
   const teamsSetupForm = useForm<TeamsSetupFormData>({
     resolver: zodResolver(teams_setup_schema),
     defaultValues: {
       teams: [{ name: "", size: "", description: "" }],
+    },
+  });
+
+  const inviteMembersForm = useForm<InviteMembersSetupFormData>({
+    resolver: zodResolver(invite_members_setup_schema),
+    defaultValues: {
+      members: [
+        {
+          first_name: "",
+          last_name: "",
+          email: "",
+          user_role: "team_member",
+          team_id: "",
+        },
+      ],
     },
   });
 
@@ -100,6 +129,38 @@ function HrSetup() {
         }
       }
       setTeamSetupBanner({
+        open: true,
+        variant: "critical",
+        title: "Error",
+        description: errorMessage,
+      });
+      throw error; // Re-throw to prevent wizard from proceeding
+    },
+  });
+
+  const { mutate: inviteMembersMutation } = useMutation<
+    GeneralReturnInt<unknown>,
+    GeneralErrorInt,
+    { members: InviteMembersSetupFormData["members"] }
+  >({
+    mutationFn: (data) => addTeamMembers(data),
+    onSuccess: (response) => {
+      setInviteMembersBanner({
+        open: true,
+        variant: "success",
+        title: "Success!",
+        description:
+          response.message || "Team members invited successfully.",
+      });
+    },
+    onError: (error: GeneralErrorInt) => {
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      if (error && "message" in error) {
+        if (typeof error.message === "string") {
+          errorMessage = error.message;
+        }
+      }
+      setInviteMembersBanner({
         open: true,
         variant: "critical",
         title: "Error",
@@ -189,12 +250,33 @@ function HrSetup() {
       id: "invite_members",
       label: "Invite Members",
       Icon: IoPersonAddOutline,
-      Component: () => <InviteMember />,
+      Component: () => (
+        <InviteMember
+          form={inviteMembersForm}
+          banner={inviteMembersBanner}
+          onDismissBanner={() =>
+            setInviteMembersBanner({ ...inviteMembersBanner, open: false })
+          }
+        />
+      ),
       formMetaData: {
         heading: "Invite Team Members",
         subHeading: "Send invitations to your team",
       },
       skip: true,
+      cbFn: async () => {
+        const isValid = await inviteMembersForm.trigger();
+        if (!isValid) {
+          throw new Error("Please fill in all required fields correctly.");
+        }
+        const formData = inviteMembersForm.getValues();
+        await new Promise<void>((resolve, reject) => {
+          inviteMembersMutation(formData, {
+            onSuccess: () => resolve(),
+            onError: (error: GeneralErrorInt) => reject(error),
+          });
+        });
+      },
     },
     {
       id: "complete",

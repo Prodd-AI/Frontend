@@ -99,6 +99,28 @@ const teams_setup_schema = z.object({
   teams: z.array(team_schema).min(1, "At least one team is required"),
 });
 
+// Invite Member Schema
+const invite_member_schema = z.object({
+  first_name: z
+    .string()
+    .min(1, "First name is required")
+    .max(80, "First name must not exceed 80 characters"),
+  last_name: z
+    .string()
+    .min(1, "Last name is required")
+    .max(80, "Last name must not exceed 80 characters"),
+  email: z.email("Please enter a valid email"),
+  user_role: z.enum(["team_lead", "team_member"], {
+    errorMap: () => ({ message: "Please select a valid role" }),
+  }),
+  team_id: z.string().min(1, "Team is required"),
+});
+
+// Invite Members Setup Schema (array of members)
+const invite_members_setup_schema = z.object({
+  members: z.array(invite_member_schema).min(1, "At least one member is required"),
+});
+
 export {
   register_schema,
   login_schema,
@@ -108,4 +130,6 @@ export {
   company_info_schema,
   team_schema,
   teams_setup_schema,
+  invite_member_schema,
+  invite_members_setup_schema,
 };

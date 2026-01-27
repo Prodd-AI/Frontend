@@ -3,8 +3,21 @@ import { ApiService } from "./root.service";
 
 const teams_service = new ApiService(`${SERVER_URL}teams`);
 
-const addTeamMembers = (teams: Array<TeamMemberDetails>) => {
-  return teams_service.post("members/bulk", { members: teams }, true);
+interface BulkAddTeamMembersData {
+  members: Array<{
+    email: string;
+    first_name: string;
+    last_name: string;
+    user_role: string;
+    team_id: string;
+  }>;
+}
+
+const addTeamMembers = (data: BulkAddTeamMembersData) => {
+  return teams_service.post<
+    GeneralReturnInt<unknown>,
+    BulkAddTeamMembersData
+  >("members/bulk", data, true);
 };
 
 interface CreateTeamData {
@@ -20,4 +33,25 @@ const createTeam = (data: CreateTeamData) => {
   >("", data, true);
 };
 
-export { addTeamMembers, createTeam };
+interface Team {
+  id: string;
+  name: string;
+  description?: string;
+  size?: string;
+}
+
+interface GetTeamsResponse {
+  data: Team[];
+  message: string;
+  status: number;
+}
+
+const getTeams = (params?: { page?: string; limit?: string }) => {
+  return teams_service.get<GeneralReturnInt<Team[]>>(
+    "",
+    params ? { page: params.page || "1", limit: params.limit || "100" } : undefined,
+    true
+  );
+};
+
+export { addTeamMembers, createTeam, getTeams };
