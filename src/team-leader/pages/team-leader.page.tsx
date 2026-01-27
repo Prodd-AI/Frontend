@@ -3,14 +3,37 @@ import { useState } from "react";
 import useUrlSearchParams from "@/shared/hooks/use-url-search-params";
 import WelcomeBackHeader from "@/shared/components/welcome-back-header.component";
 import NudgeBanner from "@/shared/components/nudge-banner.component";
-import PersonalDashboardSection from "../components/personal-dashboard-section.component";
 import TeamDashboardSection from "../components/team-dashboard-section.component";
-import PersonalTabsSection from "../components/personal-tabs-section.component";
 import TeamTabsSection from "../components/team-tabs-section.component";
+import PersonalTabsSection from "../components/personal-tabs-section.component";
+import PersonalDashboardSection from "../components/personal-dashboard-section.component";
+import { useQueries } from "@tanstack/react-query";
+import { getWeeklyStreak } from "@/config/services/tasks.service";
+import { get_average_mood_for_the_week } from "@/config/services/mood-trends.service";
 
 function TeamLeaderPage() {
   const [openNudgeBanner, setOpenNudgeBanner] = useState(true);
   const { getParam, updateParam, setParams } = useUrlSearchParams();
+
+  const [weekTasksQuery, averageMoodQuery] = useQueries({
+    queries: [
+      {
+        queryKey: ["streaks"],
+        queryFn: () =>
+          getWeeklyStreak({
+            duration: "week",
+            status: "completed",
+          }),
+      },
+      {
+        queryKey: ["average-mood-week"],
+        queryFn: () =>
+          get_average_mood_for_the_week({
+            period: "week",
+          }),
+      },
+    ],
+  });
   const currentView = getParam("view") || "team";
   const isPersonalView = currentView === "personal";
   const personalTab = getParam("personalTab") || "todays_focus";
@@ -58,13 +81,21 @@ function TeamLeaderPage() {
         }
       />
 
-      {isPersonalView ? <PersonalDashboardSection /> : <TeamDashboardSection />}
+      {isPersonalView ? (
+        <PersonalDashboardSection
+          weekTasksQuery={weekTasksQuery}
+          averageMoodQuery={averageMoodQuery}
+        />
+      ) : (
+        <TeamDashboardSection />
+      )}
 
       {isPersonalView ? (
         <PersonalTabsSection
           activeTab={personalTab}
           onTabChange={(tab) => updateParam("personalTab", tab)}
           onViewTeamDashboard={handleViewTeamDashboard}
+          averageMoodQuery={averageMoodQuery}
         />
       ) : (
         <TeamTabsSection

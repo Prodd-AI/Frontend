@@ -15,6 +15,7 @@ const ReviewsTabContent = ({ reviews }: ReviewsTabContentProps) => {
             totalTasks={review.totalTasks}
             description={review.description}
             status={review.status}
+            tasks={review.tasks}
           />
         ))}
       </div>
