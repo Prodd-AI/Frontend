@@ -48,13 +48,13 @@ const MoodEntryCard = memo(({ entry }: { entry: MoodEntry }) => {
   return (
     <div
       className={cn(
-        "flex items-center gap-6 rounded-[18px] px-6 py-5 bg-[#F3F4F6]"
+        "flex items-center gap-6 rounded-[18px] px-6 py-5 bg-[#F3F4F6]",
       )}
     >
       <div
         className={cn(
           "flex items-center gap-2 flex-col px-6 py-3 rounded-[9px]",
-          badgeBg
+          badgeBg,
         )}
       >
         {/* Large Emoji */}
@@ -90,19 +90,21 @@ MoodEntryCard.displayName = "MoodEntryCard";
  */
 function MoodTrends({
   moodEntries,
-  averageMood = "good",
+  averageMood,
   periodLabel = "Last 7 days",
   className,
 }: MoodTrendsProps) {
-  const avgMoodEmoji = MOOD_EMOJIS[averageMood];
-  const avgMoodLabel = MOOD_LABELS[averageMood];
+  const hasAverageMood = averageMood !== undefined;
+  const avgMoodEmoji = hasAverageMood ? MOOD_EMOJIS[averageMood] : null;
+  const avgMoodLabel = hasAverageMood ? MOOD_LABELS[averageMood] : null;
+  const hasMoodEntries = moodEntries.length > 0;
 
   return (
     <div
       className={cn(
         "flex flex-col gap-6 rounded-[24px] bg-[#fbfbfb] px-10 py-8",
         "shadow-[0px_4px_4px_-4px_rgba(12,12,13,0.05),0px_16px_16px_-8px_rgba(12,12,13,0.10)]",
-        className
+        className,
       )}
     >
       {/* Header Section */}
@@ -127,22 +129,40 @@ function MoodTrends({
           <span className="text-[16px] font-semibold leading-[24px] tracking-[-0.32px] text-[#6b7280]">
             Average mood:
           </span>
-          <div className="flex items-center gap-1 rounded-full bg-[rgba(37,172,66,0.14)] px-3 py-1.5">
-            <span className="text-[18.82px] font-bold leading-[17.88px] tracking-[2.82px]">
-              {avgMoodEmoji}
+          {hasAverageMood ? (
+            <div className="flex items-center gap-1 rounded-full bg-[rgba(37,172,66,0.14)] px-3 py-1.5">
+              <span className="text-[18.82px] font-bold leading-[17.88px] tracking-[2.82px]">
+                {avgMoodEmoji}
+              </span>
+              <span className="text-[16px] font-semibold leading-[24px] tracking-[-0.32px] text-[#6b7280]">
+                {avgMoodLabel}
+              </span>
+            </div>
+          ) : (
+            <span className="text-[14px] font-medium leading-[20px] tracking-[-0.28px] text-[#9ca3af] italic">
+              No recent mood logged
             </span>
-            <span className="text-[16px] font-semibold leading-[24px] tracking-[-0.32px] text-[#6b7280]">
-              {avgMoodLabel}
-            </span>
-          </div>
+          )}
         </div>
       </div>
 
       {/* Mood Entries List */}
       <div className="flex flex-col gap-3">
-        {moodEntries.map((entry) => (
-          <MoodEntryCard key={entry.id} entry={entry} />
-        ))}
+        {hasMoodEntries ? (
+          moodEntries.map((entry) => (
+            <MoodEntryCard key={entry.id} entry={entry} />
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <span className="text-[48px] mb-3">📊</span>
+            <p className="text-[16px] font-semibold leading-[24px] tracking-[-0.32px] text-[#6b7280]">
+              No mood entries available
+            </p>
+            <p className="text-[14px] font-normal leading-[20px] tracking-[-0.28px] text-[#9ca3af] mt-1">
+              Mood entries will appear here once logged
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
