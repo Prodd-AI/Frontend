@@ -58,9 +58,8 @@ const DailyMoodCheckIn = forwardRef<
           wellness`,
       onSubmit,
       isSubmitting = false,
-      isSubmitted = false,
     },
-    ref
+    ref,
   ) => {
     const [mood, setMood] = useState<Moods | null>(null);
     const [description, setDescription] = useState("");
@@ -70,9 +69,9 @@ const DailyMoodCheckIn = forwardRef<
     }, []);
 
     const handleSubmit = useCallback(() => {
-      if (!mood || isSubmitting || isSubmitted) return;
+      if (!mood || isSubmitting) return;
       onSubmit(mood, description);
-    }, [mood, description, onSubmit, isSubmitting, isSubmitted]);
+    }, [mood, description, onSubmit, isSubmitting]);
 
     const reset = useCallback(() => {
       setMood(null);
@@ -89,7 +88,7 @@ const DailyMoodCheckIn = forwardRef<
         reset,
         getCurrentData,
       }),
-      [reset, getCurrentData]
+      [reset, getCurrentData],
     );
 
     return (
@@ -97,7 +96,7 @@ const DailyMoodCheckIn = forwardRef<
         className={clsx(
           className,
           "w-[50.625rem] h-[33.313rem] bg-[#F8F8F9] rounded-[20px] flex flex-col p-[35px]",
-          "transition-all duration-500 ease-in-out"
+          "transition-all duration-500 ease-in-out",
         )}
         style={{
           boxShadow:
@@ -122,7 +121,7 @@ const DailyMoodCheckIn = forwardRef<
                   "active:scale-95",
                   mood === type
                     ? "border-2 border-[#6619DE94] bg-[#6619DE]/10 shadow-md scale-105"
-                    : "border-2 border-transparent hover:border-[#6619DE]/30"
+                    : "border-2 border-transparent hover:border-[#6619DE]/30",
                 )}
               >
                 <p className="text-[35.51px] transition-transform duration-200 ease-in-out">
@@ -146,36 +145,18 @@ const DailyMoodCheckIn = forwardRef<
                 "w-full h-[3.313rem] font-bold text-white",
                 "transition-all duration-300 ease-in-out transform",
                 "hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]",
-                isSubmitted
-                  ? "bg-green-500 hover:bg-green-600"
-                  : mood
+
+                mood
                   ? "bg-gradient-to-r from-[#6619DE] to-[#1C75BC] hover:from-[#5A15C7] hover:to-[#1A6BAB] cursor-pointer"
-                  : "bg-gray-400 cursor-not-allowed opacity-60"
+                  : "bg-gray-400 cursor-not-allowed opacity-60",
               )}
               onClick={handleSubmit}
-              disabled={!mood || isSubmitting || isSubmitted}
+              disabled={!mood || isSubmitting}
             >
               {isSubmitting ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Submitting...
-                </div>
-              ) : isSubmitted ? (
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  Successfully submitted!
                 </div>
               ) : (
                 "Submit mood check-in"
@@ -185,7 +166,7 @@ const DailyMoodCheckIn = forwardRef<
         </div>
       </div>
     );
-  }
+  },
 );
 
 DailyMoodCheckIn.displayName = "DailyMoodCheckIn";

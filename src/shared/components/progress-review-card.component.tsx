@@ -1,9 +1,18 @@
-import { ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { RequestChangesDialog } from "./request-changes-dialog.component";
 
 type ReviewStatus = "pending" | "approved" | "changes-requested";
+type TaskStatus = "Completed" | "Pending";
+
+interface Task {
+  id: string;
+  title: string;
+  status: TaskStatus;
+}
 
 interface ProgressReviewCardProps {
   name: string;
@@ -12,9 +21,9 @@ interface ProgressReviewCardProps {
   totalTasks: number;
   description: string;
   status?: ReviewStatus;
+  tasks?: Task[];
   onApprove?: () => void;
-  onRequestChanges?: () => void;
-  onClick?: () => void;
+  onRequestChanges?: (description: string) => void;
   className?: string;
 }
 
@@ -41,19 +50,37 @@ export function ProgressReviewCard({
   totalTasks,
   description,
   status = "pending",
+  tasks = [],
   onApprove,
   onRequestChanges,
-  onClick,
   className,
 }: ProgressReviewCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const percentage = Math.round((completedTasks / totalTasks) * 100);
   const statusInfo = statusConfig[status];
+
+  const handleToggleExpand = () => {
+    setIsExpanded((prev) => !prev);
+  };
+
+  const handleOpenDialog = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+  };
+
+  const handleSendRequest = (requestDescription: string) => {
+    onRequestChanges?.(requestDescription);
+  };
 
   return (
     <div
       className={cn(
         "bg-[#F3F4F6] rounded-2xl p-6 shadow-card animate-fade-in",
-        className
+        className,
       )}
     >
       {/* Header */}
@@ -64,7 +91,7 @@ export function ProgressReviewCard({
         <span
           className={cn(
             "px-3 py-1 rounded-full text-sm font-medium",
-            statusInfo.className
+            statusInfo.className,
           )}
         >
           {statusInfo.label}
@@ -98,7 +125,7 @@ export function ProgressReviewCard({
             Approve
           </Button>
           <Button
-            onClick={onRequestChanges}
+            onClick={handleOpenDialog}
             className="bg-red-500 hover:bg-red-600 text-white font-medium"
             size="sm"
           >
@@ -107,13 +134,48 @@ export function ProgressReviewCard({
         </div>
 
         <button
-          onClick={onClick}
+          onClick={handleToggleExpand}
           className="p-2 hover:bg-gray-200 rounded-full transition-colors"
-          aria-label="View details"
+          aria-label={isExpanded ? "Collapse tasks" : "Expand tasks"}
         >
-          <ChevronRight className="w-5 h-5 text-gray-500" />
+          {isExpanded ? (
+            <ChevronDown className="w-5 h-5 text-gray-500" />
+          ) : (
+            <ChevronRight className="w-5 h-5 text-gray-500" />
+          )}
         </button>
       </div>
+
+      {/* Expanded Task List */}
+      {isExpanded && tasks.length > 0 && (
+        <div className="mt-4 space-y-2 animate-fade-in">
+          {tasks.map((task) => (
+            <div
+              key={task.id}
+              className="flex items-center justify-between bg-white rounded-lg px-4 py-3"
+            >
+              <span className="text-sm text-foreground">{task.title}</span>
+              <span
+                className={cn(
+                  "text-sm font-medium",
+                  task.status === "Completed"
+                    ? "text-amber-500"
+                    : "text-amber-400",
+                )}
+              >
+                {task.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Request Changes Dialog */}
+      <RequestChangesDialog
+        isOpen={isDialogOpen}
+        onClose={handleCloseDialog}
+        onSendRequest={handleSendRequest}
+      />
     </div>
   );
 }

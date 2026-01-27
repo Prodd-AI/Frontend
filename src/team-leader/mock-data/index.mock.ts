@@ -60,27 +60,87 @@ export const upcomingMeetingsData = [
 export const progressReviewsData = [
   {
     name: "Alex Chen",
-    weekLabel: "Week 1",
-    completedTasks: 8,
-    totalTasks: 10,
-    description: "Completed API integration and unit tests",
+    weekLabel: "Week of January 8",
+    completedTasks: 4,
+    totalTasks: 5,
+    description:
+      "Completed 4/5 assigned tasks. Performance review prep in progress.",
     status: "pending" as const,
+    tasks: [
+      { id: "1", title: "Prepare presentation", status: "Completed" as const },
+      { id: "2", title: "Submit report", status: "Completed" as const },
+      { id: "3", title: "Update documentation", status: "Completed" as const },
+      { id: "4", title: "Attend team meeting", status: "Completed" as const },
+      { id: "5", title: "Attend team meeting", status: "Pending" as const },
+    ],
   },
   {
     name: "Sarah Kim",
-    weekLabel: "Week 1",
+    weekLabel: "Week of January 8",
     completedTasks: 10,
     totalTasks: 10,
     description: "Finished UI redesign and documentation",
     status: "approved" as const,
+    tasks: [
+      {
+        id: "1",
+        title: "Design homepage mockup",
+        status: "Completed" as const,
+      },
+      {
+        id: "2",
+        title: "Create component library",
+        status: "Completed" as const,
+      },
+      { id: "3", title: "Review design specs", status: "Completed" as const },
+      { id: "4", title: "Update style guide", status: "Completed" as const },
+      {
+        id: "5",
+        title: "Finalize color palette",
+        status: "Completed" as const,
+      },
+      { id: "6", title: "Create icon set", status: "Completed" as const },
+      { id: "7", title: "Design mobile layouts", status: "Completed" as const },
+      {
+        id: "8",
+        title: "Prepare design handoff",
+        status: "Completed" as const,
+      },
+      {
+        id: "9",
+        title: "Document design patterns",
+        status: "Completed" as const,
+      },
+      { id: "10", title: "Team presentation", status: "Completed" as const },
+    ],
   },
   {
     name: "Mike Johnson",
-    weekLabel: "Week 1",
+    weekLabel: "Week of January 8",
     completedTasks: 5,
     totalTasks: 10,
     description: "Backend refactoring in progress",
     status: "changes-requested" as const,
+    tasks: [
+      {
+        id: "1",
+        title: "Refactor database queries",
+        status: "Completed" as const,
+      },
+      { id: "2", title: "Update API endpoints", status: "Completed" as const },
+      { id: "3", title: "Write unit tests", status: "Completed" as const },
+      { id: "4", title: "Code review", status: "Completed" as const },
+      { id: "5", title: "Update documentation", status: "Completed" as const },
+      {
+        id: "6",
+        title: "Performance optimization",
+        status: "Pending" as const,
+      },
+      { id: "7", title: "Security audit", status: "Pending" as const },
+      { id: "8", title: "Deploy to staging", status: "Pending" as const },
+      { id: "9", title: "Integration testing", status: "Pending" as const },
+      { id: "10", title: "Release notes", status: "Pending" as const },
+    ],
   },
 ];
 

@@ -10,10 +10,21 @@ function TeamMemberDashEntry() {
   }
 
   if (!user.user.user_role) {
-    return <Navigate to="/onboarding/select-role" />;
+    return <Navigate to="/auth/login" />;
   }
   const { user: teamMember } = user;
+
   const { user_role } = teamMember;
+  // if (!is_onboarded) {
+  //   switch (user_role) {
+  //     case "hr":
+  //       return <Navigate to="/onboarding/hr-setup" />;
+  //     case "team_lead":
+  //       return <Navigate to="/onboarding/team-lead-setup" />;
+  //     default:
+  //       return <Navigate to="/auth/login" />;
+  //   }
+  // }
   switch (user_role) {
     case "hr":
       return <Navigate to="/dash/hr" />;

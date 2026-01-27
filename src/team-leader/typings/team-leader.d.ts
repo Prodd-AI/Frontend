@@ -1,4 +1,5 @@
 import { TaskPriority, TaskStatus } from "@/shared/typings/task-card";
+import { UseQueryResult } from "@tanstack/react-query";
 import { ComponentType } from "react";
 
 declare module "@/team-leader/typings/team-leader" {
@@ -29,6 +30,11 @@ declare module "@/team-leader/typings/team-leader" {
     totalTasks: number;
     description: string;
     status: "pending" | "approved" | "changes-requested";
+    tasks?: {
+      id: string;
+      title: string;
+      status: "Completed" | "Pending";
+    }[];
   }
 
   // Weekly streak day interface
@@ -60,6 +66,18 @@ declare module "@/team-leader/typings/team-leader" {
   // Section component props
   export interface PersonalDashboardSectionProps {
     className?: string;
+    weekTasksQuery: UseQueryResult<GeneralReturnInt<WeekTasksResponse>, Error>;
+    averageMoodQuery: UseQueryResult<
+      GeneralReturnInt<{
+        average_mood: number;
+        mood_scores: {
+          user_id: string;
+          mood_score: number;
+          description: string;
+        }[];
+      }>,
+      Error
+    >;
   }
 
   export interface TeamDashboardSectionProps {
@@ -70,6 +88,18 @@ declare module "@/team-leader/typings/team-leader" {
     activeTab: string;
     onTabChange: (tab: string) => void;
     onViewTeamDashboard: () => void;
+    averageMoodQuery: UseQueryResult<
+      GeneralReturnInt<{
+        average_mood: number;
+        mood_scores: {
+          user_id: string;
+          mood_score: number;
+          description: string;
+          created_at: string;
+        }[];
+      }>,
+      Error
+    >;
   }
 
   export interface TeamTabsSectionProps {

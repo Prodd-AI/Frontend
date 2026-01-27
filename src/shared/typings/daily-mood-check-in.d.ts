@@ -19,8 +19,6 @@ declare module "@/shared/typings/daily-mood-check-in" {
     onSubmit: (mood: Moods, description: string) => void;
     /** Whether the submission is currently in progress (shows loading state) */
     isSubmitting?: boolean;
-    /** Whether the submission was successful (shows success state) */
-    isSubmitted?: boolean;
   }
 
   /**

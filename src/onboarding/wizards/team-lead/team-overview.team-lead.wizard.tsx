@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   AddMemberButton,
-  AddMemberForm,
   TeamMemberCard,
 } from "@/onboarding/components/team-overview";
 import { useMutation } from "@tanstack/react-query";
@@ -9,40 +8,37 @@ import { addTeamMembers } from "@/config/services/teams.service";
 import Banner from "@/shared/components/banner.component";
 import { FiSave } from "react-icons/fi";
 import { CgSpinner } from "react-icons/cg";
+import AddTeamMember from "@/onboarding/components/team-overview/add-member-form.component";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import z from "zod";
 
-const steps: StepConfig[] = [
-  {
-    label: "First Name",
-    id: "first_name",
-    type: "text",
-    placeholder: "e.g. John",
-  },
-  {
-    label: "Last Name",
-    id: "last_name",
-    type: "text",
-    placeholder: "e.g. Doe",
-  },
-  {
-    label: "Email Address",
-    id: "email",
-    type: "email",
-    placeholder: "e.g. john@example.com",
-  },
-];
-
-const initialTeamMember: TeamMemberDetails = {
-  email: "",
-  first_name: "",
-  last_name: "",
-};
+const add_team_member_schema = z.object({
+  first_name: z
+    .string()
+    .min(2, "First Name is be at least 3 characters")
+    .max(80, "First Name must not exceed 80 characters"),
+  last_name: z
+    .string()
+    .min(2, "Last Name is be at least 3 characters")
+    .max(80, "Last Name must not exceed 80 characters"),
+  user_role: z.enum(["team_lead", "team_member"]),
+  email: z.email("Please enter a valid email"),
+});
+export type AddTeamMemberFormData = z.infer<typeof add_team_member_schema>;
 
 function TeamOverview() {
+  const [openAddTeamMemberDialog, setOpenAddTeamMemberDialog] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMemberDetails[]>([]);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [teamMember, setTeamMember] =
-    useState<TeamMemberDetails>(initialTeamMember);
-  const [isAddingMember, setIsAddingMember] = useState(false);
+
   const [banner, setBanner] = useState<{
     message: string;
     variant: "success" | "critical";
@@ -71,7 +67,30 @@ function TeamOverview() {
       });
     },
   });
+  const { register, getValues, reset, control } =
+    useForm<AddTeamMemberFormData>({
+      resolver: zodResolver(add_team_member_schema),
+      defaultValues: {
+        first_name: "",
+        last_name: "",
+        email: "",
+        user_role: "team_member",
+      },
+    });
 
+  const handleAddTeamMember = () => {
+    const member = getValues();
+    if (
+      member.email === "" ||
+      member.first_name === "" ||
+      member.last_name === "" ||
+      (member.user_role !== "team_member" && member.user_role !== "team_lead")
+    )
+      return;
+    setTeamMembers((members) => [...members, member]);
+    reset();
+    setOpenAddTeamMemberDialog(false);
+  };
   const handleSubmitTeamMembers = () => {
     if (teamMembers.length === 0) return;
     submitTeamMembers(teamMembers);
@@ -81,44 +100,6 @@ function TeamOverview() {
     setTeamMembers((members) => members.filter((_, i) => i !== index));
   };
 
-  const handleOpenForm = () => {
-    setIsAddingMember(true);
-    setCurrentStep(0);
-    setTeamMember(initialTeamMember);
-  };
-
-  const handleCloseForm = () => {
-    setIsAddingMember(false);
-    setCurrentStep(0);
-    setTeamMember(initialTeamMember);
-  };
-
-  const handleAddTeamMember = () => {
-    if (!teamMember.first_name || !teamMember.last_name || !teamMember.email) {
-      return;
-    }
-    setTeamMembers((members) => [...members, teamMember]);
-    handleCloseForm();
-  };
-
-  const handleNextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep((prev) => prev + 1);
-    }
-  };
-
-  const handlePrevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
-    }
-  };
-
-  const handleInputChange = (id: string, value: string) => {
-    setTeamMember((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const isLastStep = currentStep === steps.length - 1;
-  const currentStepConfig = steps[currentStep];
 
   return (
     <div className="p-4">
@@ -149,29 +130,9 @@ function TeamOverview() {
         ))}
 
         <div
-          className={`w-[140px] min-h-[120px] border-2 border-dashed rounded-xl p-3 flex flex-col transition-all duration-300 ${
-            isAddingMember
-              ? "border-[#6619DE] bg-[#F9F5FF]"
-              : "border-[#D1D5DB] hover:border-[#6619DE] hover:bg-[#F9F5FF]"
-          }`}
+          className={`w-[140px] min-h-[120px] border-2 border-dashed rounded-xl p-3 flex flex-col transition-all duration-300 `}
         >
-          {isAddingMember ? (
-            <AddMemberForm
-              step={currentStepConfig}
-              value={teamMember[currentStepConfig.id] || ""}
-              onChange={handleInputChange}
-              onNext={handleNextStep}
-              onPrev={handlePrevStep}
-              onSubmit={handleAddTeamMember}
-              onClose={handleCloseForm}
-              isFirstStep={currentStep === 0}
-              isLastStep={isLastStep}
-              currentStep={currentStep}
-              totalSteps={steps.length}
-            />
-          ) : (
-            <AddMemberButton onClick={handleOpenForm} />
-          )}
+          <AddMemberButton onClick={() => setOpenAddTeamMemberDialog(true)} />
         </div>
       </div>
 
@@ -196,6 +157,35 @@ function TeamOverview() {
           </button>
         </div>
       )}
+
+      <Dialog
+        open={openAddTeamMemberDialog}
+        onOpenChange={setOpenAddTeamMemberDialog}
+      >
+        <DialogContent>
+          <DialogHeader className="text-lg font-semibold text-gray-900 mb-6">
+            Add team member
+          </DialogHeader>
+          <AddTeamMember register={register} control={control} />
+          <DialogFooter>
+            {" "}
+            <DialogClose>
+              <Button
+                variant="outline"
+                className="px-6 h-10 border-gray-200 text-gray-600 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              onClick={handleAddTeamMember}
+              className="px-6 h-10 text-white"
+            >
+              Add member
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
