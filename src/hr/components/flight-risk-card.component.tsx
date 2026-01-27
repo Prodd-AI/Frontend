@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { FlightRiskCardProps } from "@/hr/typings/flight-risk-card";
+import { ChevronRight, Phone } from "lucide-react";
+import { IoWarningOutline } from "react-icons/io5";
 
 export default function FlightRiskCardComponent({
   person,
@@ -13,14 +15,14 @@ export default function FlightRiskCardComponent({
     person.status === "at_risk"
       ? "bg-danger-color/10 text-danger-color"
       : person.status === "watch"
-      ? "bg-warning-color/20 text-warning-color"
-      : "bg-success-color/20 text-success-color";
+        ? "bg-warning-color/20 text-warning-color"
+        : "bg-success-color/20 text-success-color";
 
   return (
     <div
       className={cn(
-        "rounded-xl bg-white p-5 shadow-lg flex flex-col gap-5",
-        className
+        "rounded-xl bg-white p-5 shadow-lg flex flex-col gap-5 transition-all duration-300",
+        className,
       )}
     >
       <div className="flex items-start justify-between">
@@ -38,12 +40,12 @@ export default function FlightRiskCardComponent({
           {person.status === "at_risk"
             ? "At Risk"
             : person.status === "watch"
-            ? "Watch"
-            : "Healthy"}
+              ? "Watch"
+              : "Healthy"}
         </span>
       </div>
 
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         <Metric label="Avg Mood (30 days)">
           <span className="text-primary-color font-bold">
             {person.avg_mood_score}
@@ -56,60 +58,85 @@ export default function FlightRiskCardComponent({
           </span>
         </Metric>
         <Metric label="Weekly Streak">
-          <span className="font-bold">{person.weekly_streak_days} Days</span>
+          <span className="font-bold text-[#251F2D]">
+            {person.weekly_streak_days} Days
+          </span>
         </Metric>
         <Metric label="Last Check-in">
-          <span className="font-bold">{person.last_checkin_label}</span>
+          <span className="font-bold text-[#251F2D]">
+            {person.last_checkin_label}
+          </span>
         </Metric>
       </div>
 
-      <div className="flex items-center gap-3">
-        <Button
-          className="h-8 text-xs font-semibold bg-[#EAEBEB] text-[#251F2D] hover:opacity-95"
-          onClick={() => actions?.on_schedule_one_to_one?.(person.id)}
-        >
-          Schedule 1:1
-        </Button>
-        <Button
-          className="h-8 text-xs font-semibold bg-[#EAEBEB] text-[#251F2D] hover:opacity-95"
-          onClick={() => actions?.on_contact_team_lead?.(person.id)}
-        >
-          Contact Team Lead
-        </Button>
-        <Button
-          className="h-8 text-xs font-semibold bg-[#EAEBEB] text-[#251F2D] hover:opacity-95"
-          onClick={() => actions?.on_view_profile?.(person.id)}
-        >
-          View Profile
-        </Button>
-        <div className="ml-auto text-xs">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
+          <Button
+            className="flex-1 md:flex-none h-9 text-xs font-semibold bg-[#F3F4F6] text-[#251F2D] hover:bg-[#E5E7EB] shadow-none border border-transparent"
+            onClick={() => actions?.on_schedule_one_to_one?.(person.id)}
+          >
+            Schedule 1:1
+          </Button>
+          <Button
+            className="flex-1 md:flex-none h-9 text-xs font-semibold bg-[#F3F4F6] text-[#251F2D] hover:bg-[#E5E7EB] shadow-none border border-transparent"
+            onClick={() => actions?.on_contact_team_lead?.(person.id)}
+          >
+            Contact Team Lead
+          </Button>
+          <Button
+            className="flex-1 md:flex-none h-9 text-xs font-semibold bg-[#F3F4F6] text-[#251F2D] hover:bg-[#E5E7EB] shadow-none border border-transparent"
+            onClick={() => actions?.on_view_profile?.(person.id)}
+          >
+            View Profile
+          </Button>
+        </div>
+
+        <div className="ml-auto flex items-center mt-2 md:mt-0">
           <button
-            className="px-0 text-primary-color hover:underline cursor-pointer"
+            className="flex items-center gap-1 text-xs text-primary-color hover:underline font-medium"
             onClick={() => {
               setExpanded((v) => !v);
               actions?.on_see_more?.(person.id);
             }}
           >
             {expanded ? "See Less" : "See More"}
+            <ChevronRight
+              size={14}
+              className={cn(
+                "transition-transform duration-200",
+                expanded ? "-rotate-90" : "rotate-90",
+              )}
+            />
           </button>
         </div>
       </div>
 
-      {expanded && (
-        <div className="mt-2">
+      {/* Expanded Content with Animation */}
+      <div
+        className={cn(
+          "grid transition-all duration-300 ease-in-out overflow-hidden",
+          expanded
+            ? "grid-rows-[1fr] opacity-100 mt-2"
+            : "grid-rows-[0fr] opacity-0 mt-0",
+        )}
+      >
+        <div className="min-h-0">
           {Array.isArray(person.risk_factors) &&
             person.risk_factors.length > 0 && (
-              <div className="mt-2">
-                <p className="text-xs text-[#6B7280] font-semibold">
+              <div className="mb-4">
+                <p className="text-xs text-[#251F2D] font-bold mb-2">
                   Risk Factors:
                 </p>
-                <ul className="mt-2 space-y-2">
+                <ul className="space-y-1.5">
                   {person.risk_factors.map((risk, idx) => (
                     <li
                       key={`${person.id}-risk-${idx}`}
                       className="flex items-center gap-2 text-xs text-[#6B7280]"
                     >
-                      <span className="text-danger-color">⚠</span>
+                      <IoWarningOutline
+                        className="text-danger-color shrink-0"
+                        size={14}
+                      />
                       <span>{risk}</span>
                     </li>
                   ))}
@@ -118,13 +145,13 @@ export default function FlightRiskCardComponent({
             )}
 
           {person.scheduled_call_label && (
-            <div className="mt-4 inline-flex items-center gap-2 border border-success-color/40 rounded-md px-3 py-2 text-xs text-success-color bg-success-color/10">
-              <span>🗓</span>
+            <div className="inline-flex items-center gap-2 border border-success-color rounded-lg px-4 py-2.5 text-xs font-medium text-success-color bg-[#F0FDF4]">
+              <Phone size={14} />
               <span>{person.scheduled_call_label}</span>
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

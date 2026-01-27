@@ -42,6 +42,10 @@ const calculatePasswordStrength = (password: string) => {
 };
 
 const RegisterFormComponent = () => {
+  const removeAuthGuard =
+    import.meta.env.VITE_REMOVE_AUTH_GUARD === "true" ||
+    import.meta.env.VITE_REMOVE_AUTH_GUARD === "1";
+
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [banner, setBanner] = useState<{
@@ -75,6 +79,10 @@ const RegisterFormComponent = () => {
       reset();
     },
     onError: (error: unknown) => {
+      console.log("removeAuthGuard", removeAuthGuard);
+      if (removeAuthGuard) {
+        return navigate("/onboarding/select-role");
+      }
       let errorMessage = "Something went wrong, please try again later.";
 
       if (error instanceof Error) {

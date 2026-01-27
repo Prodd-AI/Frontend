@@ -52,6 +52,7 @@ declare module "@/team-leader/typings/team-leader" {
     description?: string;
     AssignButton?: ComponentType;
     showHeader?: boolean;
+    showAssignButton?: boolean;
   }
 
   export interface MeetingsTabContentProps {
@@ -87,8 +88,8 @@ declare module "@/team-leader/typings/team-leader" {
   export interface PersonalTabsSectionProps {
     activeTab: string;
     onTabChange: (tab: string) => void;
-    onViewTeamDashboard: () => void;
-    averageMoodQuery: UseQueryResult<
+    onViewTeamDashboard?: () => void;
+    averageMoodQuery?: UseQueryResult<
       GeneralReturnInt<{
         average_mood: number;
         mood_scores: {
@@ -100,11 +101,14 @@ declare module "@/team-leader/typings/team-leader" {
       }>,
       Error
     >;
+    hasViewTeamDashboard?: boolean;
+    showAssignButton?: boolean;
   }
 
   export interface TeamTabsSectionProps {
     activeTab: string;
-    onTabChange: (tab: string) => void;
-    onViewPersonalDashboard: () => void;
+    onTabChange?: (tab: string) => void;
+    onViewPersonalDashboard?: () => void;
+    hasViewPersonalDashboard?: boolean;
   }
 }

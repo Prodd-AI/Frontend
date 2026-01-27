@@ -28,7 +28,6 @@ function OnboardingProgressTracker({
               >
                 {label}
               </span>
-             
             </div>
           ))}
         </div>

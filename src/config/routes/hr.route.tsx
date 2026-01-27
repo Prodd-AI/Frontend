@@ -6,6 +6,7 @@ const HrPage = lazy(() => import("@/hr/pages/hr.page"));
 
 export const hr_routes: RouteObject[] = [
   {
+
     element: <TeamMemberScreenLayout />,
     children: [
       {

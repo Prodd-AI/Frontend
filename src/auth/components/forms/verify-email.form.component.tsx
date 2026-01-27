@@ -69,9 +69,10 @@ function VerifyEmailFormComponent({ email }: { email: string }) {
       });
       login(res.data, res.data?.access_token);
       localStorage.setItem("refresh_token_id", res.data.refresh_token);
-      setTimeout(() => {
-        navigate("/");
-      }, 1000);
+      if (res.data.user.organization_id) {
+        return navigate("/onboarding/select-role");
+      }
+      return navigate("/onboarding/hr-setup");
     },
     onError(error) {
       setBanner({

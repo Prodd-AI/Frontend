@@ -54,11 +54,13 @@ function LoginFormComponent() {
           description: "You have been successfully signed in.",
         });
 
-        setTimeout(() => {
-          navigate("/");
-        }, 500);
-
         reset();
+
+        if (!response.data?.user?.organization_id) {
+          // add that notice banner here and redirect to the onboarding page if they select yes
+          return navigate("/onboarding/hr-setup");
+        }
+        return navigate("/onboarding/select-role");
       } else {
         setBanner({
           open: true,
@@ -213,9 +215,8 @@ function LoginFormComponent() {
         </div>
         <Button
           type="submit"
-          className={`mt-2 h-11 sm:h-[2.543rem] md:h-14 ${
-            isPending && "opacity-25"
-          }`}
+          className={`mt-2 h-11 sm:h-[2.543rem] md:h-14 ${isPending && "opacity-25"
+            }`}
           disabled={isPending}
         >
           {isPending ? "..." : "Login"}

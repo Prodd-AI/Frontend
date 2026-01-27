@@ -10,6 +10,7 @@ import TodaysFocusExample from "@/shared/components/todays-focus.example";
 import TasksTabContent from "./tasks-tab-content.component";
 import { personalTasksData } from "@/team-leader/mock-data/index.mock";
 import { PersonalTabsSectionProps } from "@/team-leader/typings/team-leader";
+import { useEffect, useState } from "react";
 import AssignTask from "./assign-task.component";
 import MoodTrends from "@/shared/components/mood-trend.component";
 import { MoodType } from "@/shared/typings/mood-trend";
@@ -26,8 +27,19 @@ const PersonalTabsSection = ({
   onTabChange,
   onViewTeamDashboard,
   averageMoodQuery,
+  hasViewTeamDashboard = true,
+  showAssignButton = true,
 }: PersonalTabsSectionProps) => {
-  const data = averageMoodQuery.data;
+  const [currentTab, setCurrentTab] = useState<string>(activeTab);
+  const handleTabChange = (tab: string) => {
+    onTabChange ? onTabChange(tab) : setCurrentTab(tab);
+  };
+
+  useEffect(() => {
+    setCurrentTab(activeTab);
+  }, [activeTab]);
+
+  const data = averageMoodQuery?.data;
   const moodEntries = data?.data.mood_scores.map((entry) => {
     return {
       id: entry.user_id,
@@ -55,6 +67,7 @@ const PersonalTabsSection = ({
               tasks={personalTasksData}
               title="Today's Tasks"
               description="Stay focused and organized with your daily task list."
+              showAssignButton={showAssignButton}
               AssignButton={AssignTask}
             />
           ),
@@ -75,17 +88,21 @@ const PersonalTabsSection = ({
           ),
         },
       ]}
-      activeTab={activeTab}
-      onTabChange={onTabChange}
-      ToggleViewComponent={() => (
-        <Button
-          className="bg-[#E5E5E5] text-[#494451] font-semibold"
-          variant="ghost"
-          onClick={onViewTeamDashboard}
-        >
-          View Team Dashboard <MdOutlineRemoveRedEye />
-        </Button>
-      )}
+      activeTab={currentTab}
+      onTabChange={(tab) => handleTabChange(tab)}
+      ToggleViewComponent={
+        hasViewTeamDashboard
+          ? () => (
+            <Button
+              className="bg-[#E5E5E5] text-[#494451] font-semibold"
+              variant="ghost"
+              onClick={onViewTeamDashboard}
+            >
+              View Team Dashboard <MdOutlineRemoveRedEye />
+            </Button>
+          )
+          : undefined
+      }
     />
   );
 };

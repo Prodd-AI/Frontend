@@ -7,7 +7,7 @@ const TasksTabContent = ({
   title = "Today's Tasks",
   description = "Stay focused and organized with your daily task list.",
   AssignButton,
-
+  showAssignButton,
   showHeader = true,
 }: TasksTabContentProps) => {
   return (
@@ -18,7 +18,7 @@ const TasksTabContent = ({
             <h4 className="text-[2.25rem] font-bold">{title}</h4>
             <p className="text-[#6B7280]">{description}</p>
           </div>
-          {AssignButton && (
+          {showAssignButton && AssignButton && (
             <AssignButton />
           )}
         </div>
