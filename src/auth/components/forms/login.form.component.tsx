@@ -54,10 +54,10 @@ function LoginFormComponent() {
           description: "You have been successfully signed in.",
         });
 
-        setTimeout(() => {
-          navigate("/");
-        }, 500);
-
+        if (!response.data?.user?.organization_id) {
+          // add that notice banner here and redirect to the onboarding page if they select yes
+          navigate("/onboarding/hr-setup");
+        }
         reset();
       } else {
         setBanner({

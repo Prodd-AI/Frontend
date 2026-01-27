@@ -14,8 +14,6 @@ export const team_member_routes: RouteObject[] = [
         index: true,
         element: <TeamMemberPage />,
       },
-     
     ],
   },
 ];
-  

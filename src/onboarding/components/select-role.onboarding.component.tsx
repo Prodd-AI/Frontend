@@ -3,7 +3,7 @@ import SelectRoleCard from "@/shared/components/cards/select-role-card";
 import { useCallback, useState } from "react";
 import { role_cards } from "../utils/constants";
 import useAuthStore from "@/config/stores/auth.store";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { update_user } from "@/config/services/users.service";
 import { FiArrowUpRight } from "react-icons/fi";
@@ -17,10 +17,6 @@ function SelectRoleFormComponent() {
     useState<TeamMemberRole>("team_member");
   const navigate = useNavigate();
 
-  const removeAuthGuard =
-    import.meta.env.VITE_REMOVE_AUTH_GUARD === "true" ||
-    import.meta.env.VITE_REMOVE_AUTH_GUARD === "1";
-
   const handleRoleSelect = useCallback((role: TeamMemberRole) => {
     setSelectedRoleValue(role);
   }, []);
@@ -33,7 +29,7 @@ function SelectRoleFormComponent() {
     variant: "success",
     isOpen: false,
   });
-  // const user = useAuthStore((state) => state.user);
+  const user = useAuthStore((state) => state.user);
   const register = useAuthStore((state) => state.register);
 
   const { mutate, isPending } = useMutation<
@@ -81,19 +77,12 @@ function SelectRoleFormComponent() {
         variant: "critical",
         isOpen: true,
       });
-
-      if (removeAuthGuard) {
-        return navigate(
-          `/onboarding/${selectedRoleValue.replace("_", "-")}-setup`
-        );
-      }
     },
   });
 
-  //commented out for now to avoid redirecting to login page
-  // if (!user) {
-  //   return <Navigate to="/auth/login" />;
-  // }
+  if (!user) {
+    return <Navigate to="/auth/login" />;
+  }
 
   const handleContinue = () => {
     mutate({ user_role: selectedRoleValue });

@@ -2,14 +2,9 @@ interface TeamMemberDetails {
   first_name: string;
   last_name: string;
   email: string;
+  user_role :string
 }
 
-interface StepConfig {
-  label: string;
-  id: keyof TeamMemberDetails;
-  type: string;
-  placeholder: string;
-}
 
 interface AddMemberButtonProps {
   onClick: () => void;

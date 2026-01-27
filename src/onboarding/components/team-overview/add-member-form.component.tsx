@@ -1,96 +1,95 @@
-import { FaArrowLeft, FaArrowRight, FaCheck, FaTimes } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AddTeamMemberFormData } from "@/onboarding/wizards/team-lead/team-overview.team-lead.wizard";
+import { Control, Controller, UseFormRegister } from "react-hook-form";
 
-const AddMemberForm = ({
-  step,
-  value,
-  onChange,
-  onNext,
-  onPrev,
-  onSubmit,
-  onClose,
-  isFirstStep,
-  isLastStep,
-  currentStep,
-  totalSteps,
-}: AddMemberFormProps) => {
+interface AddTeamMemberPropsInt {
+  register: UseFormRegister<AddTeamMemberFormData>;
+  control: Control<AddTeamMemberFormData>;
+}
+const AddTeamMember = ({ register, control }: AddTeamMemberPropsInt) => {
   return (
-    <div className="flex flex-col h-full">
-      {/* Close button */}
-      <button
-        type="button"
-        onClick={onClose}
-        className="self-end text-[#9CA3AF] hover:text-[#6B7280] transition-colors mb-1 cursor-pointer"
-      >
-        <FaTimes className="text-[10px]" />
-      </button>
-
-      {/* Step indicator */}
-      <div className="flex gap-1 mb-2">
-        {Array.from({ length: totalSteps }).map((_, i) => (
-          <div
-            key={i}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              i <= currentStep ? "bg-[#6619DE]" : "bg-[#E5E7EB]"
-            }`}
+    <div className="w-full">
+      <div className="space-y-4">
+        {/* First Name */}
+        <div className="space-y-1.5">
+          <label
+            htmlFor="first_name"
+            className="text-sm font-medium text-gray-700"
+          >
+            First Name
+          </label>
+          <Input
+            {...register("first_name")}
+            type="text"
+            id="first_name"
+            placeholder="eg. John"
+            className="h-11 border-gray-200 focus:border-purple-500 focus:ring-purple-500"
           />
-        ))}
-      </div>
-
-      {/* Form field */}
-      <div className="flex-1">
-        <label
-          htmlFor={step.id}
-          className="text-[9px] font-medium text-[#374151] block mb-1"
-        >
-          {step.label}
-        </label>
-
-        <input
-          type={step.type}
-          id={step.id}
-          name={step.id}
-          value={value}
-          placeholder={step.placeholder}
-          onChange={(e) => onChange(step.id, e.target.value)}
-          className="w-full border border-[#D1D5DB] rounded-md text-[10px] px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#6619DE] focus:border-[#6619DE] transition-all"
-        />
-      </div>
-
-      {/* Navigation */}
-      <div className="flex justify-between items-center mt-2 pt-1 border-t border-[#F3F4F6]">
-        <button
-          type="button"
-          onClick={onPrev}
-          disabled={isFirstStep}
-          className={`p-1 rounded transition-colors ${
-            isFirstStep
-              ? "text-[#D1D5DB] cursor-not-allowed"
-              : "text-[#6B7280] hover:text-[#6619DE] hover:bg-[#F3F4F6] cursor-pointer"
-          }`}
-        >
-          <FaArrowLeft className="text-[10px]" />
-        </button>
-
-        {isLastStep ? (
-          <button
-            type="button"
-            onClick={onSubmit}
-            className="p-1 rounded text-white bg-[#6619DE] hover:bg-[#5215B3] transition-colors cursor-pointer"
+        </div>
+        {/* Last Name */}
+        <div className="space-y-1.5">
+          <label
+            htmlFor="last_name"
+            className="text-sm font-medium text-gray-700"
           >
-            <FaCheck className="text-[10px]" />
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={onNext}
-            className="p-1 rounded text-[#6B7280] hover:text-[#6619DE] hover:bg-[#F3F4F6] transition-colors cursor-pointer"
+            Last Name
+          </label>
+          <Input
+            {...register("last_name")}
+            type="text"
+            id="last_name"
+            placeholder="eg. Doe"
+            className="h-11 border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+          />
+        </div>
+
+        {/* Email */}
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="text-sm font-medium text-gray-700">
+            Email
+          </label>
+          <Input
+            {...register("email")}
+            id="email"
+            type="email"
+            placeholder="john@youremail.com"
+            className="h-11 border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label
+            htmlFor="user_role"
+            className="text-sm font-medium text-gray-700"
           >
-            <FaArrowRight className="text-[10px]" />
-          </button>
-        )}
+            Role
+          </label>
+          <Controller
+            name="user_role"
+            control={control}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger className="h-11 w-full border-gray-200 focus:border-purple-500 focus:ring-purple-500 bg-white">
+                  <SelectValue placeholder="Select Role" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
+                  <SelectItem value="team_lead">Team Lead</SelectItem>
+                  <SelectItem value="team_member">Team Member</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </div>
       </div>
     </div>
   );
 };
 
-export default AddMemberForm;
+export default AddTeamMember;

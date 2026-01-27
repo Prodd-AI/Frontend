@@ -1,4 +1,4 @@
-import TeamLeadSetup from "@/onboarding/pages/team-lead/set.team-lead.page";
+import TeamLeadSetup from "@/onboarding/pages/team-lead/setup.team-lead.page";
 import { lazy } from "react";
 import type { RouteObject } from "react-router-dom";
 import withAuthGuard from "@/shared/components/HOC/with-auth-guard";

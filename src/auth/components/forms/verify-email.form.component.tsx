@@ -55,7 +55,6 @@ function VerifyEmailFormComponent({ email }: { email: string }) {
     }
   }, [resendCooldown]);
 
-  // Verify email mutation
   const { mutate, isPending } = useMutation<
     GeneralReturnInt<TeamMember>,
     Error,
@@ -71,7 +70,7 @@ function VerifyEmailFormComponent({ email }: { email: string }) {
       login(res.data, res.data?.access_token);
       localStorage.setItem("refresh_token_id", res.data.refresh_token);
       setTimeout(() => {
-        navigate("/");
+        navigate("/onboarding/hr-setup");
       }, 1000);
     },
     onError(error) {
@@ -106,7 +105,6 @@ function VerifyEmailFormComponent({ email }: { email: string }) {
       });
     },
   });
-  console.log(email);
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isValidEmail = email && emailRegex.test(email);
 
@@ -211,8 +209,8 @@ function VerifyEmailFormComponent({ email }: { email: string }) {
             {isResending
               ? "Resending..."
               : resendCooldown > 0
-              ? `Resend Code (${resendCooldown}s)`
-              : "Resend Code"}
+                ? `Resend Code (${resendCooldown}s)`
+                : "Resend Code"}
           </button>
         </div>
 

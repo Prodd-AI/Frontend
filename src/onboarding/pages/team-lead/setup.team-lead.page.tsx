@@ -14,10 +14,10 @@ import {
 } from "@/onboarding/schemas/team-lead.schema";
 import { useNavigate } from "react-router-dom";
 import { update_user } from "@/config/services/users.service";
-import { IoCheckmarkDone, IoPeople } from "react-icons/io5";
+import { IoCheckmarkDone } from "react-icons/io5";
 import CompleteTeamLeadOnBoard from "@/onboarding/wizards/team-lead/complete.onboard.component";
 import useAuthStore from "@/config/stores/auth.store";
-import TeamOverview from "@/onboarding/wizards/team-lead/team-overview.team-lead.wizard";
+// import TeamOverview from "@/onboarding/wizards/team-lead/team-overview.team-lead.wizard";
 
 function TeamLeadSetup() {
   const user = useAuthStore((state) => state.user);
@@ -57,15 +57,25 @@ function TeamLeadSetup() {
         }
 
         const formData = setup_profile_form.getValues();
-        await update_user(formData);
+        const { timezone, start_work_hour, end_work_hour, ...restFormData } =
+          formData;
+        const transformedFormData = {
+          ...restFormData,
+          working_hours: {
+            start_time: start_work_hour,
+            end_time: end_work_hour,
+            timezone: timezone,
+          },
+        };
+        await update_user(transformedFormData);
       },
     },
-    {
-      id: "team_overview",
-      label: "Team Overview",
-      Icon: IoPeople,
-      Component : () => <TeamOverview />
-    },
+    // {
+    //   id: "team_overview",
+    //   label: "Team Overview",
+    //   Icon: IoPeople,
+    //   Component: () => <TeamOverview />,
+    // },
     {
       id: "complete_onboard",
       label: "Complete",
