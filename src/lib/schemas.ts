@@ -68,10 +68,24 @@ const verify_email_schema = z.object({
   code: z.string().length(6, "Code must be exactly 6 digits"),
 });
 
+// Company Info Schema
+const company_info_schema = z.object({
+  name: z
+    .string()
+    .min(1, "Company name is required")
+    .max(100, "Company name must not exceed 100 characters"),
+  size: z.string().min(1, "Company size is required"),
+  industry: z
+    .string()
+    .min(1, "Industry is required")
+    .max(100, "Industry must not exceed 100 characters"),
+});
+
 export {
   register_schema,
   login_schema,
   forgot_password_schema,
   reset_password_schema,
   verify_email_schema,
+  company_info_schema,
 };

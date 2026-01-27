@@ -41,9 +41,12 @@ function InviteMember() {
         >
           <div className="flex flex-col md:flex-row gap-4">
             {/* Full Name */}
-            <div className="flex-1 space-y-2">
-              <Label className="font-semibold">Full Name</Label>
+            <div className="flex-1 flex flex-col gap-2">
+              <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+                Full Name
+              </Label>
               <Input
+                className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
                 placeholder="John Doe"
                 value={member.fullName}
                 onChange={(e) =>
@@ -53,9 +56,12 @@ function InviteMember() {
             </div>
 
             {/* Email */}
-            <div className="flex-1 space-y-2">
-              <Label className="font-semibold">Email</Label>
+            <div className="flex-1 flex flex-col gap-2">
+              <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+                Email
+              </Label>
               <Input
+                className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
                 placeholder="john@youremail.com"
                 value={member.email}
                 onChange={(e) => updateMember(index, "email", e.target.value)}
@@ -65,13 +71,15 @@ function InviteMember() {
 
           <div className="flex flex-col md:flex-row gap-4">
             {/* Role */}
-            <div className="flex-1 space-y-2">
-              <Label className="font-semibold">Role</Label>
+            <div className="flex-1 flex flex-col gap-2">
+              <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+                Role
+              </Label>
               <Select
                 value={member.role}
                 onValueChange={(value) => updateMember(index, "role", value)}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="!w-full !border !border-[#6B728021] !rounded-[10px] !h-11 sm:!h-12 md:!h-14">
                   <SelectValue placeholder="Select Role" />
                 </SelectTrigger>
                 <SelectContent>
@@ -83,13 +91,15 @@ function InviteMember() {
             </div>
 
             {/* Team */}
-            <div className="flex-1 space-y-2">
-              <Label className="font-semibold">Team</Label>
+            <div className="flex-1 flex flex-col gap-2">
+              <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+                Team
+              </Label>
               <Select
                 value={member.team}
                 onValueChange={(value) => updateMember(index, "team", value)}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="!w-full !border !border-[#6B728021] !rounded-[10px] !h-11 sm:!h-12 md:!h-14">
                   <SelectValue placeholder="Select Team" />
                 </SelectTrigger>
                 <SelectContent>

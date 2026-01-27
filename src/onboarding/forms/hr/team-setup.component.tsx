@@ -29,9 +29,12 @@ function TeamSetup() {
           className="flex flex-col md:flex-row gap-4 md:items-end"
         >
           {/* Team Name */}
-          <div className="flex-1 space-y-2">
-            <Label className="font-semibold">Team Name</Label>
+          <div className="flex-1 flex flex-col gap-2">
+            <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+              Team Name
+            </Label>
             <Input
+              className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
               placeholder="e.g design, marketing, engineering"
               value={team.name}
               onChange={(e) => updateTeam(index, "name", e.target.value)}
@@ -39,9 +42,12 @@ function TeamSetup() {
           </div>
 
           {/* Team Size */}
-          <div className="w-full md:w-1/3 space-y-2">
-            <Label className="font-semibold">Team Size</Label>
+          <div className="w-full md:w-1/3 flex flex-col gap-2">
+            <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+              Team Size
+            </Label>
             <Input
+              className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
               placeholder="5"
               value={team.size}
               onChange={(e) => updateTeam(index, "size", e.target.value)}
