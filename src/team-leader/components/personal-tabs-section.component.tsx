@@ -38,8 +38,8 @@ const PersonalTabsSection = ({
   useEffect(() => {
     setCurrentTab(activeTab);
   }, [activeTab]);
-  
-  const data = averageMoodQuery.data;
+
+  const data = averageMoodQuery?.data;
   const moodEntries = data?.data.mood_scores.map((entry) => {
     return {
       id: entry.user_id,
@@ -93,14 +93,14 @@ const PersonalTabsSection = ({
       ToggleViewComponent={
         hasViewTeamDashboard
           ? () => (
-              <Button
-                className="bg-[#E5E5E5] text-[#494451] font-semibold"
-                variant="ghost"
-                onClick={onViewTeamDashboard}
-              >
-                View Team Dashboard <MdOutlineRemoveRedEye />
-              </Button>
-            )
+            <Button
+              className="bg-[#E5E5E5] text-[#494451] font-semibold"
+              variant="ghost"
+              onClick={onViewTeamDashboard}
+            >
+              View Team Dashboard <MdOutlineRemoveRedEye />
+            </Button>
+          )
           : undefined
       }
     />

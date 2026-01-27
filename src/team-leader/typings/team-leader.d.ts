@@ -88,8 +88,8 @@ declare module "@/team-leader/typings/team-leader" {
   export interface PersonalTabsSectionProps {
     activeTab: string;
     onTabChange: (tab: string) => void;
-    onViewTeamDashboard: () => void;
-    averageMoodQuery: UseQueryResult<
+    onViewTeamDashboard?: () => void;
+    averageMoodQuery?: UseQueryResult<
       GeneralReturnInt<{
         average_mood: number;
         mood_scores: {

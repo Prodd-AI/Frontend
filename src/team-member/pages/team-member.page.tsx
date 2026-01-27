@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import withTeamMemberScaffold from "@/shared/components/HOC/team-member-screen-scaffold-hoc";
 import WelcomeBackHeader from "@/shared/components/welcome-back-header.component";
 import NudgeBanner from "@/shared/components/nudge-banner.component";
 import PersonalDashboardSection from "@/team-leader/components/personal-dashboard-section.component";
@@ -8,6 +7,9 @@ import PersonalTabsSection from "@/team-leader/components/personal-tabs-section.
 import useUrlSearchParams from "@/shared/hooks/use-url-search-params";
 import MeetingCardComponent from "@/shared/components/meeting-card.component";
 import { sample_meetings } from "@/shared/utils/meeting.constants";
+import { useQueries } from "@tanstack/react-query";
+import { getWeeklyStreak } from "@/config/services/tasks.service";
+import { get_average_mood_for_the_week } from "@/config/services/mood-trends.service";
 
 function Page() {
   const [openNudgeBanner, setOpenNudgeBanner] = useState(true);
@@ -18,8 +20,28 @@ function Page() {
     setParams({ tab });
   };
 
+  const [weekTasksQuery, averageMoodQuery] = useQueries({
+    queries: [
+      {
+        queryKey: ["streaks"],
+        queryFn: () =>
+          getWeeklyStreak({
+            duration: "week",
+            status: "completed",
+          }),
+      },
+      {
+        queryKey: ["average-mood-week"],
+        queryFn: () =>
+          get_average_mood_for_the_week({
+            period: "week",
+          }),
+      },
+    ],
+  });
+
   return (
-    <div className="p-2 sm:p-4 sm:pb-20">
+    <div className="py-2 sm:py-4 sm:pb-20">
       <WelcomeBackHeader
         heading={"Welcome back, Saviour! 👋"}
         subHeading={
@@ -45,13 +67,16 @@ function Page() {
         }
       />
 
-      <PersonalDashboardSection />
+      <PersonalDashboardSection
+        weekTasksQuery={weekTasksQuery}
+        averageMoodQuery={averageMoodQuery}
+      />
 
       <MeetingCardComponent
         meeting={sample_meetings[0]}
         actions={{
-          on_join: () => {},
-          on_open_more: () => {},
+          on_join: () => { },
+          on_open_more: () => { },
         }}
         className="mt-[25px] sm:mt-[1.7rem]"
       />
@@ -66,8 +91,7 @@ function Page() {
   );
 }
 
-const WrappedHrPage = withTeamMemberScaffold(Page);
 
-const TeamLeadPage = () => <WrappedHrPage HeaderChild={null} />;
+const TeamMemberPage = () => <Page />;
 
-export default TeamLeadPage;
+export default TeamMemberPage;

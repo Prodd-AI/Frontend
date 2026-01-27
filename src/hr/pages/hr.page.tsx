@@ -306,7 +306,7 @@ function HrPage() {
           </Button>
         </div>
 
-        <div className="mt-4 bg-white p-3 rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-12 items-center gap-4">
+        <div className="mt-4 bg-white p-6 rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-12 items-center gap-4">
           <div className="md:col-span-1 flex items-center gap-2 text-gray-500 font-medium whitespace-nowrap">
             <FiFilter /> Filters:
           </div>
@@ -343,22 +343,7 @@ function HrPage() {
             />
           </div>
 
-          <div className="md:col-span-4 flex items-center justify-end gap-2">
-            <span className="text-xs font-bold text-[#251F2D] whitespace-nowrap">
-              View Screen
-            </span>
-            <div className="flex bg-[#F3F4F6] p-1 rounded-lg">
-              <button className="px-3 py-1 text-xs font-semibold text-gray-500 hover:text-gray-900 rounded-md">
-                Team Member
-              </button>
-              <button className="px-3 py-1 text-xs font-semibold text-gray-500 hover:text-gray-900 rounded-md">
-                Team Lead
-              </button>
-              <button className="px-3 py-1 text-xs font-semibold bg-primary-color text-white rounded-md shadow-sm">
-                HR
-              </button>
-            </div>
-          </div>
+
         </div>
       </div>
 
