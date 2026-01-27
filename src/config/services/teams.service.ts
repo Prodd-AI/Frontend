@@ -40,12 +40,6 @@ interface Team {
   size?: string;
 }
 
-interface GetTeamsResponse {
-  data: Team[];
-  message: string;
-  status: number;
-}
-
 const getTeams = (params?: { page?: string; limit?: string }) => {
   return teams_service.get<GeneralReturnInt<Team[]>>(
     "",

@@ -2,7 +2,8 @@ interface TeamMemberDetails {
   first_name: string;
   last_name: string;
   email: string;
-  user_role :string
+  user_role: string;
+  team_id?: string;
 }
 
 

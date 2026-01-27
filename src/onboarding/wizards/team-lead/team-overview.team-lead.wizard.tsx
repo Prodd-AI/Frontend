@@ -50,7 +50,17 @@ function TeamOverview() {
   });
 
   const { mutate: submitTeamMembers, isPending } = useMutation({
-    mutationFn: (members: TeamMemberDetails[]) => addTeamMembers(members),
+    mutationFn: (members: TeamMemberDetails[]) => {
+      // Map members to include team_id (required by API)
+      const membersWithTeamId = members.map((member) => ({
+        email: member.email,
+        first_name: member.first_name,
+        last_name: member.last_name,
+        user_role: member.user_role,
+        team_id: (member as TeamMemberDetails & { team_id?: string }).team_id || "",
+      }));
+      return addTeamMembers({ members: membersWithTeamId });
+    },
     onSuccess: () => {
       setBanner({
         message: "Team members added successfully!",
