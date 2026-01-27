@@ -8,14 +8,17 @@ import { useNavigate } from "react-router-dom";
 import CompanyInfo, {
   CompanyInfoFormData,
 } from "@/onboarding/forms/hr/company-info.component";
-import TeamSetup from "@/onboarding/forms/hr/team-setup.component";
+import TeamSetup, {
+  TeamsSetupFormData,
+} from "@/onboarding/forms/hr/team-setup.component";
 import InviteMember from "@/onboarding/forms/hr/invite-member.component";
 import Complete from "@/onboarding/forms/hr/complete.component";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { company_info_schema } from "@/lib/schemas";
+import { company_info_schema, teams_setup_schema } from "@/lib/schemas";
 import { useMutation } from "@tanstack/react-query";
 import { createOrganization } from "@/config/services/organizations.service";
+import { createTeam } from "@/config/services/teams.service";
 import { useState } from "react";
 
 function HrSetup() {
@@ -33,6 +36,21 @@ function HrSetup() {
       name: "",
       size: "",
       industry: "",
+    },
+  });
+
+  const [teamSetupBanner, setTeamSetupBanner] = useState<{
+    open: boolean;
+    variant: "success" | "critical" | "warning" | "info";
+    title: string;
+    description: string;
+  }>({ open: false, variant: "info", title: "", description: "" });
+  // teamSetupBanner is used in the Component closure below
+
+  const teamsSetupForm = useForm<TeamsSetupFormData>({
+    resolver: zodResolver(teams_setup_schema),
+    defaultValues: {
+      teams: [{ name: "", size: "", description: "" }],
     },
   });
 
@@ -59,6 +77,29 @@ function HrSetup() {
         }
       }
       setCompanyInfoBanner({
+        open: true,
+        variant: "critical",
+        title: "Error",
+        description: errorMessage,
+      });
+      throw error; // Re-throw to prevent wizard from proceeding
+    },
+  });
+
+  const { mutate: createTeamMutation } = useMutation<
+    GeneralReturnInt<unknown>,
+    GeneralErrorInt,
+    { name: string; description: string; size: string }
+  >({
+    mutationFn: (data) => createTeam(data),
+    onError: (error: GeneralErrorInt) => {
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      if (error && "message" in error) {
+        if (typeof error.message === "string") {
+          errorMessage = error.message;
+        }
+      }
+      setTeamSetupBanner({
         open: true,
         variant: "critical",
         title: "Error",
@@ -105,12 +146,44 @@ function HrSetup() {
       id: "team_setup",
       label: "Team Setup",
       Icon: IoPeopleOutline,
-      Component: () => <TeamSetup />,
+      Component: () => (
+        <TeamSetup
+          form={teamsSetupForm}
+          banner={teamSetupBanner}
+          onDismissBanner={() =>
+            setTeamSetupBanner({ ...teamSetupBanner, open: false })
+          }
+        />
+      ),
       formMetaData: {
         heading: "Setup Team",
         subHeading: "Create teams to organize your workforce",
       },
       skip: true,
+      cbFn: async () => {
+        const isValid = await teamsSetupForm.trigger();
+        if (!isValid) {
+          throw new Error("Please fill in all required fields correctly.");
+        }
+        const formData = teamsSetupForm.getValues();
+        
+        // Create all teams sequentially
+        for (const team of formData.teams) {
+          await new Promise<void>((resolve, reject) => {
+            createTeamMutation(team, {
+              onSuccess: () => resolve(),
+              onError: (error) => reject(error),
+            });
+          });
+        }
+        
+        setTeamSetupBanner({
+          open: true,
+          variant: "success",
+          title: "Success!",
+          description: `${formData.teams.length} team(s) created successfully.`,
+        });
+      },
     },
     {
       id: "invite_members",

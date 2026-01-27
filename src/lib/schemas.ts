@@ -81,6 +81,24 @@ const company_info_schema = z.object({
     .max(100, "Industry must not exceed 100 characters"),
 });
 
+// Team Schema
+const team_schema = z.object({
+  name: z
+    .string()
+    .min(1, "Team name is required")
+    .max(100, "Team name must not exceed 100 characters"),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .max(500, "Description must not exceed 500 characters"),
+  size: z.string().min(1, "Team size is required"),
+});
+
+// Teams Setup Schema (array of teams)
+const teams_setup_schema = z.object({
+  teams: z.array(team_schema).min(1, "At least one team is required"),
+});
+
 export {
   register_schema,
   login_schema,
@@ -88,4 +106,6 @@ export {
   reset_password_schema,
   verify_email_schema,
   company_info_schema,
+  team_schema,
+  teams_setup_schema,
 };
