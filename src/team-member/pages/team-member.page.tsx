@@ -75,22 +75,22 @@ function Page() {
       <MeetingCardComponent
         meeting={sample_meetings[0]}
         actions={{
-          on_join: () => { },
-          on_open_more: () => { },
+          on_join: () => {},
+          on_open_more: () => {},
         }}
         className="mt-[25px] sm:mt-[1.7rem]"
       />
 
       <PersonalTabsSection
         activeTab={tab}
-        hasViewTeamDashboard={false}
         showAssignButton={false}
         onTabChange={handleTabChange}
+        weekTasksQuery={weekTasksQuery}
+        averageMoodQuery={averageMoodQuery}
       />
     </div>
   );
 }
-
 
 const TeamMemberPage = () => <Page />;
 
