@@ -24,7 +24,7 @@ const WeeklyStreak = ({
     if (!weekTasks) return false;
     const dayTasks = weekTasks[day];
     if (dayTasks.length === 0) return false;
-    return dayTasks.every((task) => task.task.status === "COMPLETED");
+    return dayTasks.every((task) => task.task.status === "completed");
   };
 
   const calculateStreak = (): number => {
