@@ -15,22 +15,24 @@ import {
   progressReviewsData,
 } from "@/team-leader/mock-data/index.mock";
 import { TeamTabsSectionProps } from "@/team-leader/typings/team-leader";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const TeamTabsSection = ({
   activeTab,
   onTabChange,
   onViewPersonalDashboard,
-  hasViewPersonalDashboard = true,
 }: TeamTabsSectionProps) => {
-  const [currentTab, setCurrentTab] = useState<string>(activeTab);
-  const handleTabChange = (tab: string) => {
-    onTabChange ? onTabChange(tab) : setCurrentTab(tab);
-  };
+  const [internalTab, setInternalTab] = useState<string>(activeTab);
 
-  useEffect(() => {
-    setCurrentTab(activeTab);
-  }, [activeTab]);
+  const currentTab = onTabChange ? activeTab : internalTab;
+
+  const handleTabChange = (tab: string) => {
+    if (onTabChange) {
+      onTabChange(tab);
+    } else {
+      setInternalTab(tab);
+    }
+  };
 
   return (
     <TabComponent
@@ -64,7 +66,7 @@ const TeamTabsSection = ({
       activeTab={currentTab}
       onTabChange={(tab) => handleTabChange(tab)}
       ToggleViewComponent={
-        hasViewPersonalDashboard
+        onViewPersonalDashboard
           ? () => (
               <Button
                 className="bg-[#E5E5E5] text-[#494451] font-semibold"

@@ -101,14 +101,13 @@ declare module "@/team-leader/typings/team-leader" {
       }>,
       Error
     >;
-    hasViewTeamDashboard?: boolean;
     showAssignButton?: boolean;
+    weekTasksQuery: UseQueryResult<GeneralReturnInt<WeekTasksResponse>, Error>
   }
 
   export interface TeamTabsSectionProps {
     activeTab: string;
     onTabChange?: (tab: string) => void;
     onViewPersonalDashboard?: () => void;
-    hasViewPersonalDashboard?: boolean;
   }
 }
