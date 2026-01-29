@@ -13,6 +13,19 @@ const getWeeklyStreak = (params: {
     true,
   );
 
-  
+const assignTasks = (data: {
+  title: string;
+  external_link: string;
+  description: string;
+  assigned_to: string[];
+  due_date: string;
+  priority: "high" | "low" | "medium";
+}) => {
+  return task_service.post<GeneralReturnInt<unknown>, typeof data>(
+    "",
+    data,
+    true,
+  );
+};
 
-export { getWeeklyStreak };
+export { getWeeklyStreak, assignTasks };
