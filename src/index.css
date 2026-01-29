@@ -7,7 +7,6 @@
 body {
   margin: 0;
   font-family: "Open Sans", sans-serif;
-  
 }
 
 .bg-card-bg-active {
@@ -95,12 +94,16 @@ body {
   --bg-grey-light: #eae7ef;
   --bg-grey-lighter: #e9e6ee4a;
   --card: oklch(1 0 0);
-  --card-background-active: linear-gradient(192.27deg,
-      #955deb 6.73%,
-      #6619de 93.27%);
-  --button-bg-primary: linear-gradient(103.15deg,
-      #6619de 46.92%,
-      #1186da 104.49%);
+  --card-background-active: linear-gradient(
+    192.27deg,
+    #955deb 6.73%,
+    #6619de 93.27%
+  );
+  --button-bg-primary: linear-gradient(
+    103.15deg,
+    #6619de 46.92%,
+    #1186da 104.49%
+  );
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
@@ -418,9 +421,6 @@ body {
   animation: toast-slide-in 0.3s ease-out !important;
 }
 
-
-
-
 /** Loader Styles **/
 
 .loader {
@@ -438,18 +438,47 @@ body {
   height: 24px;
   position: absolute;
   border-radius: 50%;
-  background: #9747FF;
+  background: #9747ff;
   animation: spin 1s linear infinite;
   transform-origin: 0px 100%;
 }
 
 .loader:before {
   transform-origin: 0 50%;
-  background: #251F2D;
+  background: #251f2d;
 }
 
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Custom Scrollbar Styles */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(102, 25, 222, 0.3) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(102, 25, 222, 0.3);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 25, 222, 0.5);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
