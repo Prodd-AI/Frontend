@@ -51,7 +51,6 @@ function TeamOverview() {
 
   const { mutate: submitTeamMembers, isPending } = useMutation({
     mutationFn: (members: TeamMemberDetails[]) => {
-      // Map members to include team_id (required by API)
       const membersWithTeamId = members.map((member) => ({
         email: member.email,
         first_name: member.first_name,
