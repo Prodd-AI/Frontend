@@ -65,6 +65,10 @@ const schema = z.object({
   attendee_emails: z
     .array(z.email())
     .min(1, "At least one attendee is required"),
+
+  meeting_link: z
+    .url("Please enter a valid URL")
+    .min(1, "Meeting link is required"),
 });
 
 type ScheduleMeetingFormData = z.infer<typeof schema>;
@@ -132,7 +136,6 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
     },
   });
 
-  // Converts "9:00 AM" or "10:30 PM" to "HH:mm" (24-hour format)
   const convertTo24Hour = (time12h: string): string => {
     const [timePart, period] = time12h.split(" ");
     const [hoursStr, minutesStr] = timePart.split(":");
@@ -156,6 +159,7 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
       date: format(values.date, "yyyy-MM-dd"),
       time: convertTo24Hour(values.time),
       attendee_emails: values.attendee_emails,
+      meeting_link: values.meeting_link,
     });
   };
 
@@ -215,6 +219,23 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
           />
           {errors.title && (
             <p className="text-red-500 text-sm">{errors.title.message}</p>
+          )}
+        </div>
+
+        {/* Meeting Link */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-foreground">
+            Meeting Link <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            {...register("meeting_link")}
+            placeholder="e.g. https://zoom.us/j/..."
+            className="h-12 bg-gray-50/80 border border-gray-200/60 rounded-xl text-sm placeholder:text-muted-foreground/50 transition-all duration-200 focus:bg-white focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+          />
+          {errors.meeting_link && (
+            <p className="text-red-500 text-sm">
+              {errors.meeting_link.message}
+            </p>
           )}
         </div>
 
@@ -304,6 +325,7 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
                   onChange={field.onChange}
                   placeholder="Select date"
                   outputFormat="date"
+                  className="h-[55px] "
                 />
               )}
             />
