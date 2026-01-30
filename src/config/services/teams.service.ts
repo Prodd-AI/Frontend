@@ -1,18 +1,14 @@
 import { SERVER_URL } from "@/shared/utils/constants";
 import { ApiService } from "./root.service";
 import { TeamMember } from "@/shared/typings/team-member";
+import {
+  BulkAddTeamMembersData,
+  CreateTeamData,
+  Team,
+  SingleTeamAnalysisMetrics,
+} from "@/team-leader/typings/team-leader";
 
 const teams_service = new ApiService(`${SERVER_URL}teams`);
-
-interface BulkAddTeamMembersData {
-  members: Array<{
-    email: string;
-    first_name: string;
-    last_name: string;
-    user_role: string;
-    team_id: string;
-  }>;
-}
 
 const addTeamMembers = (data: BulkAddTeamMembersData) => {
   return teams_service.post<GeneralReturnInt<unknown>, BulkAddTeamMembersData>(
@@ -22,12 +18,6 @@ const addTeamMembers = (data: BulkAddTeamMembersData) => {
   );
 };
 
-interface CreateTeamData {
-  name: string;
-  description: string;
-  size: string;
-}
-
 const createTeam = (data: CreateTeamData) => {
   return teams_service.post<GeneralReturnInt<unknown>, CreateTeamData>(
     "",
@@ -35,18 +25,6 @@ const createTeam = (data: CreateTeamData) => {
     true,
   );
 };
-
-interface Team {
-  id: string;
-  name: string;
-  description?: string;
-  size?: string;
-  created_at?: string;
-  created_by_id?: string;
-  deleted_at?: string;
-  organization_id: string;
-  updated_at: string;
-}
 
 const getTeams = (params?: { page?: string; limit?: string }) => {
   return teams_service.get<GeneralReturnInt<Team[]>>(
@@ -66,4 +44,24 @@ const getTeamMembers = (team_id: string) => {
   );
 };
 
-export { addTeamMembers, createTeam, getTeams, getTeamMembers };
+const getAnalysisMetricForSingleTeam = (
+  team_id: string,
+  params: {
+    start_date: string;
+    end_date: string;
+  },
+) => {
+  return teams_service.get<GeneralReturnInt<SingleTeamAnalysisMetrics>>(
+    `${team_id}/analysis`,
+    params,
+    true,
+  );
+};
+
+export {
+  addTeamMembers,
+  createTeam,
+  getTeams,
+  getTeamMembers,
+  getAnalysisMetricForSingleTeam,
+};

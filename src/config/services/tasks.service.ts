@@ -1,5 +1,10 @@
 import { SERVER_URL } from "@/shared/utils/constants";
 import { ApiService } from "./root.service";
+import {
+  AssignedTask,
+  CreateTaskDto,
+  UpdateTaskDto,
+} from "@/team-leader/typings/team-leader";
 
 const task_service = new ApiService(`${SERVER_URL}tasks`);
 
@@ -13,14 +18,7 @@ const getWeeklyStreak = (params: {
     true,
   );
 
-const assignTasks = (data: {
-  title: string;
-  external_link: string;
-  description: string;
-  assigned_to: string[];
-  due_date: string;
-  priority: "high" | "low" | "medium";
-}) => {
+const assignTasks = (data: CreateTaskDto) => {
   return task_service.post<GeneralReturnInt<unknown>, typeof data>(
     "",
     data,
@@ -28,4 +26,25 @@ const assignTasks = (data: {
   );
 };
 
-export { getWeeklyStreak, assignTasks };
+const updateTask = (task_id: string, data: UpdateTaskDto) => {
+  return task_service.patch<GeneralReturnInt<unknown>, typeof data>(
+    `${task_id}`,
+    data,
+    true,
+  );
+};
+
+const getAllTasksAssignedToTeamMembersByTeamLead = () => {
+  return task_service.get<GeneralReturnInt<AssignedTask[]>>(
+    "team",
+    undefined,
+    true,
+  );
+};
+
+export {
+  getWeeklyStreak,
+  assignTasks,
+  getAllTasksAssignedToTeamMembersByTeamLead,
+  updateTask,
+};
