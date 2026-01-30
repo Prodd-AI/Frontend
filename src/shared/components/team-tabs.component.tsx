@@ -11,6 +11,7 @@ interface TeamTabsProps {
   onSelectTeam: (teamId: string) => void;
   isLoading?: boolean;
   className?: string;
+  tabClassName?: string;
 }
 
 export const TeamTabs = ({
@@ -19,6 +20,7 @@ export const TeamTabs = ({
   onSelectTeam,
   isLoading = false,
   className,
+  tabClassName,
 }: TeamTabsProps) => {
   if (isLoading) {
     return (
@@ -34,11 +36,13 @@ export const TeamTabs = ({
         <button
           type="button"
           onClick={() => onSelectTeam(team.team_id)}
+          title={team.team_name}
           className={cn(
-            "px-3 py-1.5 text-xs border-b-2 font-medium text-black transition-colors cursor-pointer whitespace-nowrap",
+            "px-3 py-1.5 text-xs border-b-2 font-medium text-black transition-colors cursor-pointer whitespace-nowrap truncate max-w-[200px]",
             activeTeamId === team.team_id
               ? "border-primary"
               : "border-transparent text-muted-foreground hover:text-black hover:border-muted-foreground",
+            tabClassName,
           )}
           key={team.team_id}
         >

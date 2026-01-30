@@ -10,7 +10,7 @@ function Logo() {
       </div>
 
       <h2 className=" font-semibold text-[#251F2D] text-[18px] sm:text-[22px]">
-        Prodilly
+        Prodily
       </h2>
     </div>
   );

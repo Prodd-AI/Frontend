@@ -80,7 +80,8 @@ body {
   --color-primary-color-purple: var(--primary-color-purple);
   --color-danger-color: var(--danger-color);
   --color-success-color: var(--success-color);
-  --color-warning-color: var(--warning-color);
+  --color-warning-color: #e38f2b;
+  --shadow-500: 0 4px 4px -4px rgba(12, 12, 13, 0.05), 0 16px 16px -8px rgba(12, 12, 13, 0.1);
 }
 
 :root {
