@@ -6,7 +6,7 @@ import { User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface TeamMemberOverviewCardPropsInt {
-  id: number;
+  id: string | number;
   name?: string;
   role?: string;
   status?: "At risk" | "On track" | "Completed";
@@ -33,7 +33,7 @@ const TeamMemberOverviewCard = ({
   id,
 }: TeamMemberOverviewCardPropsInt) => {
   const navigate = useNavigate();
-  const handleViewTeamMemberDetails = (id: number) => () => {
+  const handleViewTeamMemberDetails = (id: string | number) => () => {
     if (!id) return;
     navigate(`${id}`);
   };
@@ -41,7 +41,7 @@ const TeamMemberOverviewCard = ({
     <div
       className={clsx(
         `bg-card rounded-2xl p-6 flex-1 min-w-[280px] max-w-sm border`,
-        "shadow-[0px_4px_4px_-4px_rgba(12,12,13,0.05),0px_16px_16px_-8px_rgba(12,12,13,0.10)]"
+        "shadow-[0px_4px_4px_-4px_rgba(12,12,13,0.05),0px_16px_16px_-8px_rgba(12,12,13,0.10)]",
       )}
     >
       {/* Header */}

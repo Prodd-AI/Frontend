@@ -1,13 +1,9 @@
-import { Clock } from "lucide-react";
+import { Clock, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MeetingData } from "@/team-leader/typings/team-leader";
 
 export interface UpcomingMeetingProps {
-  meeting: {
-    title: string;
-    description: string;
-    time: string;
-    badge: string;
-  };
+  meeting: MeetingData;
   className?: string;
 }
 
@@ -28,7 +24,7 @@ const UpcomingMeeting = ({ meeting, className }: UpcomingMeetingProps) => {
     <div
       className={cn(
         "bg-[#F3F4F6] rounded-2xl p-6 shadow-card animate-fade-in",
-        className
+        className,
       )}
     >
       <div className="flex items-start justify-between">
@@ -38,13 +34,22 @@ const UpcomingMeeting = ({ meeting, className }: UpcomingMeetingProps) => {
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Clock className="w-4 h-4" />
             <span>{meeting.time}</span>
+
+            {meeting.meeting_link && (
+              <a href={meeting.meeting_link} target="_blank">
+                <ExternalLink
+                  size={18}
+                  className=" ml-4 hover:scale-110 cursor-pointer transition-all"
+                />
+              </a>
+            )}
           </div>
         </div>
 
         <div
           className={cn(
             "px-3 py-1 rounded-full text-sm font-medium",
-            getBadgeStyles(meeting.badge)
+            getBadgeStyles(meeting.badge),
           )}
         >
           {meeting.badge}
