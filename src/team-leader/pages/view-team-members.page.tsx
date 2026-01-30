@@ -1,67 +1,45 @@
 import GoBackBtn from "@/shared/components/go-back-btn";
-import TeamInsightMetricCard from "@/shared/components/team-insight-metric-card";
+import { useTeamLeadDashMetricInsight } from "@/team-leader/hooks/use-team-lead-dash-metric-insight";
+import { TeamPerformanceOverview } from "@/team-leader/components/team-performance-overview.component";
 import TeamMemberOverviewCard from "@/shared/components/team-member-overview-card.component";
 import WelcomeBackHeader from "@/shared/components/welcome-back-header.component";
-
-const teamMembers = [
-  {
-    id: 1,
-    name: "Maria Rodriguez",
-    role: "Frontend Developer",
-    status: "At risk" as const,
-    taskCompletion: 45,
-    tasksCompleted: 4,
-    totalTasks: 10,
-    weekStreak: "2 weeks",
-    lastActive: "1 day ago",
-  },
-  {
-    id: 2,
-    name: "James Chen",
-    role: "Backend Developer",
-    status: "On track" as const,
-    taskCompletion: 78,
-    tasksCompleted: 7,
-    totalTasks: 9,
-    weekStreak: "5 weeks",
-    lastActive: "2 hours ago",
-  },
-  {
-    id: 3,
-    name: "Sarah Johnson",
-    role: "UI/UX Designer",
-    status: "Completed" as const,
-    taskCompletion: 100,
-    tasksCompleted: 8,
-    totalTasks: 8,
-    weekStreak: "3 weeks",
-    lastActive: "Just now",
-  },
-  {
-    id: 4,
-    name: "Michael Okonkwo",
-    role: "DevOps Engineer",
-    status: "On track" as const,
-    taskCompletion: 65,
-    tasksCompleted: 6,
-    totalTasks: 10,
-    weekStreak: "4 weeks",
-    lastActive: "3 hours ago",
-  },
-  {
-    id: 5,
-    name: "Emily Davis",
-    role: "Product Manager",
-    status: "At risk" as const,
-    taskCompletion: 30,
-    tasksCompleted: 2,
-    totalTasks: 7,
-    weekStreak: "1 week",
-    lastActive: "2 days ago",
-  },
-];
+import { DataTable } from "@/shared/components/data-table/data-table";
+import { useState } from "react";
+import { LayoutGrid, List } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  columns,
+  TeamMemberData,
+} from "@/team-leader/components/columns/team-members-table-columns";
 
 function ViewTeamMembers() {
+  const {
+    teams,
+    activeTeamId,
+    setSelectedTeamId,
+    teamsLoading,
+    metrics,
+    analysisLoading,
+    handleDateRangeChange,
+  } = useTeamLeadDashMetricInsight();
+
+  const [viewMode, setViewMode] = useState<"card" | "table">("table");
+
+  const teamMembers: TeamMemberData[] =
+    metrics?.team_members_details.map((member) => ({
+      id: member.member_id,
+      name: member.member_name,
+      role: member.job_title || "Team Member",
+      status:
+        member.flight_risk_indicator === "at risk" ? "At risk" : "On track",
+      taskCompletion: member.task_completion,
+      tasksCompleted: member.completed_task,
+      totalTasks: member.total_task,
+      weekStreak: `${member.week_streak} weeks`,
+      lastActive: member.last_active,
+      email: member.email,
+    })) || [];
+
   return (
     <div className="pb-12">
       <GoBackBtn title="Back home" />
@@ -71,22 +49,74 @@ function ViewTeamMembers() {
         badge
         className="sm:mt-6"
       />
-      <TeamInsightMetricCard className="mt-5" />
-      <div className="flex flex-wrap gap-4 mt-6">
-        {teamMembers.map((member) => (
-          <TeamMemberOverviewCard
-            id={member.id}
-            key={member.id}
-            name={member.name}
-            role={member.role}
-            status={member.status}
-            taskCompletion={member.taskCompletion}
-            tasksCompleted={member.tasksCompleted}
-            totalTasks={member.totalTasks}
-            weekStreak={member.weekStreak}
-            lastActive={member.lastActive}
+      <TeamPerformanceOverview
+        teams={teams}
+        activeTeamId={activeTeamId}
+        onSelectTeam={setSelectedTeamId}
+        teamsLoading={teamsLoading}
+        metrics={metrics}
+        analysisLoading={analysisLoading}
+        onDateRangeChange={handleDateRangeChange}
+        className="mt-5"
+      />
+
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2 bg-muted p-1 rounded-lg">
+            <Button
+              variant={viewMode === "card" ? "secondary" : "ghost"}
+              size="sm"
+              className="px-2"
+              onClick={() => setViewMode("card")}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "table" ? "secondary" : "ghost"}
+              size="sm"
+              className="px-2"
+              onClick={() => setViewMode("table")}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {analysisLoading ? (
+          <div className="flex items-center justify-center h-40">
+            <p className="text-muted-foreground">Loading team members...</p>
+          </div>
+        ) : teamMembers.length === 0 ? (
+          <div className="flex items-center justify-center h-40 border rounded-lg bg-card">
+            <p className="text-muted-foreground">
+              No team members found for this team.
+            </p>
+          </div>
+        ) : viewMode === "card" ? (
+          <div className="flex flex-wrap gap-4">
+            {teamMembers.map((member) => (
+              <TeamMemberOverviewCard
+                id={member.id}
+                key={member.id}
+                name={member.name}
+                role={member.role}
+                status={member.status}
+                taskCompletion={member.taskCompletion}
+                tasksCompleted={member.tasksCompleted}
+                totalTasks={member.totalTasks}
+                weekStreak={member.weekStreak}
+                lastActive={member.lastActive}
+              />
+            ))}
+          </div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={teamMembers}
+            tableName="Team Members"
+            tableDescription="View detailed performance metrics for each team member."
           />
-        ))}
+        )}
       </div>
     </div>
   );
