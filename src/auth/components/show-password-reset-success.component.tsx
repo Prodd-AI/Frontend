@@ -20,9 +20,11 @@ function ShowPasswordResetSuccess() {
               You can now your password to login to login your account
             </p>
           </div>
-          <Button className="w-full mt-[5.688rem]">
-            <Link to="/auth/login"> Login</Link>
-          </Button>
+          <Link to="/" className="w-full">
+            <Button className="w-full mt-[5.688rem] h-[3.5rem]">
+              Login
+            </Button>
+          </Link>
         </div>
       }
     />

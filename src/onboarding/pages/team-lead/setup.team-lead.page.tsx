@@ -17,6 +17,7 @@ import { update_user } from "@/config/services/users.service";
 import { IoCheckmarkDone } from "react-icons/io5";
 import CompleteTeamLeadOnBoard from "@/onboarding/wizards/team-lead/complete.onboard.component";
 import useAuthStore from "@/config/stores/auth.store";
+import { toast } from "sonner";
 // import TeamOverview from "@/onboarding/wizards/team-lead/team-overview.team-lead.wizard";
 
 function TeamLeadSetup() {
@@ -34,6 +35,7 @@ function TeamLeadSetup() {
       end_work_hour: user?.user.end_work_hour ?? "5:00 PM",
     },
   });
+
   const navigate = useNavigate();
 
   const steps: WizardStep[] = [
@@ -82,7 +84,8 @@ function TeamLeadSetup() {
       Icon: IoCheckmarkDone,
       Component: () => <CompleteTeamLeadOnBoard />,
       cbFn: () => {
-        navigate("/");
+        toast.success("Onboarding complete. Click on forgot password to reset your password.");
+        navigate("/auth/login");
       },
     },
   ];

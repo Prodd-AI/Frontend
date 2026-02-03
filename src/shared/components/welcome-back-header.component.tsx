@@ -69,8 +69,8 @@ function WelcomeBackHeader({
                       y2="16.6795"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="#AC2323" />
-                      <stop offset="1" stop-color="#EF6529" />
+                      <stop stopColor="#AC2323" />
+                      <stop offset="1" stopColor="#EF6529" />
                     </linearGradient>
                     <linearGradient
                       id="paint1_linear_661_5741"
@@ -80,8 +80,8 @@ function WelcomeBackHeader({
                       y2="16.663"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="#AC2323" />
-                      <stop offset="1" stop-color="#EF6529" />
+                      <stop stopColor="#AC2323" />
+                      <stop offset="1" stopColor="#EF6529" />
                     </linearGradient>
                     <clipPath id="clip0_661_5741">
                       <rect width="21" height="21" fill="white" />

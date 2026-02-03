@@ -101,8 +101,8 @@ function AviPlaceholder() {
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(29.4472 34.7533) scale(7.14117 3.50774)"
         >
-          <stop offset="0.728" stop-color="#6D4C41" stop-opacity="0" />
-          <stop offset="1" stop-color="#6D4C41" />
+          <stop offset="0.728" stopColor="#6D4C41" stopOpacity="0" />
+          <stop offset="1" stopColor="#6D4C41" />
         </radialGradient>
         <radialGradient
           id="paint1_radial_292_2819"
@@ -112,8 +112,8 @@ function AviPlaceholder() {
           gradientTransform="matrix(-1.91131 0.894351 -0.663482 -1.41792 36.4804 33.6912)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0.663" stop-color="#6D4C41" />
-          <stop offset="1" stop-color="#6D4C41" stop-opacity="0" />
+          <stop offset="0.663" stopColor="#6D4C41" />
+          <stop offset="1" stopColor="#6D4C41" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint2_radial_292_2819"
@@ -123,8 +123,8 @@ function AviPlaceholder() {
           gradientTransform="matrix(-0.691507 -9.24358 7.70391 -0.576565 31.0109 27.722)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0.725" stop-color="#6D4C41" stop-opacity="0" />
-          <stop offset="1" stop-color="#6D4C41" />
+          <stop offset="0.725" stopColor="#6D4C41" stopOpacity="0" />
+          <stop offset="1" stopColor="#6D4C41" />
         </radialGradient>
         <radialGradient
           id="paint3_radial_292_2819"
@@ -134,8 +134,8 @@ function AviPlaceholder() {
           gradientTransform="matrix(0.691507 -9.24358 -7.70391 -0.576565 18.9953 27.7218)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0.725" stop-color="#6D4C41" stop-opacity="0" />
-          <stop offset="1" stop-color="#6D4C41" />
+          <stop offset="0.725" stopColor="#6D4C41" stopOpacity="0" />
+          <stop offset="1" stopColor="#6D4C41" />
         </radialGradient>
         <radialGradient
           id="paint4_radial_292_2819"
@@ -145,8 +145,8 @@ function AviPlaceholder() {
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(20.5608 34.7533) rotate(180) scale(7.14117 3.50774)"
         >
-          <stop offset="0.728" stop-color="#6D4C41" stop-opacity="0" />
-          <stop offset="1" stop-color="#6D4C41" />
+          <stop offset="0.728" stopColor="#6D4C41" stopOpacity="0" />
+          <stop offset="1" stopColor="#6D4C41" />
         </radialGradient>
         <radialGradient
           id="paint5_radial_292_2819"
@@ -156,8 +156,8 @@ function AviPlaceholder() {
           gradientTransform="matrix(1.91131 0.894351 0.663482 -1.41792 13.5275 33.6915)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0.663" stop-color="#6D4C41" />
-          <stop offset="1" stop-color="#6D4C41" stop-opacity="0" />
+          <stop offset="0.663" stopColor="#6D4C41" />
+          <stop offset="1" stopColor="#6D4C41" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint6_radial_292_2819"
@@ -167,8 +167,8 @@ function AviPlaceholder() {
           gradientTransform="matrix(3.34219 10.3384 7.67097 -2.47948 30.4938 22.8313)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0.699" stop-color="#6D4C41" stop-opacity="0" />
-          <stop offset="1" stop-color="#6D4C41" />
+          <stop offset="0.699" stopColor="#6D4C41" stopOpacity="0" />
+          <stop offset="1" stopColor="#6D4C41" />
         </radialGradient>
         <radialGradient
           id="paint7_radial_292_2819"
@@ -178,8 +178,8 @@ function AviPlaceholder() {
           gradientTransform="matrix(2.51067 1.34636 1.5962 -2.97703 19.9018 10.985)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0.58" stop-color="#6D4C41" />
-          <stop offset="1" stop-color="#6D4C41" stop-opacity="0" />
+          <stop offset="0.58" stopColor="#6D4C41" />
+          <stop offset="1" stopColor="#6D4C41" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint8_radial_292_2819"
@@ -189,8 +189,8 @@ function AviPlaceholder() {
           gradientTransform="matrix(-8.21315 -3.45411 -1.91097 4.62855 26.2689 16.1591)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0.699" stop-color="#6D4C41" stop-opacity="0" />
-          <stop offset="1" stop-color="#6D4C41" />
+          <stop offset="0.699" stopColor="#6D4C41" stopOpacity="0" />
+          <stop offset="1" stopColor="#6D4C41" />
         </radialGradient>
         <radialGradient
           id="paint9_radial_292_2819"
@@ -200,8 +200,8 @@ function AviPlaceholder() {
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(18.7577 13.5836) scale(2.61492 3.19883)"
         >
-          <stop offset="0.702" stop-color="#6D4C41" stop-opacity="0" />
-          <stop offset="1" stop-color="#6D4C41" />
+          <stop offset="0.702" stopColor="#6D4C41" stopOpacity="0" />
+          <stop offset="1" stopColor="#6D4C41" />
         </radialGradient>
         <radialGradient
           id="paint10_radial_292_2819"
@@ -211,8 +211,8 @@ function AviPlaceholder() {
           gradientTransform="matrix(-4.73608 -1.27414 -1.19273 4.43201 18.3986 18.1993)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0.66" stop-color="#6D4C41" stop-opacity="0" />
-          <stop offset="1" stop-color="#6D4C41" />
+          <stop offset="0.66" stopColor="#6D4C41" stopOpacity="0" />
+          <stop offset="1" stopColor="#6D4C41" />
         </radialGradient>
         <radialGradient
           id="paint11_radial_292_2819"
@@ -222,8 +222,8 @@ function AviPlaceholder() {
           gradientTransform="matrix(5.1011 0.701807 0.986031 -7.1679 17.2349 22.9347)"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0.598" stop-color="#6D4C41" stop-opacity="0" />
-          <stop offset="1" stop-color="#6D4C41" />
+          <stop offset="0.598" stopColor="#6D4C41" stopOpacity="0" />
+          <stop offset="1" stopColor="#6D4C41" />
         </radialGradient>
       </defs>
     </svg>

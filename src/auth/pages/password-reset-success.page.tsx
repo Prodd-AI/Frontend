@@ -28,9 +28,9 @@ const ResetComponent = () => {
           You can now your password to login to login your account
         </p>
       </div>
-      <Link to="/auth/login" className=" w-full">
+      <Link to="/auth/login" className=" w-full h-[3.5rem]">
         {" "}
-        <Button className=" w-full mt-[4.375rem]">Login</Button>
+        <Button className=" w-full mt-[4.375rem] h-[3.5rem]">Login</Button>
       </Link>
     </div>
   );

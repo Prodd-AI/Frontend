@@ -56,11 +56,12 @@ function LoginFormComponent() {
 
         reset();
 
-        if (!response.data?.user?.organization_id) {
-          // add that notice banner here and redirect to the onboarding page if they select yes
-          return navigate("/onboarding/hr-setup");
+        if (response.data.user.organization_id && response.data.user.is_onboarded) {
+          return navigate(`/dash/${response.data.user.user_role.replace("_", "-")}`);
         }
-        // return navigate("/onboarding/select-role"); This is Redundant
+        if (response.data.user.organization_id && !response.data.user.is_onboarded) {
+          return navigate(`/onboarding/${response.data.user.user_role.replace("_", "-")}-setup`);
+        }
         return navigate("/")
       } else {
         setBanner({

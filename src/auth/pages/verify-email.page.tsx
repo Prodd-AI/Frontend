@@ -6,12 +6,13 @@ import useUrlSearchParams from "@/shared/hooks/use-url-search-params";
 function VerfiyEmail() {
   const { getParam } = useUrlSearchParams();
   const email = getParam("email") ?? "";
+  const code = getParam("otp") ?? "";
   return (
     <AuthLayout>
       <AuthFormLayout
         title="E-Mail Verification"
         subTitle={`We have mailed ${email} a 6-digit code, please check your email & enter the code here to complete the verification.`}
-        Form={<VerifyEmailFormComponent email={email} />}
+        Form={<VerifyEmailFormComponent email={email} code={code} />}
         centralizeText
       />
     </AuthLayout>
