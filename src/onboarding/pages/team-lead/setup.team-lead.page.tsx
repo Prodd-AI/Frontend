@@ -18,16 +18,10 @@ import { IoCheckmarkDone } from "react-icons/io5";
 import CompleteTeamLeadOnBoard from "@/onboarding/wizards/team-lead/complete.onboard.component";
 import useAuthStore from "@/config/stores/auth.store";
 import { toast } from "sonner";
-import { Lock } from "lucide-react";
-import { reset_password_schema } from "@/lib/schemas";
-import { ResetPasswordFormData } from "@/auth/typings/auth";
-import SetupPasswordComponent from "@/onboarding/components/setup-password.component";
-import { reset_password } from "@/config/services/auth.service";
 // import TeamOverview from "@/onboarding/wizards/team-lead/team-overview.team-lead.wizard";
 
 function TeamLeadSetup() {
   const user = useAuthStore((state) => state.user);
-  const token = useAuthStore((state) => state.token);
 
   const setup_profile_form = useForm<TeamLeadOnboardingForm>({
     resolver: zodResolver(team_lead_onboarding_schema),
@@ -40,10 +34,6 @@ function TeamLeadSetup() {
       start_work_hour: user?.user.start_work_hour ?? "9:00 AM",
       end_work_hour: user?.user.end_work_hour ?? "5:00 PM",
     },
-  });
-
-  const password_form = useForm<ResetPasswordFormData>({
-    resolver: zodResolver(reset_password_schema),
   });
 
   const navigate = useNavigate();
@@ -89,42 +79,13 @@ function TeamLeadSetup() {
     //   Component: () => <TeamOverview />,
     // },
     {
-      id: "setup_password",
-      label: "Set Password",
-      Icon: Lock,
-      Component: () => <SetupPasswordComponent form={password_form} />,
-      formMetaData: {
-        heading: "Set Your Password",
-        subHeading: "Create a secure password for your account",
-      },
-      skip: false,
-      cbFn: async () => {
-        const isValid = await password_form.trigger();
-        if (!isValid) {
-          throw new Error("Please fill in all required fields correctly");
-        }
-
-        const formData = password_form.getValues();
-        if (!token) {
-          throw new Error("Authentication token is missing");
-        }
-
-        const transformedData = {
-          ...formData,
-          token,
-        };
-
-        await reset_password(transformedData);
-      },
-    },
-    {
       id: "complete_onboard",
       label: "Complete",
       Icon: IoCheckmarkDone,
       Component: () => <CompleteTeamLeadOnBoard />,
       cbFn: () => {
-        toast.success("Onboarding complete!");
-        navigate("/dash/team-lead");
+        toast.success("Onboarding complete. Click on forgot password to reset your password.");
+        navigate("/auth/login");
       },
     },
   ];
