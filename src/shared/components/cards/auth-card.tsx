@@ -17,9 +17,8 @@ const AuthCard = ({
       )}
     >
       <section
-        className={`flex items-center gap-3 ${
-          centralize && "justify-center text-center"
-        }
+        className={`flex items-center gap-3 ${centralize && "justify-center text-center"
+          }
        `}
       >
         <img
@@ -27,7 +26,7 @@ const AuthCard = ({
           alt="ProdAI Logo"
           className="w-6.5 h-6.5"
         ></img>
-        <p className="font-semibold text-xl">Prod AI</p>
+        <p className="font-semibold text-xl">Prodily</p>
       </section>
       <>{children}</>
     </div>

@@ -151,11 +151,10 @@ const WelcomeComponent = () => {
               <button
                 key={index}
                 onClick={() => setDesktopCurrentSlide(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ease-out ${
-                  index === desktopCurrentSlide
-                    ? "bg-white w-6"
-                    : "bg-white/50 hover:bg-white/70"
-                }`}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ease-out ${index === desktopCurrentSlide
+                  ? "bg-white w-6"
+                  : "bg-white/50 hover:bg-white/70"
+                  }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
@@ -165,7 +164,7 @@ const WelcomeComponent = () => {
         <div className="h-full flex flex-col gap-8 animate-slide-in-right w-full">
           <div className="animate-fade-in-up delay-300">
             <h1 className="text-[#251F2D] lg:text-[3.17rem] lg:font-bold font-[600] transition-all duration-700 ease-out hover:text-[#6B46C1] text-[1.75rem]">
-              Welcome to Prod AI
+              Welcome to Prodily
             </h1>
             <h2 className="text-[#3A404D] lg:text-[1.375rem] lg:w-2/4 transition-all duration-500 ease-out w-full text-[1rem] font-medium">
               Your new AI companion for focus, well-being, and daily
@@ -250,11 +249,10 @@ const WelcomeComponent = () => {
                     <button
                       key={index}
                       onClick={() => setCurrentSlide(index)}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 ease-out  ${
-                        index === currentSlide
-                          ? "bg-[#6619DE] w-8"
-                          : "bg-[#D1D5DB] hover:bg-[#9CA3AF]"
-                      }`}
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ease-out  ${index === currentSlide
+                        ? "bg-[#6619DE] w-8"
+                        : "bg-[#D1D5DB] hover:bg-[#9CA3AF]"
+                        }`}
                       aria-label={`Go to slide ${index + 1}`}
                     />
                   ))}
@@ -270,11 +268,10 @@ const WelcomeComponent = () => {
                           : currentSlide - 1
                       )
                     }
-                    className={`size-[3.368rem] rounded-full flex items-center justify-center transition-all duration-300 ease-out ${
-                      currentSlide === 0
-                        ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
-                        : "bg-[#6619DE] text-white hover:bg-[#5915c7]"
-                    }`}
+                    className={`size-[3.368rem] rounded-full flex items-center justify-center transition-all duration-300 ease-out ${currentSlide === 0
+                      ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
+                      : "bg-[#6619DE] text-white hover:bg-[#5915c7]"
+                      }`}
                     aria-label="Previous slide"
                     disabled={currentSlide === 0}
                   >
@@ -301,11 +298,10 @@ const WelcomeComponent = () => {
                           : currentSlide + 1
                       )
                     }
-                    className={`size-[3.368rem] rounded-full flex items-center justify-center transition-all duration-300 ease-out ${
-                      currentSlide === mobile_carousel_cards.length - 1
-                        ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
-                        : "bg-[#6619DE] text-white hover:bg-[#5915c7]"
-                    }`}
+                    className={`size-[3.368rem] rounded-full flex items-center justify-center transition-all duration-300 ease-out ${currentSlide === mobile_carousel_cards.length - 1
+                      ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
+                      : "bg-[#6619DE] text-white hover:bg-[#5915c7]"
+                      }`}
                     aria-label="Next slide"
                     disabled={currentSlide === mobile_carousel_cards.length - 1}
                   >
@@ -329,11 +325,10 @@ const WelcomeComponent = () => {
           )}
           <Link to="/auth/login" className=" w-full mb-6 sm:mb-0 lg:mb-0">
             <Button
-              className={`h-[3.188rem] transition-all duration-300 ease-out animate-fade-in-up w-full group ${
-                isMobile && currentSlide !== mobile_carousel_cards.length - 1
-                  ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60 hover:bg-gray-400 hover:scale-100 hover:shadow-none"
-                  : "bg-[#6619DE] text-white hover:bg-[#5915c7] hover:shadow-xl hover:scale-105"
-              }`}
+              className={`h-[3.188rem] transition-all duration-300 ease-out animate-fade-in-up w-full group ${isMobile && currentSlide !== mobile_carousel_cards.length - 1
+                ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60 hover:bg-gray-400 hover:scale-100 hover:shadow-none"
+                : "bg-[#6619DE] text-white hover:bg-[#5915c7] hover:shadow-xl hover:scale-105"
+                }`}
               style={{ animationDelay: "1000ms" }}
               disabled={
                 isMobile && currentSlide !== mobile_carousel_cards.length - 1
@@ -341,11 +336,10 @@ const WelcomeComponent = () => {
             >
               Let's Explore{" "}
               <LuArrowUpRight
-                className={`transition-transform duration-300 ease-out ${
-                  isMobile && currentSlide !== mobile_carousel_cards.length - 1
-                    ? ""
-                    : "group-hover:translate-x-1 group-hover:-translate-y-1"
-                }`}
+                className={`transition-transform duration-300 ease-out ${isMobile && currentSlide !== mobile_carousel_cards.length - 1
+                  ? ""
+                  : "group-hover:translate-x-1 group-hover:-translate-y-1"
+                  }`}
               />
             </Button>
           </Link>

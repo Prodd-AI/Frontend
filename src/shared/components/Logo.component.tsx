@@ -4,7 +4,7 @@ function Logo() {
       <div className="relative size-[26px] sm:size-[32px] ">
         <img
           src="/assets/icons/logo.svg"
-          alt="Prod AI logo"
+          alt="Prodily logo"
           className=" w-full h-full absolute"
         />
       </div>

@@ -1,6 +1,6 @@
-## PROD AI — Frontend
+## PRODILY — Frontend
 
-Prod AI is a productivity and culture management platform that leverages autonomous AI agents to drive employee engagement, performance, retention, and organizational alignment. This frontend implements a modular, AI‑enhanced experience that integrates with existing workplace tools, delivering real‑time productivity insights, morale analysis, performance gamification, and AI‑driven coaching across diverse enterprise environments and team structures.
+Prodily is a productivity and culture management platform that leverages autonomous AI agents to drive employee engagement, performance, retention, and organizational alignment. This frontend implements a modular, AI‑enhanced experience that integrates with existing workplace tools, delivering real‑time productivity insights, morale analysis, performance gamification, and AI‑driven coaching across diverse enterprise environments and team structures.
 
 ### Tech stack
 
