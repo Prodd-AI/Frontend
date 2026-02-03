@@ -22,14 +22,14 @@ const statusColor = {
   Completed: "text-blue-500",
 };
 const TeamMemberOverviewCard = ({
-  name = "Maria Rodriguez",
-  role = "Frontend Developer",
-  status = "At risk",
-  taskCompletion = 45,
-  tasksCompleted = 4,
-  totalTasks = 10,
-  weekStreak = "2 weeks",
-  lastActive = "1 day ago",
+  name,
+  role,
+  status,
+  taskCompletion,
+  tasksCompleted,
+  totalTasks,
+  weekStreak,
+  lastActive,
   id,
 }: TeamMemberOverviewCardPropsInt) => {
   const navigate = useNavigate();
@@ -53,55 +53,59 @@ const TeamMemberOverviewCard = ({
             </AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="font-semibold text-foreground">{name}</h3>
-            <p className="text-sm text-muted-foreground">{role}</p>
+            <h3 className="font-semibold text-foreground">{name || "—"}</h3>
+            {role && <p className="text-sm text-muted-foreground">{role}</p>}
           </div>
         </div>
-        <span className={`text-sm font-medium ${statusColor[status]}`}>
-          {status}
-        </span>
+        {status && (
+          <span className={`text-sm font-medium ${statusColor[status]}`}>
+            {status}
+          </span>
+        )}
       </div>
 
       {/* Stats */}
       <div className="space-y-3 mb-4">
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Task Completion</span>
-          <span
-            className={`font-medium ${
-              taskCompletion < 50 ? "text-green-500" : "text-foreground"
-            }`}
-          >
-            {taskCompletion}%
-          </span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Task</span>
-          <span className="font-medium text-foreground">
-            {tasksCompleted}/{totalTasks}
-          </span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Week Streak</span>
-          <span className="font-medium text-foreground">{weekStreak}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Last Active</span>
-          <span className="font-medium text-foreground">{lastActive}</span>
-        </div>
+        {taskCompletion !== undefined && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Task Completion</span>
+            <span
+              className={`font-medium ${
+                taskCompletion < 50 ? "text-green-500" : "text-foreground"
+              }`}
+            >
+              {taskCompletion}%
+            </span>
+          </div>
+        )}
+        {(tasksCompleted !== undefined || totalTasks !== undefined) && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Task</span>
+            <span className="font-medium text-foreground">
+              {tasksCompleted ?? 0}/{totalTasks ?? 0}
+            </span>
+          </div>
+        )}
+        {weekStreak && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Week Streak</span>
+            <span className="font-medium text-foreground">{weekStreak}</span>
+          </div>
+        )}
+        {lastActive && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Last Active</span>
+            <span className="font-medium text-foreground">{lastActive}</span>
+          </div>
+        )}
       </div>
 
       {/* Progress Bar */}
-      <div className="mb-4">
-        <Progress value={taskCompletion} className="h-2" />
-      </div>
-
-      {/* Schedule Call Link */}
-      <p className="text-sm text-muted-foreground mb-4">
-        Click here to{" "}
-        <a href="#" className="text-primary font-medium hover:underline">
-          Schedule Call
-        </a>
-      </p>
+      {taskCompletion !== undefined && (
+        <div className="mb-4">
+          <Progress value={taskCompletion} className="h-2" />
+        </div>
+      )}
 
       {/* View Details Button */}
       <Button className="w-full" onClick={handleViewTeamMemberDetails(id)}>

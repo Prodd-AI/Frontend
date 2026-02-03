@@ -2,14 +2,14 @@ import { Button } from "@/components/ui/button";
 import TabComponent from "@/shared/components/tab.component";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { IoCheckmarkOutline } from "react-icons/io5";
-import { LuClock2 } from "react-icons/lu";
+// import { LuClock2 } from "react-icons/lu";
 import { BsCameraReels } from "react-icons/bs";
-import { MdOutlineReviews } from "react-icons/md";
+// import { MdOutlineReviews } from "react-icons/md";
 import TasksTabContent from "./tasks-tab-content.component";
-import TeamMoodTabContent from "./team-mood-tab-content.component";
+// import TeamMoodTabContent from "./team-mood-tab-content.component";
 import MeetingsTabContent from "./meetings-tab-content.component";
-import ReviewsTabContent from "./reviews-tab-content.component";
-import { progressReviewsData } from "@/team-leader/mock-data/index.mock";
+// import ReviewsTabContent from "./reviews-tab-content.component";
+// import { progressReviewsData } from "@/team-leader/mock-data/index.mock";
 import { TeamTabsSectionProps } from "@/team-leader/typings/team-leader";
 import { useState } from "react";
 import {
@@ -19,7 +19,9 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { format, isToday, isTomorrow } from "date-fns";
 import { MeetingData } from "@/team-leader/typings/team-leader";
-import { getAllTasksAssignedToTeamMembersByTeamLead } from "@/config/services/tasks.service";
+import { getAllTasksAssignedToTeamMembersByTeamLeadViaTeadId } from "@/config/services/tasks.service";
+import { columns } from "./columns/assigned-tasks-columns";
+import { useTeams } from "@/team-leader/hooks/use-teams";
 
 const TeamTabsSection = ({
   activeTab,
@@ -41,7 +43,7 @@ const TeamTabsSection = ({
   const [meetingsStatus, setMeetingsStatus] = useState<
     "scheduled" | "cancelled" | "completed"
   >("scheduled");
-
+  const { activeTeamId } = useTeams();
   const { data: meetingsResponse, isLoading: isMeetingsLoading } = useQuery({
     queryKey: ["meetings", meetingsPage, meetingsStatus],
     queryFn: () =>
@@ -54,7 +56,9 @@ const TeamTabsSection = ({
   const { data: assignedTasksResponse, isLoading: isAssignedTasksLoading } =
     useQuery({
       queryKey: ["team-assigned-tasks"],
-      queryFn: getAllTasksAssignedToTeamMembersByTeamLead,
+      queryFn: () =>
+        getAllTasksAssignedToTeamMembersByTeamLeadViaTeadId(activeTeamId),
+      enabled: !!activeTeamId,
     });
 
   const assignedTasks = assignedTasksResponse?.data || [];
@@ -76,7 +80,15 @@ const TeamTabsSection = ({
     };
   };
 
-  const meetingsData = meetingsResponse?.data?.map(transformMeetingData) || [];
+  const meetingsData =
+    meetingsResponse?.data
+      ?.slice()
+      .sort(
+        (a, b) =>
+          new Date(b.scheduled_at).getTime() -
+          new Date(a.scheduled_at).getTime(),
+      )
+      .map(transformMeetingData) || [];
 
   return (
     <TabComponent
@@ -91,15 +103,13 @@ const TeamTabsSection = ({
               assignedTasks={assignedTasks}
               isLoading={isAssignedTasksLoading}
               showHeader={false}
+              columns={columns}
+              title="Team's Tasks"
+              description="Stay focused and organized with your daily task list."
             />
           ),
         },
-        {
-          label: "Team Mood",
-          value: "team_mood",
-          icon: <LuClock2 />,
-          content: <TeamMoodTabContent />,
-        },
+
         {
           label: "Meetings",
           value: "meeting",
@@ -119,12 +129,6 @@ const TeamTabsSection = ({
               }}
             />
           ),
-        },
-        {
-          label: "Reviews",
-          value: "reviews",
-          icon: <MdOutlineReviews />,
-          content: <ReviewsTabContent reviews={progressReviewsData} />,
         },
       ]}
       activeTab={currentTab}

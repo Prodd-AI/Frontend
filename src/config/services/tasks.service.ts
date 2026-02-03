@@ -42,9 +42,27 @@ const getAllTasksAssignedToTeamMembersByTeamLead = () => {
   );
 };
 
+const getAllTasksAssignedToTeamMembersByTeamLeadViaTeadId = (
+  team_id: string,
+) => {
+  return task_service.get<GeneralReturnInt<AssignedTask[]>>(
+    `team/${team_id}`,
+    undefined,
+    true,
+  );
+};
+const getAssignedTasksForTeamMember = (member_id: string) => {
+  return task_service.get<GeneralReturnInt<Omit<AssignedTask, "user">[]>>(
+    `member/${member_id}`,
+    undefined,
+    true,
+  );
+};
 export {
   getWeeklyStreak,
   assignTasks,
   getAllTasksAssignedToTeamMembersByTeamLead,
   updateTask,
+  getAllTasksAssignedToTeamMembersByTeamLeadViaTeadId,
+  getAssignedTasksForTeamMember,
 };
