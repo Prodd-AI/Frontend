@@ -9,6 +9,8 @@ interface TeamPerformanceOverviewProps {
   teamsLoading?: boolean;
   metrics?: SingleTeamAnalysisMetrics;
   analysisLoading?: boolean;
+  startDate: string;
+  endDate: string;
   onDateRangeChange: (start: string, end: string) => void;
   className?: string;
 }
@@ -20,11 +22,16 @@ export const TeamPerformanceOverview = ({
   teamsLoading,
   metrics,
   analysisLoading,
+  startDate,
+  endDate,
   onDateRangeChange,
   className,
 }: TeamPerformanceOverviewProps) => {
-  const completedTask = metrics?.team_members_details.reduce((acc,curr)=>acc + curr.completed_task,0) ?? 0
-  console.log(completedTask)
+  const completedTask =
+    metrics?.team_members_details.reduce(
+      (acc, curr) => acc + curr.completed_task,
+      0,
+    ) ?? 0;
   return (
     <div className={className}>
       <TeamTabs
@@ -41,6 +48,8 @@ export const TeamPerformanceOverview = ({
         moraleScore={metrics?.morale_score ?? 0}
         atRiskCount={metrics?.at_risk_members ?? 0}
         isLoading={analysisLoading}
+        startDate={startDate}
+        endDate={endDate}
         onDateRangeChange={onDateRangeChange}
         completedTasks={completedTask}
       />

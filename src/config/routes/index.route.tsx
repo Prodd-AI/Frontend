@@ -11,7 +11,6 @@ import { settings_routes } from "./settings.route";
 import TeamMemberEntryDash from "@/shared/pages/teamMemberDashEntry.page";
 import Loader from "@/shared/components/loader.component";
 import withAuthGuard from "@/shared/components/HOC/with-auth-guard";
-
 const WelcomePage = lazy(() => import("@/onboarding/pages/welcome.page"));
 
 const GuardedTeamMemberEntryDash = withAuthGuard(TeamMemberEntryDash);
@@ -25,6 +24,7 @@ const router = createBrowserRouter([
     path: "/welcome",
     element: <WelcomePage />,
   },
+
   { path: "/dash/hr", children: hr_routes },
   { path: "/dash/team-member", children: team_member_routes },
   { path: "/dash/team-lead", children: team_leader_routes },
@@ -48,3 +48,4 @@ export function AppRouter() {
     </Suspense>
   );
 }
+

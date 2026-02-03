@@ -13,9 +13,11 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  Row,
 } from "@tanstack/react-table";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { rankItem } from "@tanstack/match-sorter-utils";
-import { Search, Inbox } from "lucide-react";
+import { Search, Inbox, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 
 import {
   Table,
@@ -41,17 +43,12 @@ interface DataTableProps<TData, TValue> {
 }
 
 const fuzzyFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
-  // Rank the item
   const itemRank = rankItem(row.getValue(columnId), value);
-
-  // Store the itemRank info
-  addMeta({
-    itemRank,
-  });
-
-  // Return if the item should be filtered in/out
+  addMeta({ itemRank });
   return itemRank.passed;
 };
+
+const ROW_HEIGHT = 64;
 
 export function DataTable<TData, TValue>({
   columns,
@@ -69,6 +66,8 @@ export function DataTable<TData, TValue>({
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState("");
+
+  const tableContainerRef = React.useRef<HTMLDivElement>(null);
 
   const table = useReactTable({
     data,
@@ -97,6 +96,41 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
+
+  const { rows } = table.getRowModel();
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 5,
+  });
+
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+
+  const paddingTop = virtualRows.length > 0 ? virtualRows[0]?.start || 0 : 0;
+  const paddingBottom =
+    virtualRows.length > 0
+      ? totalSize - (virtualRows[virtualRows.length - 1]?.end || 0)
+      : 0;
+
+  const MemoizedTableRow = React.useMemo(() => {
+    return React.memo(function TableRowMemo({ row }: { row: Row<TData> }) {
+      return (
+        <TableRow
+          data-state={row.getIsSelected() && "selected"}
+          className="hover:bg-muted/30 transition-colors data-[state=selected]:bg-muted/50 border-border/60"
+        >
+          {row.getVisibleCells().map((cell) => (
+            <TableCell key={cell.id} className="py-4 px-6">
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </TableCell>
+          ))}
+        </TableRow>
+      );
+    });
+  }, []);
 
   return (
     <Card
@@ -130,27 +164,45 @@ export function DataTable<TData, TValue>({
           />
         </div>
       </div>
-      <div className="overflow-hidden">
+
+      <div ref={tableContainerRef} className="overflow-auto max-h-[600px]">
         <Table>
-          <TableHeader className="bg-muted/40">
+          <TableHeader className="bg-muted/40 sticky top-0 z-10">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
                 className="hover:bg-transparent border-border/60"
               >
                 {headerGroup.headers.map((header) => {
+                  const canSort = header.column.getCanSort();
+                  const sorted = header.column.getIsSorted();
                   return (
                     <TableHead
                       key={header.id}
                       colSpan={header.colSpan}
-                      className="h-12 px-6 text-xs font-bold uppercase tracking-wider text-black/80"
+                      className={clsx(
+                        "h-12 px-6 text-xs font-bold uppercase tracking-wider text-black/80 bg-muted/40",
+                        canSort &&
+                          "cursor-pointer select-none hover:bg-muted/60",
+                      )}
+                      onClick={header.column.getToggleSortingHandler()}
                     >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
+                      {header.isPlaceholder ? null : (
+                        <div className="flex items-center gap-1.5">
+                          {flexRender(
                             header.column.columnDef.header,
                             header.getContext(),
                           )}
+                          {canSort &&
+                            (sorted === "asc" ? (
+                              <ArrowUp className="h-3.5 w-3.5 text-foreground" />
+                            ) : sorted === "desc" ? (
+                              <ArrowDown className="h-3.5 w-3.5 text-foreground" />
+                            ) : (
+                              <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                            ))}
+                        </div>
+                      )}
                     </TableHead>
                   );
                 })}
@@ -158,23 +210,23 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-muted/30 transition-colors data-[state=selected]:bg-muted/50 border-border/60"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-4 px-6">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+            {rows.length ? (
+              <>
+                {paddingTop > 0 && (
+                  <tr>
+                    <td style={{ height: `${paddingTop}px` }} />
+                  </tr>
+                )}
+                {virtualRows.map((virtualRow) => {
+                  const row = rows[virtualRow.index];
+                  return <MemoizedTableRow key={row.id} row={row} />;
+                })}
+                {paddingBottom > 0 && (
+                  <tr>
+                    <td style={{ height: `${paddingBottom}px` }} />
+                  </tr>
+                )}
+              </>
             ) : (
               <TableRow>
                 <TableCell

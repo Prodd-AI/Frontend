@@ -36,7 +36,7 @@ const MeetingsTabContent = ({
         <h4 className="text-[1.75rem] font-semibold">
           Upcoming Meetings & 1:1s
         </h4>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           {filter && (
             <Select
               value={filter.status}
@@ -46,7 +46,7 @@ const MeetingsTabContent = ({
                 )
               }
             >
-              <SelectTrigger className="w-[180px] h-9  bg-white border-gray-200">
+              <SelectTrigger className="w-[180px] !h-[52px] bg-white border-gray-200">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
@@ -62,20 +62,20 @@ const MeetingsTabContent = ({
               </SelectContent>
             </Select>
           )}
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="h-[52px]">
+                <Plus /> Schedule Meeting
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-[720px] p-8 rounded-lg border-gray-200/80 shadow-xl">
+              <ScheduleMeeting
+                onCancel={() => setOpen(false)}
+                onSchedule={handleSchedule}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="h-[52px]">
-              <Plus /> Schedule Meeting
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-[720px] p-8 rounded-lg border-gray-200/80 shadow-xl">
-            <ScheduleMeeting
-              onCancel={() => setOpen(false)}
-              onSchedule={handleSchedule}
-            />
-          </DialogContent>
-        </Dialog>
       </div>
       <div className="flex flex-col gap-4 mt-[1.25rem]">
         {isLoading ? (

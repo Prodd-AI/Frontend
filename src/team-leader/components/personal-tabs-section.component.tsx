@@ -7,7 +7,7 @@ import {
 import { IoCheckmarkOutline } from "react-icons/io5";
 import { LuClock2 } from "react-icons/lu";
 import TasksTabContent from "./tasks-tab-content.component";
-import { personalTasksData } from "@/team-leader/mock-data/index.mock";
+// import { personalTasksData } from "@/team-leader/mock-data/index.mock";
 import { PersonalTabsSectionProps } from "@/team-leader/typings/team-leader";
 
 import AssignTask from "./assign-task.component";
@@ -15,6 +15,7 @@ import MoodTrends from "@/shared/components/mood-trend.component";
 import { MoodType } from "@/shared/typings/mood-trend";
 import { FocusInfoCard } from "@/shared/typings/todays-focus";
 import TodaysFocusComponent from "@/shared/components/todays-focus.component";
+import { personalTasksColumns } from "./columns/personal-tasks-columns";
 
 const MoodEntryMapper: Record<number, MoodType> = {
   1: "rough",
@@ -63,7 +64,6 @@ const PersonalTabsSection = ({
       mood: MoodEntryMapper[entry.mood_score],
     };
   });
-
   return (
     <TabComponent
       className="mt-[38px]"
@@ -86,11 +86,12 @@ const PersonalTabsSection = ({
           icon: <IoCheckmarkOutline />,
           content: (
             <TasksTabContent
-              tasks={personalTasksData}
-              title="Today's Tasks"
+              title="Your Tasks"
               description="Stay focused and organized with your daily task list."
               showAssignButton={showAssignButton}
               AssignButton={AssignTask}
+              assignedTasks={weekTasks ? Object.values(weekTasks).flat() : []}
+              columns={personalTasksColumns}
             />
           ),
         },

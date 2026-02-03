@@ -10,7 +10,9 @@ interface TeamInsightMetricCardPropsInt {
   moraleScore?: number;
   atRiskCount?: number;
   isLoading?: boolean;
-  onDateRangeChange?: (startDate: string, endDate: string) => void;
+  startDate: string;
+  endDate: string;
+  onDateRangeChange: (startDate: string, endDate: string) => void;
 }
 
 const MoodEmojiMapper: Record<number, string> = {
@@ -28,6 +30,8 @@ function TeamInsightMetricCard({
   moraleScore = 0,
   atRiskCount = 0,
   isLoading = false,
+  startDate,
+  endDate,
   onDateRangeChange,
 }: TeamInsightMetricCardPropsInt) {
   const moodScale = Math.ceil((moraleScore / 100) * 5) || 1;
@@ -41,7 +45,11 @@ function TeamInsightMetricCard({
         className,
       )}
     >
-      <FilterBar onDateRangeChange={onDateRangeChange} />
+      <FilterBar
+        startDate={startDate}
+        endDate={endDate}
+        onDateRangeChange={onDateRangeChange}
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard

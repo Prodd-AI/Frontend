@@ -17,6 +17,8 @@ interface DatePickerFieldProps {
   dateStringFormat?: string;
   className?: string;
   disabled?: boolean;
+  minDate?: Date;
+  maxDate?: Date;
 }
 
 export const DatePickerField = ({
@@ -27,6 +29,8 @@ export const DatePickerField = ({
   dateStringFormat = "yyyy-MM-dd",
   className,
   disabled = false,
+  minDate,
+  maxDate,
 }: DatePickerFieldProps) => {
   // Convert value to Date for the Calendar
   const selectedDate = value
@@ -78,6 +82,11 @@ export const DatePickerField = ({
           selected={selectedDate}
           onSelect={handleSelect}
           className="p-3 pointer-events-auto"
+          disabled={(date) => {
+            if (minDate && date < minDate) return true;
+            if (maxDate && date > maxDate) return true;
+            return false;
+          }}
         />
       </PopoverContent>
     </Popover>

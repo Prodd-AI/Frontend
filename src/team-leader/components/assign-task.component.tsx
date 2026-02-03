@@ -76,7 +76,7 @@ const AssignTask = () => {
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className=" !min-w-[40rem]">
-          <AssignTaskForm onSuccess={() => setOpen(false)} />
+          <AssignTaskForm isOpen={open} onSuccess={() => setOpen(false)} />
         </DialogContent>
       </Dialog>
     </>
@@ -86,10 +86,11 @@ const AssignTask = () => {
 export default AssignTask;
 
 interface AssignTaskFormProps {
+  isOpen?: boolean;
   onSuccess?: () => void;
 }
 
-const AssignTaskForm = ({ onSuccess }: AssignTaskFormProps) => {
+const AssignTaskForm = ({ isOpen = false, onSuccess }: AssignTaskFormProps) => {
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
 
   const {
@@ -110,10 +111,10 @@ const AssignTaskForm = ({ onSuccess }: AssignTaskFormProps) => {
 
   const selectedAssignees = watch("assigned_to");
 
-  // Fetch teams
   const { data: teamsData, isLoading: teamsLoading } = useQuery({
-    queryKey: ["teams"],
+    queryKey: ["assign-task-teams"],
     queryFn: () => getTeams(),
+    enabled: isOpen,
   });
 
   const teams =

@@ -1,24 +1,21 @@
 import { TasksTabContentProps } from "@/team-leader/typings/team-leader";
 import { DataTable } from "@/shared/components/data-table/data-table";
-import { columns } from "./columns/assigned-tasks-columns";
+// import { columns } from "./columns/assigned-tasks-columns";
 
-const TasksTabContent = ({
+function TasksTabContent<T>({
   assignedTasks = [],
   isLoading,
-  title = "Team's Tasks",
-  description = "Stay focused and organized with your daily task list.",
+  title,
+  description,
   AssignButton,
   showAssignButton,
   showHeader = true,
-}: TasksTabContentProps) => {
+  columns,
+}: TasksTabContentProps<T>) {
   return (
     <div className="flex flex-col gap-6">
       {showHeader && (
         <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-[2.25rem] font-bold">{title}</h4>
-            <p className="text-[#6B7280]">{description}</p>
-          </div>
           {showAssignButton && AssignButton && <AssignButton />}
         </div>
       )}
@@ -39,6 +36,6 @@ const TasksTabContent = ({
       )}
     </div>
   );
-};
+}
 
 export default TasksTabContent;

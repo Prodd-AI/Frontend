@@ -1,5 +1,6 @@
 import { TaskPriority, TaskStatus } from "@/shared/typings/task-card";
 import { UseQueryResult } from "@tanstack/react-query";
+import { ColumnDef } from "@tanstack/react-table";
 import { ComponentType } from "react";
 
 declare module "@/team-leader/typings/team-leader" {
@@ -79,7 +80,7 @@ declare module "@/team-leader/typings/team-leader" {
   }
 
   export interface UpdateTaskDto extends Partial<
-    Exclude<CreateTaskDto, "assigned_to">
+    Omit<CreateTaskDto, "assigned_to">
   > {
     status?: TaskStatus;
     assigned_to?: string[];
@@ -92,9 +93,9 @@ declare module "@/team-leader/typings/team-leader" {
     totalTasks: number;
   }
 
-  export interface TasksTabContentProps {
-    tasks?: TaskData[];
-    assignedTasks?: AssignedTask[];
+  export interface TasksTabContentProps<T> {
+    columns: ColumnDef<T>[];
+    assignedTasks: T[];
     isLoading?: boolean;
     title?: string;
     description?: string;

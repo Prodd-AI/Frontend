@@ -27,5 +27,24 @@ const get_average_mood_for_the_week = (params: {
       }>;
     }>
   >("average", params, true);
-
-export { submit_check_in_mood, get_average_mood_for_the_week };
+const get_user_mood_history = (
+  user_id: string,
+  params?: {
+    start_date: string;
+    end_date: string;
+  },
+) => {
+  return mood_trend_service.get<
+    GeneralReturnInt<
+      Array<{
+        date: string;
+        mood: "great" | "good" | "okay" | "notGreat" | "rough" | null;
+      }>
+    >
+  >(`user/${user_id}/history`, params, true);
+};
+export {
+  submit_check_in_mood,
+  get_average_mood_for_the_week,
+  get_user_mood_history,
+};

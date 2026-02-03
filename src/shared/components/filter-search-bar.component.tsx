@@ -1,29 +1,31 @@
 import { Filter } from "lucide-react";
-import { useState } from "react";
 import { DatePickerField } from "./date-picker-field.component";
-import { format, subDays } from "date-fns";
+import { format } from "date-fns";
 
 interface FilterBarProps {
-  onDateRangeChange?: (startDate: string, endDate: string) => void;
+  startDate: string;
+  endDate: string;
+  onDateRangeChange: (startDate: string, endDate: string) => void;
 }
 
-export function FilterBar({ onDateRangeChange }: FilterBarProps) {
-  const today = new Date();
-  const defaultStartDate = format(subDays(today, 30), "yyyy-MM-dd");
-  const defaultEndDate = format(today, "yyyy-MM-dd");
-
-  const [startDate, setStartDate] = useState<string>(defaultStartDate);
-  const [endDate, setEndDate] = useState<string>(defaultEndDate);
+export function FilterBar({
+  startDate,
+  endDate,
+  onDateRangeChange,
+}: FilterBarProps) {
+  const startDateAsDate = startDate ? new Date(startDate) : undefined;
 
   const handleStartDateChange = (value: Date | string | undefined) => {
     const newStartDate =
       typeof value === "string"
         ? value
         : value
-          ? format(value, "yyyy-MM-dd")
+        ? format(value, "yyyy-MM-dd")
           : "";
-    setStartDate(newStartDate);
-    if (onDateRangeChange && newStartDate && endDate) {
+
+    if (newStartDate && endDate && new Date(newStartDate) > new Date(endDate)) {
+      onDateRangeChange(newStartDate, newStartDate);
+    } else if (newStartDate && endDate) {
       onDateRangeChange(newStartDate, endDate);
     }
   };
@@ -35,8 +37,7 @@ export function FilterBar({ onDateRangeChange }: FilterBarProps) {
         : value
           ? format(value, "yyyy-MM-dd")
           : "";
-    setEndDate(newEndDate);
-    if (onDateRangeChange && startDate && newEndDate) {
+    if (startDate && newEndDate) {
       onDateRangeChange(startDate, newEndDate);
     }
   };
@@ -69,6 +70,7 @@ export function FilterBar({ onDateRangeChange }: FilterBarProps) {
           outputFormat="string"
           dateStringFormat="yyyy-MM-dd"
           className="w-[160px] border-transparent bg-[#ECEEF3] shadow-card"
+          minDate={startDateAsDate}
         />
       </div>
     </div>

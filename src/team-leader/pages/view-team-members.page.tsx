@@ -1,5 +1,7 @@
 import GoBackBtn from "@/shared/components/go-back-btn";
-import { useTeamLeadDashMetricInsight } from "@/team-leader/hooks/use-team-lead-dash-metric-insight";
+import { useTeams } from "@/team-leader/hooks/use-teams";
+import { useTeamAnalysis } from "@/team-leader/hooks/use-team-analysis";
+import { useDateRange } from "@/team-leader/hooks/use-date-range";
 import { TeamPerformanceOverview } from "@/team-leader/components/team-performance-overview.component";
 import TeamMemberOverviewCard from "@/shared/components/team-member-overview-card.component";
 import WelcomeBackHeader from "@/shared/components/welcome-back-header.component";
@@ -13,15 +15,14 @@ import {
 } from "@/team-leader/components/columns/team-members-table-columns";
 
 function ViewTeamMembers() {
-  const {
-    teams,
-    activeTeamId,
-    setSelectedTeamId,
-    teamsLoading,
-    metrics,
-    analysisLoading,
-    handleDateRangeChange,
-  } = useTeamLeadDashMetricInsight();
+  const { teams, activeTeamId, setSelectedTeamId, teamsLoading } = useTeams();
+  const { startDate, endDate, handleDateRangeChange } = useDateRange();
+
+  const { metrics, analysisLoading } = useTeamAnalysis({
+    teamId: activeTeamId,
+    startDate,
+    endDate,
+  });
 
   const [viewMode, setViewMode] = useState<"card" | "table">("table");
 
@@ -56,6 +57,8 @@ function ViewTeamMembers() {
         teamsLoading={teamsLoading}
         metrics={metrics}
         analysisLoading={analysisLoading}
+        startDate={startDate}
+        endDate={endDate}
         onDateRangeChange={handleDateRangeChange}
         className="mt-5"
       />
