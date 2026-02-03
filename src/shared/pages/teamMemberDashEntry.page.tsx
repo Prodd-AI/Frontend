@@ -5,13 +5,10 @@ function TeamMemberDashEntry() {
   //determine team member role and redirect based on the user role
   const user = useAuthStore((state) => state.user);
 
-  if (!user) {
+  if (!user || !user.user.user_role) {
     return <Navigate to="/auth/login" />;
   }
 
-  if (!user.user.user_role) {
-    return <Navigate to="/auth/login" />;
-  }
   const { user: teamMember } = user;
 
   const { user_role } = teamMember;

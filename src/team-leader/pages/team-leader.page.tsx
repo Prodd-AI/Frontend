@@ -7,7 +7,7 @@ import TeamDashboardSection from "../components/team-dashboard-section.component
 import TeamTabsSection from "../components/team-tabs-section.component";
 import PersonalTabsSection from "../components/personal-tabs-section.component";
 import PersonalDashboardSection from "../components/personal-dashboard-section.component";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries,} from "@tanstack/react-query";
 import { getWeeklyStreak } from "@/config/services/tasks.service";
 import { get_average_mood_for_the_week } from "@/config/services/mood-trends.service";
 
@@ -34,6 +34,8 @@ function TeamLeaderPage() {
       },
     ],
   });
+
+
   const currentView = getParam("view") || "team";
   const isPersonalView = currentView === "personal";
   const personalTab = getParam("personalTab") || "todays_focus";
@@ -71,6 +73,8 @@ function TeamLeaderPage() {
         open={openNudgeBanner}
         onDismiss={() => setOpenNudgeBanner(false)}
         isDismissable
+        autoShowIntervalMs={3 * 60 * 60 * 1000}
+        setOpen={setOpenNudgeBanner}
         child={
           <Button
             variant="outline"
@@ -96,6 +100,7 @@ function TeamLeaderPage() {
           onTabChange={(tab) => updateParam("personalTab", tab)}
           onViewTeamDashboard={handleViewTeamDashboard}
           averageMoodQuery={averageMoodQuery}
+          weekTasksQuery={weekTasksQuery}
         />
       ) : (
         <TeamTabsSection
@@ -109,3 +114,5 @@ function TeamLeaderPage() {
 }
 
 export default TeamLeaderPage;
+
+

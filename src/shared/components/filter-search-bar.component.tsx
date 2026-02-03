@@ -1,14 +1,47 @@
-import { Filter, Search } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { Filter } from "lucide-react";
+import { DatePickerField } from "./date-picker-field.component";
+import { format } from "date-fns";
 
-export function FilterBar() {
+interface FilterBarProps {
+  startDate: string;
+  endDate: string;
+  onDateRangeChange: (startDate: string, endDate: string) => void;
+}
+
+export function FilterBar({
+  startDate,
+  endDate,
+  onDateRangeChange,
+}: FilterBarProps) {
+  const startDateAsDate = startDate ? new Date(startDate) : undefined;
+
+  const handleStartDateChange = (value: Date | string | undefined) => {
+    const newStartDate =
+      typeof value === "string"
+        ? value
+        : value
+        ? format(value, "yyyy-MM-dd")
+          : "";
+
+    if (newStartDate && endDate && new Date(newStartDate) > new Date(endDate)) {
+      onDateRangeChange(newStartDate, newStartDate);
+    } else if (newStartDate && endDate) {
+      onDateRangeChange(newStartDate, endDate);
+    }
+  };
+
+  const handleEndDateChange = (value: Date | string | undefined) => {
+    const newEndDate =
+      typeof value === "string"
+        ? value
+        : value
+          ? format(value, "yyyy-MM-dd")
+          : "";
+    if (startDate && newEndDate) {
+      onDateRangeChange(startDate, newEndDate);
+    }
+  };
+
   return (
     <div className="flex flex-wrap items-center gap-4 mb-6">
       <div className="flex items-center gap-2 text-muted-foreground">
@@ -16,34 +49,28 @@ export function FilterBar() {
         <span className="text-sm font-medium">Filters:</span>
       </div>
 
-      <Select defaultValue="member">
-        <SelectTrigger className="w-[160px] border-transparent  bg-[#ECEEF3] shadow-card">
-          <SelectValue placeholder="Member" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="member">Member</SelectItem>
-          <SelectItem value="manager">Manager</SelectItem>
-          <SelectItem value="admin">Admin</SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-muted-foreground">From:</span>
+        <DatePickerField
+          value={startDate}
+          onChange={handleStartDateChange}
+          placeholder="Start date"
+          outputFormat="string"
+          dateStringFormat="yyyy-MM-dd"
+          className="w-[160px] border-transparent bg-[#ECEEF3] shadow-card"
+        />
+      </div>
 
-      <Select defaultValue="30days">
-        <SelectTrigger className="w-[160px] border-transparent  bg-[#ECEEF3] shadow-card">
-          <SelectValue placeholder="Select period" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="7days">Last 7 days</SelectItem>
-          <SelectItem value="30days">Last 30 days</SelectItem>
-          <SelectItem value="90days">Last 90 days</SelectItem>
-          <SelectItem value="year">Last year</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <div className="relative rounded-md flex-1 min-w-[200px] max-w-[300px] bg-[#ECEEF3]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Search team member..."
-          className="pl-10 bg-[#ECEEF3] border-transparent placeholder:text-muted-foreground/60"
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-muted-foreground">To:</span>
+        <DatePickerField
+          value={endDate}
+          onChange={handleEndDateChange}
+          placeholder="End date"
+          outputFormat="string"
+          dateStringFormat="yyyy-MM-dd"
+          className="w-[160px] border-transparent bg-[#ECEEF3] shadow-card"
+          minDate={startDateAsDate}
         />
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,115 +16,181 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  CalendarIcon,
-  Clock,
-  User,
-  Video,
-  Users,
-  Plus,
-  X,
-  Search,
-  Check,
-} from "lucide-react";
+import { Video, Users, Plus, X, Search } from "lucide-react";
+import { TimePicker } from "@/components/ui/time-picker";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getTeamMembers, getTeams } from "@/config/services/teams.service";
+import { schedule_meeting } from "@/config/services/meeting.service";
+import { z } from "zod";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import useAuthStore from "@/config/stores/auth.store";
+import { TeamTabs } from "./team-tabs.component";
+import {
+  TeamMemberSelector,
+  TeamMember,
+} from "./team-member-selector.component";
+import { DatePickerField } from "./date-picker-field.component";
 
 interface ScheduleMeetingProps {
   onCancel?: () => void;
   onSchedule?: () => void;
 }
 
-interface Attendee {
-  id: number;
-  name: string;
-  email: string;
-  image: string;
-}
+const schema = z.object({
+  title: z
+    .string()
+    .min(3, "Title must be at least 3 characters")
+    .max(100, "Title must not exceed 100 characters"),
 
-const availableTeamMembers: Attendee[] = [
-  {
-    id: 1,
-    name: "John Smith",
-    email: "john.smith@company.com",
-    image:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face",
-  },
-  {
-    id: 2,
-    name: "Sarah Johnson",
-    email: "sarah.johnson@company.com",
-    image:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=32&h=32&fit=crop&crop=face",
-  },
-  {
-    id: 3,
-    name: "Mike Williams",
-    email: "mike.williams@company.com",
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face",
-  },
-  {
-    id: 4,
-    name: "Emily Davis",
-    email: "emily.davis@company.com",
-    image:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face",
-  },
-  {
-    id: 5,
-    name: "Alex Chen",
-    email: "alex.chen@company.com",
-    image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=32&h=32&fit=crop&crop=face",
-  },
-  {
-    id: 6,
-    name: "Lisa Brown",
-    email: "lisa.brown@company.com",
-    image:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=32&h=32&fit=crop&crop=face",
-  },
-];
+  type: z.enum(
+    ["1:1", "Team Sync", "Review", "All Hands", "Workshop", "other"],
+    {
+      error: "Please select a meeting type",
+    },
+  ),
+
+  description: z
+    .string()
+    .max(500, "Description must not exceed 500 characters")
+    .optional(),
+
+  date: z.date({
+    error: "Please select a date",
+  }),
+
+  time: z.string().min(1, "Please select a time"),
+
+  attendee_emails: z
+    .array(z.email())
+    .min(1, "At least one attendee is required"),
+
+  meeting_link: z
+    .url("Please enter a valid URL")
+    .min(1, "Meeting link is required"),
+});
+
+type ScheduleMeetingFormData = z.infer<typeof schema>;
 
 const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
-  const [date, setDate] = useState<Date>();
-  const [time, setTime] = useState("");
-  const [selectedAttendees, setSelectedAttendees] = useState<Attendee[]>([
-    availableTeamMembers[0],
-    availableTeamMembers[1],
-  ]);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAttendeePopoverOpen, setIsAttendeePopoverOpen] = useState(false);
+  const user = useAuthStore((state) => state.user);
 
-  const filteredMembers = availableTeamMembers.filter(
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+    reset,
+  } = useForm<ScheduleMeetingFormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      attendee_emails: [],
+      description: "",
+    },
+  });
+
+  const selectedAttendeeEmails = watch("attendee_emails");
+
+  const { data: teamsData, isLoading: teamsLoading } = useQuery({
+    queryKey: ["schedule-meeting-teams"],
+    queryFn: () => getTeams(),
+    enabled: isAttendeePopoverOpen,
+  });
+
+  const teams =
+    teamsData?.data?.map((team) => ({
+      team_id: team.id,
+      team_name: team.name,
+    })) ?? [];
+
+  const activeTeamId = selectedTeamId ?? teams[0]?.team_id;
+
+  const { data: teamMembersData, isLoading: membersLoading } = useQuery({
+    queryKey: ["team-members", activeTeamId],
+    queryFn: () => getTeamMembers(activeTeamId ?? ""),
+    enabled: !!activeTeamId,
+  });
+
+  const teamMembers: TeamMember[] = teamMembersData?.data ?? [];
+
+  const filteredMembers = teamMembers.filter(
     (member) =>
-      member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.email.toLowerCase().includes(searchQuery.toLowerCase())
+      member.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      member.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      member.email.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const toggleAttendee = (attendee: Attendee) => {
-    setSelectedAttendees((prev) => {
-      const isSelected = prev.some((a) => a.id === attendee.id);
-      if (isSelected) {
-        return prev.filter((a) => a.id !== attendee.id);
-      } else {
-        return [...prev, attendee];
-      }
+  const { mutate, isPending } = useMutation({
+    mutationFn: schedule_meeting,
+    onSuccess: () => {
+      reset();
+      toast.success("Meeting scheduled successfully!");
+      onSchedule?.();
+    },
+  });
+
+  const convertTo24Hour = (time12h: string): string => {
+    const [timePart, period] = time12h.split(" ");
+    const [hoursStr, minutesStr] = timePart.split(":");
+    let hours = Number(hoursStr);
+    const minutes = Number(minutesStr);
+
+    if (period === "PM" && hours !== 12) {
+      hours += 12;
+    } else if (period === "AM" && hours === 12) {
+      hours = 0;
+    }
+
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  };
+
+  const onSubmit = (values: ScheduleMeetingFormData) => {
+    mutate({
+      title: values.title,
+      type: values.type,
+      description: values.description ?? "",
+      date: format(values.date, "yyyy-MM-dd"),
+      time: convertTo24Hour(values.time),
+      attendee_emails: values.attendee_emails,
+      meeting_link: values.meeting_link,
     });
   };
 
-  const removeAttendee = (attendeeId: number) => {
-    setSelectedAttendees((prev) => prev.filter((a) => a.id !== attendeeId));
+  const toggleAttendee = (email: string) => {
+    const current = selectedAttendeeEmails;
+    if (current.includes(email)) {
+      setValue(
+        "attendee_emails",
+        current.filter((e) => e !== email),
+      );
+    } else {
+      setValue("attendee_emails", [...current, email]);
+    }
   };
 
-  const isSelected = (attendeeId: number) =>
-    selectedAttendees.some((a) => a.id === attendeeId);
+  const removeAttendee = (email: string) => {
+    setValue(
+      "attendee_emails",
+      selectedAttendeeEmails.filter((e) => e !== email),
+    );
+  };
+
+  const getSelectedMemberDetails = () => {
+    return teamMembers.filter((m) => selectedAttendeeEmails.includes(m.email));
+  };
 
   return (
-    <div className="w-full max-w-[680px]">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="w-full max-w-[680px] max-h-[80vh] overflow-y-auto"
+    >
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center">
@@ -146,9 +213,30 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
             Meeting Title <span className="text-destructive">*</span>
           </Label>
           <Input
+            {...register("title")}
             placeholder="e.g Weekly Check-in"
             className="h-12 bg-gray-50/80 border border-gray-200/60 rounded-xl text-sm placeholder:text-muted-foreground/50 transition-all duration-200 focus:bg-white focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
           />
+          {errors.title && (
+            <p className="text-red-500 text-sm">{errors.title.message}</p>
+          )}
+        </div>
+
+        {/* Meeting Link */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-foreground">
+            Meeting Link <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            {...register("meeting_link")}
+            placeholder="e.g. https://zoom.us/j/..."
+            className="h-12 bg-gray-50/80 border border-gray-200/60 rounded-xl text-sm placeholder:text-muted-foreground/50 transition-all duration-200 focus:bg-white focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
+          />
+          {errors.meeting_link && (
+            <p className="text-red-500 text-sm">
+              {errors.meeting_link.message}
+            </p>
+          )}
         </div>
 
         {/* Meeting Type */}
@@ -156,37 +244,55 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
           <Label className="text-sm font-medium text-foreground">
             Meeting Type <span className="text-destructive">*</span>
           </Label>
-          <Select>
-            <SelectTrigger className="h-12 bg-gray-50/80 border border-gray-200/60 rounded-xl text-sm transition-all duration-200 focus:bg-white focus:border-primary/30 focus:ring-2 focus:ring-primary/10 [&>span]:text-muted-foreground/50 [&[data-state=open]>span]:text-foreground">
-              <SelectValue placeholder="Select Meeting Type" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border-gray-200/80 rounded-xl shadow-lg">
-              <SelectItem value="standup" className="rounded-lg cursor-pointer">
-                Daily Standup
-              </SelectItem>
-              <SelectItem value="review" className="rounded-lg cursor-pointer">
-                Sprint Review
-              </SelectItem>
-              <SelectItem
-                value="planning"
-                className="rounded-lg cursor-pointer"
-              >
-                Planning Session
-              </SelectItem>
-              <SelectItem
-                value="one-on-one"
-                className="rounded-lg cursor-pointer"
-              >
-                One-on-One
-              </SelectItem>
-              <SelectItem
-                value="brainstorm"
-                className="rounded-lg cursor-pointer"
-              >
-                Brainstorming
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <Controller
+            name="type"
+            control={control}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger className="h-12 bg-gray-50/80 border border-gray-200/60 rounded-xl text-sm transition-all duration-200 focus:bg-white focus:border-primary/30 focus:ring-1 focus:ring-primary/20 focus:outline-none [&>span]:text-foreground [&:not([data-state=open])>span:empty]:text-muted-foreground/50">
+                  <SelectValue placeholder="Select Meeting Type" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-200/80 rounded-xl shadow-lg">
+                  <SelectItem value="1:1" className="rounded-lg cursor-pointer">
+                    1:1
+                  </SelectItem>
+                  <SelectItem
+                    value="Team Sync"
+                    className="rounded-lg cursor-pointer"
+                  >
+                    Team Sync
+                  </SelectItem>
+                  <SelectItem
+                    value="Review"
+                    className="rounded-lg cursor-pointer"
+                  >
+                    Review
+                  </SelectItem>
+                  <SelectItem
+                    value="All Hands"
+                    className="rounded-lg cursor-pointer"
+                  >
+                    All Hands
+                  </SelectItem>
+                  <SelectItem
+                    value="Workshop"
+                    className="rounded-lg cursor-pointer"
+                  >
+                    Workshop
+                  </SelectItem>
+                  <SelectItem
+                    value="other"
+                    className="rounded-lg cursor-pointer"
+                  >
+                    Other
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.type && (
+            <p className="text-red-500 text-sm">{errors.type.message}</p>
+          )}
         </div>
 
         {/* Description */}
@@ -195,9 +301,13 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
             Description
           </Label>
           <Textarea
+            {...register("description")}
             placeholder="Meeting agenda and notes..."
             className="min-h-[100px] bg-gray-50/80 border border-gray-200/60 rounded-xl text-sm placeholder:text-muted-foreground/50 resize-none transition-all duration-200 focus:bg-white focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
           />
+          {errors.description && (
+            <p className="text-red-500 text-sm">{errors.description.message}</p>
+          )}
         </div>
 
         {/* Date and Time */}
@@ -206,47 +316,42 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
             <Label className="text-sm font-medium text-foreground">
               Date <span className="text-destructive">*</span>
             </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "h-12 w-full justify-between text-left font-normal bg-gray-50/80 border border-gray-200/60 rounded-xl text-sm transition-all duration-200 hover:bg-gray-100/80 hover:border-gray-300/60",
-                    !date && "text-muted-foreground/50"
-                  )}
-                >
-                  {date ? format(date, "MMM dd, yyyy") : "Select date"}
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground/60" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-auto p-0 bg-white border-gray-200/80 rounded-xl shadow-lg"
-                align="start"
-              >
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
+            <Controller
+              name="date"
+              control={control}
+              render={({ field }) => (
+                <DatePickerField
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Select date"
+                  outputFormat="date"
+                  className="h-[55px] "
                 />
-              </PopoverContent>
-            </Popover>
+              )}
+            />
+            {errors.date && (
+              <p className="text-red-500 text-sm">{errors.date.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label className="text-sm font-medium text-foreground">
               Time <span className="text-destructive">*</span>
             </Label>
-            <div className="relative">
-              <Input
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="h-12 bg-gray-50/80 border border-gray-200/60 rounded-xl text-sm pr-10 transition-all duration-200 focus:bg-white focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-              />
-              <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none" />
-            </div>
+            <Controller
+              name="time"
+              control={control}
+              render={({ field }) => (
+                <TimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Select time"
+                />
+              )}
+            />
+            {errors.time && (
+              <p className="text-red-500 text-sm">{errors.time.message}</p>
+            )}
           </div>
         </div>
 
@@ -254,14 +359,17 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium text-foreground">
-              Attendees
+              Attendees <span className="text-destructive">*</span>
             </Label>
             <Popover
               open={isAttendeePopoverOpen}
               onOpenChange={setIsAttendeePopoverOpen}
             >
               <PopoverTrigger asChild>
-                <button className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                >
                   <Plus className="h-3.5 w-3.5" />
                   Add attendee
                 </button>
@@ -270,6 +378,15 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
                 className="w-80 p-0 bg-white border-gray-200/80 rounded-xl shadow-xl"
                 align="end"
               >
+                {/* Team Tabs */}
+                <TeamTabs
+                  teams={teams}
+                  activeTeamId={activeTeamId}
+                  onSelectTeam={setSelectedTeamId}
+                  isLoading={teamsLoading}
+                  className="p-3 border-b border-gray-100"
+                />
+
                 {/* Search */}
                 <div className="p-3 border-b border-gray-100">
                   <div className="relative">
@@ -285,61 +402,21 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
 
                 {/* Team members list */}
                 <div className="max-h-64 overflow-y-auto p-2">
-                  {filteredMembers.length > 0 ? (
-                    filteredMembers.map((member) => (
-                      <button
-                        key={member.id}
-                        onClick={() => toggleAttendee(member)}
-                        className={cn(
-                          "w-full flex items-center gap-3 p-2.5 rounded-lg transition-all duration-150",
-                          isSelected(member.id)
-                            ? "bg-primary/5 hover:bg-primary/10"
-                            : "hover:bg-gray-50"
-                        )}
-                      >
-                        <Avatar className="w-9 h-9 border border-gray-100">
-                          <AvatarImage src={member.image} alt={member.name} />
-                          <AvatarFallback className="bg-gray-100 text-muted-foreground text-xs font-medium">
-                            {member.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 text-left">
-                          <p className="text-sm font-medium text-foreground">
-                            {member.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {member.email}
-                          </p>
-                        </div>
-                        <div
-                          className={cn(
-                            "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-150",
-                            isSelected(member.id)
-                              ? "border-primary bg-primary"
-                              : "border-gray-300"
-                          )}
-                        >
-                          {isSelected(member.id) && (
-                            <Check className="w-3 h-3 text-white" />
-                          )}
-                        </div>
-                      </button>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-6">
-                      No members found
-                    </p>
-                  )}
+                  <TeamMemberSelector
+                    members={filteredMembers}
+                    selectedValues={selectedAttendeeEmails}
+                    onToggle={toggleAttendee}
+                    isLoading={membersLoading}
+                    emptyMessage="No members found"
+                    valueKey="email"
+                  />
                 </div>
 
                 {/* Footer */}
                 <div className="p-3 border-t border-gray-100 bg-gray-50/50">
                   <p className="text-xs text-muted-foreground text-center">
-                    {selectedAttendees.length} attendee
-                    {selectedAttendees.length !== 1 ? "s" : ""} selected
+                    {selectedAttendeeEmails.length} attendee
+                    {selectedAttendeeEmails.length !== 1 ? "s" : ""} selected
                   </p>
                 </div>
               </PopoverContent>
@@ -351,14 +428,18 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
               {/* You (Organizer) */}
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center ring-2 ring-white">
-                    <User className="w-5 h-5 text-primary" />
-                  </div>
+                  <Avatar className="w-10 h-10 ring-2 ring-white">
+                    <AvatarImage src={user?.user?.avatar_url ?? ""} alt="You" />
+                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary text-sm font-medium">
+                      {user?.user?.first_name?.[0]}
+                      {user?.user?.last_name?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-foreground">
-                    You
+                    {user?.user?.first_name ?? "You"}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     Organizer
@@ -366,34 +447,33 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
                 </div>
               </div>
 
-              {selectedAttendees.length > 0 && (
+              {getSelectedMemberDetails().length > 0 && (
                 <>
                   <div className="w-px h-8 bg-gray-200/80" />
 
                   {/* Selected attendees */}
                   <div className="flex items-center gap-2 flex-1 flex-wrap">
-                    {selectedAttendees.map((attendee) => (
+                    {getSelectedMemberDetails().map((member) => (
                       <div
-                        key={attendee.id}
+                        key={member.id}
                         className="group relative flex items-center gap-2 pl-1 pr-2 py-1 bg-white rounded-full border border-gray-200/80 shadow-sm transition-all duration-150 hover:border-gray-300"
                       >
                         <Avatar className="w-6 h-6">
                           <AvatarImage
-                            src={attendee.image}
-                            alt={attendee.name}
+                            src={member.avatar_url ?? ""}
+                            alt={`${member.first_name} ${member.last_name}`}
                           />
                           <AvatarFallback className="bg-gray-100 text-muted-foreground text-[10px] font-medium">
-                            {attendee.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
+                            {member.first_name[0]}
+                            {member.last_name[0]}
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-xs font-medium text-foreground">
-                          {attendee.name.split(" ")[0]}
+                          {member.first_name}
                         </span>
                         <button
-                          onClick={() => removeAttendee(attendee.id)}
+                          type="button"
+                          onClick={() => removeAttendee(member.email)}
                           className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200"
                         >
                           <X className="w-2.5 h-2.5 text-muted-foreground" />
@@ -405,11 +485,17 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
               )}
             </div>
           </div>
+          {errors.attendee_emails && (
+            <p className="text-red-500 text-sm">
+              {errors.attendee_emails.message}
+            </p>
+          )}
         </div>
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
           <Button
+            type="button"
             variant="ghost"
             onClick={onCancel}
             className="h-11 px-6 rounded-xl text-muted-foreground font-medium transition-all duration-200 hover:bg-gray-100 hover:text-foreground"
@@ -418,15 +504,16 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
             Cancel
           </Button>
           <Button
-            onClick={onSchedule}
+            type="submit"
+            disabled={isPending}
             className="h-11 px-6 rounded-xl bg-primary text-white font-medium transition-all duration-200 hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20"
           >
             <Users className="w-4 h-4 mr-2" />
-            Schedule Meeting
+            {isPending ? "Scheduling..." : "Schedule Meeting"}
           </Button>
         </div>
       </div>
-    </div>
+    </form>
   );
 };
 

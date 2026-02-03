@@ -1,6 +1,7 @@
 type BaseReturnType = {
   message: string;
   timestamp: string;
+  meta?: { total: number; limit: number; page: number; total_pages: number };
 };
 
 type GeneralReturnInt<T> = {

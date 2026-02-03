@@ -13,8 +13,8 @@ interface Task {
   title: string;
   description: string;
   external_link: string | null;
-  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"; // adjust enum as needed
-  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT"; // adjust enum as needed
+  status: "pending" |  "completed" ;
+  priority: "low" | "medium" | "high" 
   due_date: string;
   created_by_id: string;
   created_at: string;
@@ -29,4 +29,6 @@ interface WeekTasksResponse {
   Fri: UserTaskAssignment[];
   Sat: UserTaskAssignment[];
   Sun: UserTaskAssignment[];
+  // total_tasks_today: number;
+  // completed_tasks_today: number;
 }

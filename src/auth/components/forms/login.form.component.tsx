@@ -60,7 +60,8 @@ function LoginFormComponent() {
           // add that notice banner here and redirect to the onboarding page if they select yes
           return navigate("/onboarding/hr-setup");
         }
-        return navigate("/onboarding/select-role");
+        // return navigate("/onboarding/select-role"); This is Redundant
+        return navigate("/")
       } else {
         setBanner({
           open: true,
@@ -139,7 +140,6 @@ function LoginFormComponent() {
           description={banner.description}
           isDismiss
           onDismiss={() => setBanner({ ...banner, open: false })}
-          className="mb-4"
         />
       )}
       <form

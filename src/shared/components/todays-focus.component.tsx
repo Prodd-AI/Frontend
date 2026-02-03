@@ -27,7 +27,7 @@ function TodaysFocus({
       className={cn(
         "flex flex-col gap-8 rounded-[24px] bg-[#fbfbfb] px-10 py-10",
         "shadow-[0px_4px_4px_-4px_rgba(12,12,13,0.05),0px_16px_16px_-8px_rgba(12,12,13,0.10)]",
-        className
+        className,
       )}
     >
       {/* Header with Title */}
@@ -46,7 +46,7 @@ function TodaysFocus({
           {primaryGoalTitle}
         </h3>
         <p className="text-[16px] font-medium leading-[24px] tracking-[-0.24px] text-[#6b7280]">
-          {primaryGoalDescription}
+          {primaryGoalDescription || "No primary goals for today. Stay sharp!"}
         </p>
       </div>
 

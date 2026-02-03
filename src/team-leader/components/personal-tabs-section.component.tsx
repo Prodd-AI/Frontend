@@ -6,14 +6,16 @@ import {
 } from "react-icons/md";
 import { IoCheckmarkOutline } from "react-icons/io5";
 import { LuClock2 } from "react-icons/lu";
-import TodaysFocusExample from "@/shared/components/todays-focus.example";
 import TasksTabContent from "./tasks-tab-content.component";
-import { personalTasksData } from "@/team-leader/mock-data/index.mock";
+// import { personalTasksData } from "@/team-leader/mock-data/index.mock";
 import { PersonalTabsSectionProps } from "@/team-leader/typings/team-leader";
-import { useEffect, useState } from "react";
+
 import AssignTask from "./assign-task.component";
 import MoodTrends from "@/shared/components/mood-trend.component";
 import { MoodType } from "@/shared/typings/mood-trend";
+import { FocusInfoCard } from "@/shared/typings/todays-focus";
+import TodaysFocusComponent from "@/shared/components/todays-focus.component";
+import { personalTasksColumns } from "./columns/personal-tasks-columns";
 
 const MoodEntryMapper: Record<number, MoodType> = {
   1: "rough",
@@ -22,22 +24,36 @@ const MoodEntryMapper: Record<number, MoodType> = {
   4: "good",
   5: "great",
 };
+const sampleInfoCards: FocusInfoCard[] = [
+  {
+    icon: "break",
+    title: "Recommended Break",
+    description: "Take a 15-minute walk at 2:30 PM",
+  },
+  {
+    icon: "energy",
+    title: "Energy Level",
+    description: "Peak hours: 9-11 AM & 2-4 PM",
+  },
+];
 const PersonalTabsSection = ({
   activeTab,
   onTabChange,
   onViewTeamDashboard,
   averageMoodQuery,
-  hasViewTeamDashboard = true,
   showAssignButton = true,
+  weekTasksQuery,
 }: PersonalTabsSectionProps) => {
-  const [currentTab, setCurrentTab] = useState<string>(activeTab);
   const handleTabChange = (tab: string) => {
-    onTabChange ? onTabChange(tab) : setCurrentTab(tab);
+    onTabChange(tab);
   };
-
-  useEffect(() => {
-    setCurrentTab(activeTab);
-  }, [activeTab]);
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+  const weekTasks = weekTasksQuery.data?.data;
+  const todaysTasks = weekTasks?.[dayNames[new Date().getDay()]] ?? [];
+  const primaryGoalDescription = (todaysTasks as UserTaskAssignment[]).find(
+    (userTask) =>
+      userTask.task.priority === "high" && userTask.task.status === "pending",
+  )?.task.description;
 
   const data = averageMoodQuery?.data;
   const moodEntries = data?.data.mood_scores.map((entry) => {
@@ -56,7 +72,13 @@ const PersonalTabsSection = ({
           label: "Today's Focus",
           value: "todays_focus",
           icon: <MdOutlineCenterFocusStrong />,
-          content: <TodaysFocusExample />,
+          content: (
+            <TodaysFocusComponent
+              primaryGoalTitle="Primary Goal"
+              primaryGoalDescription={primaryGoalDescription ?? ""}
+              infoCards={sampleInfoCards}
+            />
+          ),
         },
         {
           label: "Tasks",
@@ -64,11 +86,12 @@ const PersonalTabsSection = ({
           icon: <IoCheckmarkOutline />,
           content: (
             <TasksTabContent
-              tasks={personalTasksData}
-              title="Today's Tasks"
+              title="Your Tasks"
               description="Stay focused and organized with your daily task list."
               showAssignButton={showAssignButton}
               AssignButton={AssignTask}
+              assignedTasks={weekTasks ? Object.values(weekTasks).flat() : []}
+              columns={personalTasksColumns}
             />
           ),
         },
@@ -88,19 +111,19 @@ const PersonalTabsSection = ({
           ),
         },
       ]}
-      activeTab={currentTab}
+      activeTab={activeTab}
       onTabChange={(tab) => handleTabChange(tab)}
       ToggleViewComponent={
-        hasViewTeamDashboard
+        onViewTeamDashboard
           ? () => (
-            <Button
-              className="bg-[#E5E5E5] text-[#494451] font-semibold"
-              variant="ghost"
-              onClick={onViewTeamDashboard}
-            >
-              View Team Dashboard <MdOutlineRemoveRedEye />
-            </Button>
-          )
+              <Button
+                className="bg-[#E5E5E5] text-[#494451] font-semibold"
+                variant="ghost"
+                onClick={onViewTeamDashboard}
+              >
+                View Team Dashboard <MdOutlineRemoveRedEye />
+              </Button>
+            )
           : undefined
       }
     />
