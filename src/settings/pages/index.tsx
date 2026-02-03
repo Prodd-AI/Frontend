@@ -17,8 +17,8 @@ function SettingsPage() {
       <div className="max-w-screen-xl mx-auto md:p-10 p-4 ">
         {/* Top brand bar */}
         <div className="flex items-center gap-2 mb-6">
-          <img src="/assets/icons/logo.svg" alt="Prod AI" className="h-6 w-6" />
-          <span className="text-sm font-semibold">Prod AI</span>
+          <img src="/assets/icons/logo.svg" alt="Prodily" className="h-6 w-6" />
+          <span className="text-sm font-semibold">Prodily</span>
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-sm pb-10">
