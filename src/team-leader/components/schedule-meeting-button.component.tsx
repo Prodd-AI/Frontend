@@ -7,12 +7,6 @@ import ScheduleMeeting from "@/shared/components/schedule-meeting.component";
 const ScheduleMeetingButton = () => {
   const [open, setOpen] = useState(false);
 
-  const handleSchedule = () => {
-    // Handle the schedule logic here
-    console.log("Meeting scheduled!");
-    setOpen(false);
-  };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -24,7 +18,11 @@ const ScheduleMeetingButton = () => {
       <DialogContent className="max-w-[720px] p-8 rounded-2xl border-gray-200/80 shadow-xl">
         <ScheduleMeeting
           onCancel={() => setOpen(false)}
-          onSchedule={handleSchedule}
+          onSchedule={() => {
+            setTimeout(() => {
+              setOpen(false);
+            }, 1000);
+          }}
         />
       </DialogContent>
     </Dialog>

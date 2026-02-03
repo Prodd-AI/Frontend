@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -98,8 +99,9 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
   const selectedAttendeeEmails = watch("attendee_emails");
 
   const { data: teamsData, isLoading: teamsLoading } = useQuery({
-    queryKey: ["teams"],
+    queryKey: ["schedule-meeting-teams"],
     queryFn: () => getTeams(),
+    enabled: isAttendeePopoverOpen,
   });
 
   const teams =
@@ -129,10 +131,8 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
     mutationFn: schedule_meeting,
     onSuccess: () => {
       reset();
+      toast.success("Meeting scheduled successfully!");
       onSchedule?.();
-    },
-    onError: (error) => {
-      console.error("Failed to schedule meeting:", error);
     },
   });
 

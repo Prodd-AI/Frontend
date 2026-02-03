@@ -23,7 +23,7 @@ export const UpcomingSchedule = ({
 }: UpcomingScheduleProps) => {
   if (isLoading) {
     return (
-      <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm animate-pulse h-[160px]">
+      <div className="bg-[#F8F8F9] rounded-3xl px-[2.25rem] py-[2.75rem] shadow-sm animate-pulse min-h-[16.25rem]">
         <div className="space-y-4">
           <div className="h-4 bg-gray-200 rounded w-1/4" />
           <div className="h-8 bg-gray-200 rounded w-3/4" />
@@ -35,7 +35,10 @@ export const UpcomingSchedule = ({
 
   if (!meeting) {
     return (
-      <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-500 flex flex-col items-center justify-center text-center h-[160px]">
+      <div
+        className="bg-[#F8F8F9] rounded-3xl px-[2.25rem] py-[2.75rem]  flex flex-col items-center justify-center text-center min-h-[16.25rem] shadow-[0_4px_4px_-4px_rgba(0,0,0,0.55),_0_16px_16px_-8px_rgba(0,0,0,0.1)]
+"
+      >
         <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center mb-2">
           <Video className="w-5 h-5 text-gray-400" />
         </div>
@@ -47,40 +50,41 @@ export const UpcomingSchedule = ({
   }
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-500 relative overflow-hidden group transition-all duration-300 h-[180px] flex flex-col justify-between">
+    <div
+      className="bg-[#F8F8F9] rounded-3xl px-[2.25rem] py-[2.75rem]  relative overflow-hidden group transition-all duration-300 min-h-[16.25rem] flex flex-col justify-between gap-6 shadow-[0_4px_4px_-4px_rgba(0,0,0,0.55),_0_16px_16px_-8px_rgba(0,0,0,0.1)]
+"
+    >
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center">
-            <Video className="w-4 h-4 text-primary" />
-          </div>
-          <span className="text-sm font-semibold text-gray-500">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-[1.625rem]">
+          <Video size={28} className="text-[#934DFF]" />
+          <h5 className="text-[#5C5666] text-[1.375rem] font-medium">
             Upcoming Meeting/Call
-          </span>
+          </h5>
         </div>
         <Badge
           variant="secondary"
-          className="bg-amber-50 text-amber-600 border-none px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
+          className="bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7] border-none px-3 py-1 text-[11px] font-bold uppercase tracking-wider"
         >
           Starting Soon
         </Badge>
       </div>
 
       {/* Main Info */}
-      <div className="mb-4">
-        <h3 className="text-xl font-bold text-gray-900 line-clamp-1 mb-2">
+      <div className="flex items-center gap-4">
+        <h3 className="text-[1.375rem] font-semibold text-[#5C5666] whitespace-nowrap">
           {meeting.title}
         </h3>
-        <div className="flex items-center gap-6 text-gray-400">
+        <div className="flex items-center gap-4 text-[#6B7280]">
           <div className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">
+            <Clock className="w-4 h-4" />
+            <span className="text-sm text-[#6B7280]">
               in {meeting.start_in_minutes} minutes
             </span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">
+          <div className="flex items-center gap-1.5 text-[#6B7280]">
+            <Users className="w-4 h-4" />
+            <span className="text-sm">
               {meeting.participant_count} Participants
             </span>
           </div>
@@ -88,15 +92,15 @@ export const UpcomingSchedule = ({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-4 mt-auto">
+      <div className="flex items-center gap-4">
         <Button
-          className="bg-primary hover:bg-primary/90 text-white rounded-xl h-9 px-6 font-semibold text-sm transition-all duration-200 group-hover:scale-[1.02]"
+          className="text-white rounded-xl h-[50px] px-8 font-semibold text-sm transition-all duration-200 shadow-sm"
           onClick={() => window.open(meeting.meeting_link, "_blank")}
         >
           Join Call
         </Button>
         {remainingCount > 0 && (
-          <span className="text-xs font-medium text-gray-400">
+          <span className="text-xs font-medium text-slate-400">
             +{remainingCount} more today
           </span>
         )}
