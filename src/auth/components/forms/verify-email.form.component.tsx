@@ -22,7 +22,7 @@ import { Link } from "react-router-dom";
 import { TeamMember } from "@/shared/typings/team-member";
 import Banner from "@/shared/components/banner.component";
 
-function VerifyEmailFormComponent({ email }: { email: string }) {
+function VerifyEmailFormComponent({ email, code }: { email: string, code?: string }) {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [banner, setBanner] = useState<{
     message: string;
@@ -40,7 +40,7 @@ function VerifyEmailFormComponent({ email }: { email: string }) {
   } = useForm<VerifyEmailFormData>({
     resolver: zodResolver(verify_email_schema),
     defaultValues: {
-      code: "",
+      code: code || "",
     },
   });
   const navigate = useNavigate();
@@ -69,8 +69,12 @@ function VerifyEmailFormComponent({ email }: { email: string }) {
       });
       login(res.data, res.data?.access_token);
       localStorage.setItem("refresh_token_id", res.data.refresh_token);
-      if (res.data.user.organization_id) {
-        return navigate("/onboarding/select-role");
+
+      if (res.data.user.organization_id && res.data.user.is_onboarded) {
+        return navigate(`/dash/${res.data.user.user_role.replace("_", "-")}`);
+      }
+      if (res.data.user.organization_id && !res.data.user.is_onboarded) {
+        return navigate(`/onboarding/${res.data.user.user_role.replace("_", "-")}-setup`);
       }
       return navigate("/onboarding/hr-setup");
     },
@@ -82,6 +86,12 @@ function VerifyEmailFormComponent({ email }: { email: string }) {
       });
     },
   });
+
+  useEffect(() => {
+    if (code && email) {
+      onSubmit({ code: code });
+    }
+  }, [code, email]);
 
   // Resend OTP mutation
   const { mutate: resendMutate, isPending: isResending } = useMutation<
@@ -115,7 +125,7 @@ function VerifyEmailFormComponent({ email }: { email: string }) {
 
   const onSubmit = (values: VerifyEmailFormData) => {
     mutate({
-      otp: values.code,
+      otp: values.code || code || "",
       email: email ?? "",
     });
   };

@@ -1,19 +1,54 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { RiUserLine } from "react-icons/ri";
 import { MdOutlinePhotoCamera } from "react-icons/md";
 import ProfilePictureUploadModal from "@/shared/components/profile-picture-upload-modal.component";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { GiPadlock } from "react-icons/gi";
+import useAuthStore from "@/config/stores/auth.store";
+import { COMMON_TIMEZONES } from "@/shared/utils/constants";
+import { UseFormReturn } from "react-hook-form";
+import { QuickSetupForm } from "@/onboarding/schemas/quick-setup.schema";
 
-const QuickSetupComponent = () => {
+interface QuickSetupComponentProps {
+  form: UseFormReturn<QuickSetupForm>;
+}
+
+const QuickSetupComponent = ({ form }: QuickSetupComponentProps) => {
+  const user = useAuthStore((state) => state.user);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string>("");
-  const [first_name, setFirst_name] = useState("John");
-  const [last_name, setLast_name] = useState("Doe");
+  const { register, setValue, watch, formState: { errors } } = form;
+  const profilePictureUrl = watch("avatar_url") ?? "";
+
+  // Format user role for display
+  const formattedRole = useMemo(() => {
+    if (!user?.user.user_role) return "Team Member";
+    const roleMap: Record<string, string> = {
+      team_member: "Team Member",
+      team_lead: "Team Lead",
+      hr: "HR",
+      super_admin: "Super Admin",
+      executive: "Executive",
+    };
+    return roleMap[user.user.user_role] || user.user.user_role;
+  }, [user?.user.user_role]);
+
+  // Format timezone display
+  const timezoneDisplay = useMemo(() => {
+    const timezone = user?.user.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const timezoneInfo = COMMON_TIMEZONES.find((tz) => tz.value === timezone);
+    return timezoneInfo?.abbr || timezone;
+  }, [user?.user.timezone]);
+
+  // Format work hours display
+  const workHoursDisplay = useMemo(() => {
+    const startHour = user?.user.start_work_hour || "9:00 AM";
+    const endHour = user?.user.end_work_hour || "5:00 PM";
+    return `${startHour} - ${endHour}`;
+  }, [user?.user.start_work_hour, user?.user.end_work_hour]);
 
   const handleUploadSuccess = (imageUrl: string) => {
-    setProfilePictureUrl(imageUrl);
+    setValue("avatar_url", imageUrl, { shouldValidate: true });
   };
 
   return (
@@ -59,9 +94,13 @@ const QuickSetupComponent = () => {
                 type="text"
                 id="first_name"
                 className="mt-2 h-[55px] border border-[#6B728021] rounded-[10px]"
-                value={first_name}
-                onChange={(e) => setFirst_name(e.target.value)}
+                {...register("first_name")}
               />
+              {errors.first_name && (
+                <div className="text-red-500 text-xs mt-1">
+                  {errors.first_name.message}
+                </div>
+              )}
             </div>
             <div className="flex-1">
               <Label
@@ -74,9 +113,13 @@ const QuickSetupComponent = () => {
                 type="text"
                 id="last_name"
                 className="mt-2 h-[55px] border border-[#6B728021] rounded-[10px]"
-                value={last_name}
-                onChange={(e) => setLast_name(e.target.value)}
+                {...register("last_name")}
               />
+              {errors.last_name && (
+                <div className="text-red-500 text-xs mt-1">
+                  {errors.last_name.message}
+                </div>
+              )}
             </div>
           </div>
           <div className="mt-2">
@@ -92,7 +135,7 @@ const QuickSetupComponent = () => {
                 id="team_name_and_role"
                 className="flex h-[55px] w-full rounded-md border border-input bg-[#F3F4F6] pl-3 pr-10 py-2 text-base text-[#6B7280] font-semibold ring-offset-background disabled:cursor-not-allowed md:text-sm"
                 disabled
-                value="Marketing Department • Team Lead"
+                value={formattedRole}
                 readOnly
               />
               <GiPadlock
@@ -114,7 +157,7 @@ const QuickSetupComponent = () => {
                 id="timezone_work_hours"
                 className="flex h-[55px] w-full rounded-md border border-input bg-[#F3F4F6] pl-3 pr-10 py-2 text-base text-[#6B7280] font-semibold ring-offset-background disabled:cursor-not-allowed md:text-sm"
                 disabled
-                value="(WAT) | 9:00 AM - 5:00 PM"
+                value={`(${timezoneDisplay}) | ${workHoursDisplay}`}
                 readOnly
               />
               <GiPadlock
