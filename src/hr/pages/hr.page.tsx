@@ -39,7 +39,7 @@ import { toast } from "sonner";
 
 function HrPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [active_tab, set_active_tab] = useState("overview");
 
   const handle_view_employee = (id: string) => {
     navigate(`/dash/hr/employee/${id}`);
@@ -48,7 +48,7 @@ function HrPage() {
   const handle_view_team = (id: string) => {
     navigate(`/dash/hr/team/${id}`);
   };
-  const [activeTeamSubTab, setActiveTeamSubTab] = useState<
+  const [active_team_sub_tab, set_active_team_sub_tab] = useState<
     "analysis" | "timesheet" | "payroll"
   >("analysis");
 
@@ -111,7 +111,7 @@ function HrPage() {
         ).toFixed(0)
       : "0";
 
-  const statusItems = [
+  const status_items = [
     {
       id: "total_employees",
       title: "Total Employees",
@@ -178,7 +178,7 @@ function HrPage() {
     },
   ];
 
-  const wellnessTrends = [
+  const wellness_trends = [
     {
       id: "1",
       title: "Positive Trend",
@@ -201,7 +201,7 @@ function HrPage() {
     },
   ];
 
-  const OverviewContent = (
+  const overview_content = (
     <div className="space-y-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-6">
@@ -241,7 +241,7 @@ function HrPage() {
               Check how various teams performed so far
             </p>
           </div>
-          <WellnessTrendCards items={wellnessTrends} />
+          <WellnessTrendCards items={wellness_trends} />
         </div>
       </div>
 
@@ -269,7 +269,7 @@ function HrPage() {
     </div>
   );
 
-  const FlightRiskContent = (
+  const flight_risk_content = (
     <div className="space-y-6">
       <div className="space-y-1">
         <h3 className="text-base font-bold text-[#251F2D] flex items-center gap-2">
@@ -382,7 +382,7 @@ function HrPage() {
       </div>
 
       {/* Top Metrics */}
-      <StatusCards items={statusItems} />
+      <StatusCards items={status_items} />
 
       {/* Meeting Card */}
       <MeetingCardComponent
@@ -397,7 +397,11 @@ function HrPage() {
       />
 
       {/* Tabs & Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs
+        value={active_tab}
+        onValueChange={set_active_tab}
+        className="w-full"
+      >
         {/* Scrollable List Wrapper */}
         <div className="w-full overflow-x-auto pb-2">
           <TabsList className="bg-[#EAEBEB] h-14 p-1.5 rounded-[12px] min-w-[600px] md:w-full gap-1 grid grid-cols-4">
@@ -429,7 +433,7 @@ function HrPage() {
         </div>
 
         <TabsContent value="overview" className="mt-6">
-          {OverviewContent}
+          {overview_content}
         </TabsContent>
 
         <TabsContent value="mood" className="mt-6">
@@ -444,39 +448,39 @@ function HrPage() {
                 <button
                   className={cn(
                     "text-sm font-semibold pb-3 px-1 whitespace-nowrap transition-colors border-b-2",
-                    activeTeamSubTab === "analysis"
+                    active_team_sub_tab === "analysis"
                       ? "text-[#251F2D] border-[#251F2D]"
                       : "text-gray-400 border-transparent hover:text-gray-600",
                   )}
-                  onClick={() => setActiveTeamSubTab("analysis")}
+                  onClick={() => set_active_team_sub_tab("analysis")}
                 >
                   Team Analysis
                 </button>
                 <button
                   className={cn(
                     "text-sm font-semibold pb-3 px-1 whitespace-nowrap transition-colors border-b-2",
-                    activeTeamSubTab === "timesheet"
+                    active_team_sub_tab === "timesheet"
                       ? "text-[#251F2D] border-[#251F2D]"
                       : "text-gray-400 border-transparent hover:text-gray-600",
                   )}
-                  onClick={() => setActiveTeamSubTab("timesheet")}
+                  onClick={() => set_active_team_sub_tab("timesheet")}
                 >
                   Timesheet Weekly Overview
                 </button>
                 <button
                   className={cn(
                     "text-sm font-semibold pb-3 px-1 whitespace-nowrap transition-colors border-b-2",
-                    activeTeamSubTab === "payroll"
+                    active_team_sub_tab === "payroll"
                       ? "text-[#251F2D] border-[#251F2D]"
                       : "text-gray-400 border-transparent hover:text-gray-600",
                   )}
-                  onClick={() => setActiveTeamSubTab("payroll")}
+                  onClick={() => set_active_team_sub_tab("payroll")}
                 >
                   HR Payroll
                 </button>
               </div>
 
-              {activeTeamSubTab === "analysis" && (
+              {active_team_sub_tab === "analysis" && (
                 <>
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col gap-1">
@@ -514,14 +518,16 @@ function HrPage() {
                 </>
               )}
 
-              {activeTeamSubTab === "timesheet" && <TimesheetWeeklyOverview />}
-              {activeTeamSubTab === "payroll" && <HrPayroll />}
+              {active_team_sub_tab === "timesheet" && (
+                <TimesheetWeeklyOverview />
+              )}
+              {active_team_sub_tab === "payroll" && <HrPayroll />}
             </div>
           }
         </TabsContent>
 
         <TabsContent value="flight_risk" className="mt-6">
-          {FlightRiskContent}
+          {flight_risk_content}
         </TabsContent>
       </Tabs>
     </div>
