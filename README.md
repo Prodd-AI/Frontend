@@ -47,6 +47,7 @@ Prodily is a productivity and culture management platform that leverages autonom
 - **Flight risk card**
 - **Wellness trend card**
 - **Payroll card**
+- **Mood Heatmap**
 - **Timesheet weekly overview**
 
 ### General pages

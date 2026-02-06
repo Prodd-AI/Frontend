@@ -1,25 +1,35 @@
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
-import { Clock, DollarSign, Wallet } from "lucide-react";
+import { Clock, DollarSign, Wallet, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useHrPayroll } from "../hooks/use-hr-payroll";
 
 export default function HrPayroll() {
   const [hourlyRate, setHourlyRate] = useState<number>(50);
+  const { payroll_data, is_loading } = useHrPayroll();
 
-  // Mock Data dependent on hourly rate
-  const weeklyHours = 14;
-  const regularHours = 14;
-  const overtimeHours = 0;
-  const monthlyEstHours = 56;
+  if (is_loading) {
+    return (
+      <div className="h-64 flex items-center justify-center">
+        <Loader2 className="animate-spin text-primary-color" />
+      </div>
+    );
+  }
 
-  // 0h for "Daily Hours" in design image shows $0.00. Using 0 inline.
-  const weeklyPay = weeklyHours * hourlyRate;
-  const monthlyPay = monthlyEstHours * hourlyRate;
-  const overtimePay = overtimeHours * (hourlyRate * 1.5);
-  const regularPay = regularHours * hourlyRate;
+  // Use live data if available, otherwise fallback to calculated mocks OR zeros
+  const weeklyHours = payroll_data?.weekly_hours ?? 0;
+  const regularHours = payroll_data?.regular_hours ?? 0;
+  const overtimeHours = payroll_data?.overtime_hours ?? 0;
+  const monthlyEstHours = weeklyHours * 4; // Estimation
+
+  const weeklyPay = payroll_data?.weekly_pay ?? weeklyHours * hourlyRate;
+  const monthlyPay = payroll_data?.monthly_pay ?? monthlyEstHours * hourlyRate;
+  const overtimePay =
+    payroll_data?.overtime_pay ?? overtimeHours * (hourlyRate * 1.5);
+  const regularPay = payroll_data?.regular_pay ?? regularHours * hourlyRate;
   const totalWeeklyPay = regularPay + overtimePay;
 
-  const projectCosts = [
+  const projectCosts = payroll_data?.project_costs || [
     { name: "Product Development", hours: 9, cost: 9 * hourlyRate },
     { name: "Team Meetings", hours: 2, cost: 2 * hourlyRate },
     { name: "Code Review", hours: 3, cost: 3 * hourlyRate },
@@ -156,7 +166,7 @@ export default function HrPayroll() {
         </div>
 
         <div className="space-y-4">
-          {projectCosts.map((project, idx) => (
+          {projectCosts.map((project: any, idx: number) => (
             <div
               key={idx}
               className="flex items-center justify-between group hover:bg-gray-50 p-2 rounded-lg transition-colors"
