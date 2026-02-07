@@ -36,6 +36,7 @@ import { Loader2 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { TeamAnalysisInfo } from "@/shared/typings/team-analysis-card";
 
 function HrPage() {
   const navigate = useNavigate();
@@ -76,12 +77,12 @@ function HrPage() {
 
   const filtered_analysis_teams = analysis_teams.filter(
     (team: any) =>
-      team.team_name.toLowerCase().includes(search_term.toLowerCase()) ||
-      team.lead_name.toLowerCase().includes(search_term.toLowerCase()),
+      team.team_name?.toLowerCase().includes(search_term.toLowerCase()) ||
+      team.lead_name?.toLowerCase().includes(search_term.toLowerCase()),
   );
 
   const filtered_flight_risks = flight_risks.filter((person: any) =>
-    person.member_name.toLowerCase().includes(search_term.toLowerCase()),
+    person.member_name?.toLowerCase().includes(search_term.toLowerCase()),
   );
 
   const total_employees = analysis_teams.reduce(
@@ -95,20 +96,20 @@ function HrPage() {
   const avg_mood =
     analysis_teams.length > 0
       ? (
-          analysis_teams.reduce(
-            (acc: number, team: any) => acc + (team.avg_score || 0),
-            0,
-          ) / analysis_teams.length
-        ).toFixed(1)
+        analysis_teams.reduce(
+          (acc: number, team: any) => acc + (team.avg_score || 0),
+          0,
+        ) / analysis_teams.length
+      ).toFixed(1)
       : "0";
   const avg_participation =
     analysis_teams.length > 0
       ? (
-          analysis_teams.reduce(
-            (acc: number, team: any) => acc + (team.participation_percent || 0),
-            0,
-          ) / analysis_teams.length
-        ).toFixed(0)
+        analysis_teams.reduce(
+          (acc: number, team: any) => acc + (team.participation_percent || 0),
+          0,
+        ) / analysis_teams.length
+      ).toFixed(0)
       : "0";
 
   const status_items = [
@@ -201,6 +202,8 @@ function HrPage() {
     },
   ];
 
+  console.log(filtered_analysis_teams);
+
   const overview_content = (
     <div className="space-y-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -220,11 +223,11 @@ function HrPage() {
                 <Loader2 className="animate-spin text-primary-color" />
               </div>
             ) : (
-              filtered_analysis_teams.map((team: any, idx: number) => (
+              filtered_analysis_teams.map((team: TeamAnalysisInfo, idx: number) => (
                 <TeamPerformanceListItem
-                  key={`${team.id}-${idx}`}
+                  key={`${team.team_id}-${idx}`}
                   team={team}
-                  onClick={() => handle_view_team(team.id)}
+                  onClick={() => handle_view_team(team.team_id)}
                 />
               ))
             )}

@@ -85,19 +85,19 @@ export default function TeamDetailPage() {
             <tbody className="divide-y divide-gray-50">
               {team_detail?.members?.map((member: any) => (
                 <tr
-                  key={member.id}
+                  key={member.user_id}
                   className="hover:bg-gray-50 transition-colors"
                 >
                   <td className="py-4 text-sm font-medium text-[#251F2D]">
                     {member.name}
                   </td>
-                  <td className="py-4 text-sm text-gray-500">
-                    {member.job_title}
+                  <td className="py-4 text-sm text-gray-500 capitalize">
+                    {member.role?.replace('_', ' ')}
                   </td>
                   <td className="py-4 text-sm text-right">
                     <button
-                      className="text-primary-color font-semibold hover:underline"
-                      onClick={() => handle_view_employee(member.id)}
+                      className="text-primary-color font-semibold hover:underline cursor-pointer"
+                      onClick={() => handle_view_employee(member.user_id)}
                     >
                       View Profile
                     </button>
