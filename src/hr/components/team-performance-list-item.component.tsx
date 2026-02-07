@@ -21,9 +21,9 @@ export default function TeamPerformanceListItem({
       )}
     >
       <div className="flex flex-col gap-1">
-        <p className="text-sm font-bold text-[#251F2D]">{team.team_name}</p>
+        <p className="text-sm font-bold text-[#251F2D]">{team.name}</p>
         <p className="text-xs text-[#6B7280] font-medium">
-          {team.member_count} members • Led by {team.lead_name}
+          {team.member_count} members • {team.lead_name === 'Unassigned' ? 'No team lead assigned' : `Led by ${team.lead_name}`}
         </p>
       </div>
 
@@ -31,18 +31,18 @@ export default function TeamPerformanceListItem({
         <span
           className={cn(
             "text-xs px-2 py-1 rounded-md font-bold",
-            Number(team.avg_score) >= 4
+            Number(team.performance_score) >= 4
               ? "bg-success-color/20 text-success-color"
-              : Number(team.avg_score) >= 3
-              ? "bg-[#EAEBEB] text-[#6B7280]"
-              : "bg-danger-color/20 text-danger-color"
+              : Number(team.performance_score) >= 3
+                ? "bg-[#EAEBEB] text-[#6B7280]"
+                : "bg-danger-color/20 text-danger-color"
           )}
         >
-          {Number(team.avg_score) >= 4
-            ? `${team.avg_score} Avg.`
-            : String(team.avg_score)}
+          {Number(team.performance_score) >= 4
+            ? `${team.performance_score} Avg.`
+            : String(team.performance_score)}
         </span>
-        {team.at_risk_count > 0 && (
+        {team.at_risk_count && team.at_risk_count > 0 && (
           <span className="text-[10px] text-danger-color font-semibold">
             {team.at_risk_count} at risk
           </span>

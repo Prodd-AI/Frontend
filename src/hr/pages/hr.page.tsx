@@ -19,6 +19,9 @@ import WellnessTrendCards from "@/hr/components/wellness-trend-cards.component";
 import MoodHeatmap from "../components/mood-heatmap.component";
 import TimesheetWeeklyOverview from "../components/timesheet-overview.component";
 import HrPayroll from "../components/hr-payroll.component";
+import useTeamStore from "@/config/stores/team.store";
+import useDateStore from "@/config/stores/date.store";
+import { DatePeriod } from "@/shared/typings/date.store";
 import { FiDownload, FiFilter } from "react-icons/fi";
 import { GoGraph, GoArrowUpRight } from "react-icons/go";
 import { HiOutlineUserGroup } from "react-icons/hi";
@@ -26,122 +29,157 @@ import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDashboard } from "react-icons/md";
 import { PiUsersThree } from "react-icons/pi";
 import { RiHeartPulseLine } from "react-icons/ri";
+import { useFlightRisk } from "../hooks/use-flight-risk";
+import { useTeams } from "@/shared/hooks/use-teams";
+import { useTeamsOverview } from "../hooks/use-teams-overview";
+import { Loader2 } from "lucide-react";
+
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { TeamAnalysisInfo } from "@/shared/typings/team-analysis-card";
 
 function HrPage() {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [activeTeamSubTab, setActiveTeamSubTab] = useState<
+  const navigate = useNavigate();
+  const [active_tab, set_active_tab] = useState("overview");
+
+  const handle_view_employee = (id: string) => {
+    navigate(`/dash/hr/employee/${id}`);
+  };
+
+  const handle_view_team = (id: string) => {
+    navigate(`/dash/hr/team/${id}`);
+  };
+  const [active_team_sub_tab, set_active_team_sub_tab] = useState<
     "analysis" | "timesheet" | "payroll"
   >("analysis");
 
-  const statusItems = [
+  const [invite_email, set_invite_email] = useState("");
+
+  const handle_invite = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!invite_email) return toast.error("Please enter an email address");
+    toast.success(`Invitation sent to ${invite_email}!`);
+    set_invite_email("");
+  };
+
+  const {
+    selectedTeamId: selected_team_id,
+    setSelectedTeamId: set_selected_team_id,
+    search_term,
+    set_search_term,
+  } = useTeamStore();
+  const { selected_period, set_selected_period } = useDateStore();
+
+  const { teams: real_teams, is_loading: is_teams_loading } = useTeams();
+  const { flight_risks, is_loading: is_flight_risk_loading } = useFlightRisk();
+  const { teams: analysis_teams, is_loading: is_analysis_loading } =
+    useTeamsOverview();
+
+  const filtered_analysis_teams = analysis_teams.filter(
+    (team: any) =>
+      team.team_name?.toLowerCase().includes(search_term.toLowerCase()) ||
+      team.lead_name?.toLowerCase().includes(search_term.toLowerCase()),
+  );
+
+  const filtered_flight_risks = flight_risks.filter((person: any) =>
+    person.member_name?.toLowerCase().includes(search_term.toLowerCase()),
+  );
+
+  const total_employees = analysis_teams.reduce(
+    (acc: number, team: any) => acc + (team.member_count || 0),
+    0,
+  );
+  const total_at_risk = analysis_teams.reduce(
+    (acc: number, team: any) => acc + (team.at_risk_count || 0),
+    0,
+  );
+  const avg_mood =
+    analysis_teams.length > 0
+      ? (
+        analysis_teams.reduce(
+          (acc: number, team: any) => acc + (team.avg_score || 0),
+          0,
+        ) / analysis_teams.length
+      ).toFixed(1)
+      : "0";
+  const avg_participation =
+    analysis_teams.length > 0
+      ? (
+        analysis_teams.reduce(
+          (acc: number, team: any) => acc + (team.participation_percent || 0),
+          0,
+        ) / analysis_teams.length
+      ).toFixed(0)
+      : "0";
+
+  const status_items = [
     {
       id: "total_employees",
       title: "Total Employees",
-      value: "156",
+      value: String(total_employees),
       icon: <PiUsersThree size={18} />,
       icon_classname: "text-[#6619DE]",
-      delta_value: 0.3,
+      delta_value: 0,
       value_suffix: "",
-      delta_text: "+0.3",
+      delta_text: total_employees > 0 ? "Active" : "None",
       delta_color: "success" as const,
-      delta_period: "vs Last week",
+      delta_period: "Across teams",
       description: "Total number of employees on board",
     },
     {
       id: "check_in_rate",
       title: "Check-in Rate",
-      value: "87",
+      value: avg_participation,
       value_suffix: "%",
       icon: <RiHeartPulseLine size={18} />,
       icon_classname: "text-success-color",
-      delta_value: 5,
-      delta_text: "+5",
+      delta_value: 0,
+      delta_text: "Avg",
       delta_color: "success" as const,
-      delta_period: "vs Last week",
+      delta_period: "Daily average",
       description: "More employees are checking in daily",
     },
     {
       id: "avg_mood",
       title: "Average Mood",
-      value: "3.8",
+      value: avg_mood,
       icon: <GoGraph size={18} />,
       icon_classname: "text-primary-color",
-      delta_value: 0.3,
-      delta_text: "+0.3",
+      delta_value: 0,
+      delta_text: "Score",
       delta_color: "success" as const,
-      delta_period: "vs Last week",
-      description: "Avg. team mood improved this week",
+      delta_period: "Global average",
+      description: "Avg. team mood across organization",
     },
     {
-      id: "flight_risk",
-      title: "Flight Risk",
-      value: "12",
+      id: "at_risk",
+      title: "At Risk",
+      value: String(total_at_risk),
       icon: <IoWarningOutline size={18} />,
       icon_classname: "text-danger-color",
-      delta_value: 2,
-      delta_text: "+2",
-      delta_color: "danger" as const,
-      delta_period: "Needs Attention",
-      description: "More team members poses risk",
+      delta_value: total_at_risk,
+      delta_text: total_at_risk > 0 ? "Alert" : "Safe",
+      delta_color:
+        total_at_risk > 0 ? ("danger" as const) : ("success" as const),
+      delta_period: total_at_risk > 0 ? "Needs Attention" : "All good",
+      description: "Employees showing signs of burnout",
     },
     {
       id: "burnout_alerts",
       title: "Burnout Alerts",
-      value: "4",
+      value: String(total_at_risk), // Mirror at risk for now
       icon: <RiHeartPulseLine size={18} />,
-      icon_classname: "text-success-color",
-      delta_value: 1,
-      delta_text: "+1",
-      delta_color: "danger" as const,
-      delta_period: "vs Last week",
-      description: "Employees showing signs of burnout",
+      icon_classname: "text-danger-color",
+      delta_value: total_at_risk,
+      delta_text: total_at_risk > 0 ? "High" : "Low",
+      delta_color:
+        total_at_risk > 0 ? ("danger" as const) : ("success" as const),
+      delta_period: "Organization wide",
+      description: "Burnout risk notifications",
     },
   ];
 
-  const teams = [
-    {
-      id: "eng",
-      team_name: "Engineering",
-      lead_name: "Sarah Johnson",
-      avg_score: 3.9,
-      member_count: 25,
-      at_risk_count: 2,
-      morale_percent: 78,
-      participation_percent: 92,
-    },
-    {
-      id: "des",
-      team_name: "Design",
-      lead_name: "Mike Chan",
-      avg_score: 4.2,
-      member_count: 12,
-      at_risk_count: 0,
-      morale_percent: 88,
-      participation_percent: 95,
-    },
-    {
-      id: "prod",
-      team_name: "Product",
-      lead_name: "Lisa Wang",
-      avg_score: 3.6,
-      member_count: 18,
-      at_risk_count: 3,
-      morale_percent: 65,
-      participation_percent: 80,
-    },
-    {
-      id: "eng2",
-      team_name: "Engineering",
-      lead_name: "Sarah Johnson",
-      avg_score: 3.9,
-      member_count: 25,
-      at_risk_count: 2,
-      morale_percent: 78,
-      participation_percent: 92,
-    },
-  ];
-
-  const wellnessTrends = [
+  const wellness_trends = [
     {
       id: "1",
       title: "Positive Trend",
@@ -164,7 +202,9 @@ function HrPage() {
     },
   ];
 
-  const OverviewContent = (
+  console.log(filtered_analysis_teams);
+
+  const overview_content = (
     <div className="space-y-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-6">
@@ -178,9 +218,19 @@ function HrPage() {
             </p>
           </div>
           <div className="grid grid-cols-1 gap-4">
-            {teams.map((team, idx) => (
-              <TeamPerformanceListItem key={`${team.id}-${idx}`} team={team} />
-            ))}
+            {is_analysis_loading ? (
+              <div className="flex items-center justify-center p-10">
+                <Loader2 className="animate-spin text-primary-color" />
+              </div>
+            ) : (
+              filtered_analysis_teams.map((team: TeamAnalysisInfo, idx: number) => (
+                <TeamPerformanceListItem
+                  key={`${team.team_id}-${idx}`}
+                  team={team}
+                  onClick={() => handle_view_team(team.team_id)}
+                />
+              ))
+            )}
           </div>
         </div>
 
@@ -194,7 +244,7 @@ function HrPage() {
               Check how various teams performed so far
             </p>
           </div>
-          <WellnessTrendCards items={wellnessTrends} />
+          <WellnessTrendCards items={wellness_trends} />
         </div>
       </div>
 
@@ -203,73 +253,26 @@ function HrPage() {
         <h4 className="text-sm font-bold text-[#251F2D] mb-3">
           Invite Attendee
         </h4>
-        <div className="flex items-center gap-3">
+        <form onSubmit={handle_invite} className="flex items-center gap-3">
           <Input
             placeholder="email address"
             className="bg-[#F9FAFB] border border-[#E5E7EB] h-[48px] focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-[#6619DE]"
+            value={invite_email}
+            onChange={(e) => set_invite_email(e.target.value)}
+            type="email"
           />
-          <Button className="bg-[#6619DE] hover:bg-[#5214B3] w-[56px] h-[48px] shrink-0 rounded-[8px]">
+          <Button
+            type="submit"
+            className="bg-[#6619DE] hover:bg-[#5214B3] w-[56px] h-[48px] shrink-0 rounded-[8px]"
+          >
             <GoArrowUpRight size={24} />
           </Button>
-        </div>
+        </form>
       </div>
     </div>
   );
 
-  const flightRiskPeople = [
-    {
-      id: "p1",
-      member_name: "Alex Chan",
-      role_title: "Frontend Develop",
-      team_name: "Engineering Team",
-      status: "at_risk" as const,
-      avg_mood_score: 2.1,
-      avg_mood_scale: 5,
-      task_completion_percent: 55,
-      weekly_streak_days: 2,
-      last_checkin_label: "2 days ago",
-      risk_factors: [
-        "Low task completion",
-        "Missed deadlines",
-        "Reduced activity",
-      ],
-      scheduled_call_label: undefined,
-    },
-    {
-      id: "p2",
-      member_name: "Alex Chan",
-      role_title: "Frontend Develop",
-      team_name: "Engineering Team",
-      status: "at_risk" as const,
-      avg_mood_score: 2.1,
-      avg_mood_scale: 5,
-      task_completion_percent: 55,
-      weekly_streak_days: 2,
-      last_checkin_label: "2 days ago",
-      risk_factors: [
-        "Very Low task completion",
-        "Extended inactivity",
-        "Multiple missed check-ins",
-      ],
-      scheduled_call_label: "Call scheduled for 1/21/2024",
-    },
-    {
-      id: "p3",
-      member_name: "Alex Chan",
-      role_title: "Frontend Develop",
-      team_name: "Engineering Team",
-      status: "at_risk" as const,
-      avg_mood_score: 2.1,
-      avg_mood_scale: 5,
-      task_completion_percent: 55,
-      weekly_streak_days: 2,
-      last_checkin_label: "2 days ago",
-      risk_factors: ["Declining Productivity", "Missed team meetings"],
-      scheduled_call_label: "Call scheduled for 1/21/2024",
-    },
-  ];
-
-  const FlightRiskContent = (
+  const flight_risk_content = (
     <div className="space-y-6">
       <div className="space-y-1">
         <h3 className="text-base font-bold text-[#251F2D] flex items-center gap-2">
@@ -280,11 +283,31 @@ function HrPage() {
           Employees showing signs of burnout or disengagement
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-4">
-        {flightRiskPeople.map((person) => (
-          <FlightRiskCardComponent key={person.id} person={person} />
-        ))}
-      </div>
+
+      {is_flight_risk_loading ? (
+        <div className="flex flex-col items-center justify-center p-20 bg-white rounded-xl">
+          <Loader2 className="size-8 text-primary-color animate-spin mb-2" />
+          <p className="text-gray-500 font-medium">
+            Loading flight risk analysis...
+          </p>
+        </div>
+      ) : flight_risks.length === 0 ? (
+        <div className="flex flex-col items-center justify-center p-20 bg-white rounded-xl text-gray-400 italic">
+          No at-risk employees found for the selected filter.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {filtered_flight_risks.map((person) => (
+            <FlightRiskCardComponent
+              key={person.id}
+              person={person}
+              actions={{
+                on_view_profile: (id) => handle_view_employee(id),
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 
@@ -312,20 +335,34 @@ function HrPage() {
           </div>
 
           <div className="md:col-span-2">
-            <Select defaultValue="all">
+            <Select
+              value={selected_team_id || "all"}
+              onValueChange={(val) =>
+                set_selected_team_id(val === "all" ? null : val)
+              }
+              disabled={is_teams_loading}
+            >
               <SelectTrigger className="w-full bg-[#F3F4F6] border-none">
-                <SelectValue placeholder="All Teams" />
+                <SelectValue
+                  placeholder={is_teams_loading ? "Loading..." : "All Teams"}
+                />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Teams</SelectItem>
-                <SelectItem value="eng">Engineering</SelectItem>
-                <SelectItem value="design">Design</SelectItem>
+                {real_teams.map((team: any) => (
+                  <SelectItem key={team.id} value={team.id}>
+                    {team.team_name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="md:col-span-2">
-            <Select defaultValue="30days">
+            <Select
+              value={selected_period}
+              onValueChange={(val: DatePeriod) => set_selected_period(val)}
+            >
               <SelectTrigger className="w-full bg-[#F3F4F6] border-none">
                 <SelectValue placeholder="Last 30 days" />
               </SelectTrigger>
@@ -340,15 +377,15 @@ function HrPage() {
             <Input
               placeholder="Search employees..."
               className="bg-[#F3F4F6] border-none w-full"
+              value={search_term}
+              onChange={(e) => set_search_term(e.target.value)}
             />
           </div>
-
-
         </div>
       </div>
 
       {/* Top Metrics */}
-      <StatusCards items={statusItems} />
+      <StatusCards items={status_items} />
 
       {/* Meeting Card */}
       <MeetingCardComponent
@@ -363,7 +400,11 @@ function HrPage() {
       />
 
       {/* Tabs & Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs
+        value={active_tab}
+        onValueChange={set_active_tab}
+        className="w-full"
+      >
         {/* Scrollable List Wrapper */}
         <div className="w-full overflow-x-auto pb-2">
           <TabsList className="bg-[#EAEBEB] h-14 p-1.5 rounded-[12px] min-w-[600px] md:w-full gap-1 grid grid-cols-4">
@@ -395,7 +436,7 @@ function HrPage() {
         </div>
 
         <TabsContent value="overview" className="mt-6">
-          {OverviewContent}
+          {overview_content}
         </TabsContent>
 
         <TabsContent value="mood" className="mt-6">
@@ -410,39 +451,39 @@ function HrPage() {
                 <button
                   className={cn(
                     "text-sm font-semibold pb-3 px-1 whitespace-nowrap transition-colors border-b-2",
-                    activeTeamSubTab === "analysis"
+                    active_team_sub_tab === "analysis"
                       ? "text-[#251F2D] border-[#251F2D]"
                       : "text-gray-400 border-transparent hover:text-gray-600",
                   )}
-                  onClick={() => setActiveTeamSubTab("analysis")}
+                  onClick={() => set_active_team_sub_tab("analysis")}
                 >
                   Team Analysis
                 </button>
                 <button
                   className={cn(
                     "text-sm font-semibold pb-3 px-1 whitespace-nowrap transition-colors border-b-2",
-                    activeTeamSubTab === "timesheet"
+                    active_team_sub_tab === "timesheet"
                       ? "text-[#251F2D] border-[#251F2D]"
                       : "text-gray-400 border-transparent hover:text-gray-600",
                   )}
-                  onClick={() => setActiveTeamSubTab("timesheet")}
+                  onClick={() => set_active_team_sub_tab("timesheet")}
                 >
                   Timesheet Weekly Overview
                 </button>
                 <button
                   className={cn(
                     "text-sm font-semibold pb-3 px-1 whitespace-nowrap transition-colors border-b-2",
-                    activeTeamSubTab === "payroll"
+                    active_team_sub_tab === "payroll"
                       ? "text-[#251F2D] border-[#251F2D]"
                       : "text-gray-400 border-transparent hover:text-gray-600",
                   )}
-                  onClick={() => setActiveTeamSubTab("payroll")}
+                  onClick={() => set_active_team_sub_tab("payroll")}
                 >
                   HR Payroll
                 </button>
               </div>
 
-              {activeTeamSubTab === "analysis" && (
+              {active_team_sub_tab === "analysis" && (
                 <>
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col gap-1">
@@ -455,30 +496,41 @@ function HrPage() {
                       </p>
                     </div>
                     <div className="bg-[#EAEBEB] px-3 py-1 rounded-full text-xs font-bold text-[#6B7280]">
-                      {teams.length} teams
+                      {analysis_teams.length} teams
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {teams.map((team, idx) => (
-                      <TeamAnalysisCardComponent
-                        key={`${team.id}-analysis-${idx}`}
-                        team={team}
-                        className="border-none shadow-sm hover:shadow-md transition-shadow"
-                      />
-                    ))}
+                    {is_analysis_loading ? (
+                      <div className="col-span-full flex items-center justify-center p-20">
+                        <Loader2 className="animate-spin text-primary-color" />
+                      </div>
+                    ) : (
+                      filtered_analysis_teams.map((team: any, idx: number) => (
+                        <TeamAnalysisCardComponent
+                          key={`${team.id}-analysis-${idx}`}
+                          team={team}
+                          className="border-none shadow-sm hover:shadow-md transition-shadow"
+                          actions={{
+                            on_view: (id) => handle_view_team(id),
+                          }}
+                        />
+                      ))
+                    )}
                   </div>
                 </>
               )}
 
-              {activeTeamSubTab === "timesheet" && <TimesheetWeeklyOverview />}
-              {activeTeamSubTab === "payroll" && <HrPayroll />}
+              {active_team_sub_tab === "timesheet" && (
+                <TimesheetWeeklyOverview />
+              )}
+              {active_team_sub_tab === "payroll" && <HrPayroll />}
             </div>
           }
         </TabsContent>
 
         <TabsContent value="flight_risk" className="mt-6">
-          {FlightRiskContent}
+          {flight_risk_content}
         </TabsContent>
       </Tabs>
     </div>

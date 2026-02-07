@@ -77,7 +77,7 @@ const TEAMS_DATA: TeamEntry[] = [
 ];
 
 export default function TimesheetWeeklyOverview() {
-  const totalHours = "14.001048888888889h";
+  const totalHours = "14h";
 
   return (
     <div className="space-y-8">
@@ -135,11 +135,7 @@ export default function TimesheetWeeklyOverview() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatBox
-            value="14.001048888888889h"
-            label="Total Hours"
-            className="bg-[#F9FAFB]"
-          />
+          <StatBox value="14h" label="Total Hours" className="bg-[#F9FAFB]" />
           <StatBox value="2.8h" label="Daily Avg" className="bg-[#F9FAFB]" />
           <StatBox value="3" label="Teams" className="bg-[#F9FAFB]" />
           <StatBox value="5" label="Entries" className="bg-[#F9FAFB]" />
