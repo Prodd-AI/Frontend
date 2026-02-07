@@ -44,9 +44,9 @@ const get_user_mood_history = (
   >(`user/${user_id}/history`, params, true);
 };
 const get_mood_distribution = (params: {
-  start_date: string;
-  end_date: string;
+  date_filter: string;
   team_id?: string;
+  employee_id?: string;
 }) => {
   return mood_trend_service.get<
     GeneralReturnInt<

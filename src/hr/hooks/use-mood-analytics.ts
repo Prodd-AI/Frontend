@@ -2,31 +2,39 @@ import { useQuery } from "@tanstack/react-query";
 import { get_mood_distribution } from "@/config/services/mood-trends.service";
 import useTeamStore from "@/config/stores/team.store";
 import useDateStore from "@/config/stores/date.store";
-import { format, subDays, parseISO } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { MOOD_EMOJIS } from "@/shared/utils/constants";
 import { DatePeriod } from "@/shared/typings/date.store";
+
+// Map date period to API date_filter format
+const mapDatePeriodToFilter = (period: DatePeriod): string => {
+  if (period === "this_week") return "this_week";
+  if (period === "this_month") return "this_month";
+  if (period === "last_week" || period === "7days") return "this_week";
+  if (period === "last_month" || period === "30days") return "this_month";
+  return "this_week"; // default
+};
 
 export const useMoodAnalytics = (options?: { 
   period?: DatePeriod; 
   team_id?: string | null;
+  employee_id?: string | null;
 }) => {
   const { selectedTeamId: store_team_id } = useTeamStore();
   const { selected_period: global_period } = useDateStore();
   
   const active_period = options?.period || global_period;
   const active_team_id = options?.team_id !== undefined ? options.team_id : store_team_id;
+  const active_employee_id = options?.employee_id || undefined;
   
-  const today = new Date();
-  const days_to_sub = (active_period === "last_week" || active_period === "7days") ? 7 : 30;
-  const start_date = format(subDays(today, days_to_sub), "yyyy-MM-dd");
-  const end_date = format(today, "yyyy-MM-dd");
+  const date_filter = mapDatePeriodToFilter(active_period);
 
   const { data, isLoading: is_loading, error } = useQuery({
-    queryKey: ["mood-distribution", start_date, end_date, active_team_id],
+    queryKey: ["mood-distribution", date_filter, active_team_id, active_employee_id],
     queryFn: () => get_mood_distribution({
-      start_date: start_date,
-      end_date: end_date,
-      team_id: active_team_id || undefined
+      date_filter: date_filter,
+      team_id: active_team_id || undefined,
+      employee_id: active_employee_id
     }),
   });
 

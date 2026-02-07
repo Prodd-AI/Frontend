@@ -8,6 +8,7 @@ import {
 import TeamAnalysisCardComponent from "@/shared/components/team-analysis-card.component";
 import { Loader2 } from "lucide-react";
 import MoodHeatmap from "../components/mood-heatmap.component";
+import { TeamAnalysisInfo } from "@/shared/typings/team-analysis-card";
 
 export default function TeamDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -34,7 +35,7 @@ export default function TeamDetailPage() {
   });
 
   const selected_team_analysis = teams_overview?.data?.find(
-    (t: any) => t.id === id,
+    (t: TeamAnalysisInfo) => t.team_id === id,
   );
 
   if (is_detail_loading) {
@@ -44,6 +45,8 @@ export default function TeamDetailPage() {
       </div>
     );
   }
+
+  console.log(selected_team_analysis);
 
   return (
     <div className="pb-12 space-y-10">

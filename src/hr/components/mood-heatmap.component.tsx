@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { useTeams } from "@/shared/hooks/use-teams";
+import { useState, useEffect } from "react";
 
 const legend_items = [
   { label: "Rough", color: "bg-[#FFC5C5]", border: "border-[#FFB0B0]" },
@@ -38,9 +40,21 @@ interface MoodDataItem {
 
 export default function MoodHeatmap({ team_id }: { team_id?: string | null }) {
   const { selected_period, set_selected_period } = useDateStore();
+  const { teams, is_loading: is_teams_loading } = useTeams();
+  const [selected_team_id, set_selected_team_id] = useState<string | null>(
+    team_id || null
+  );
+
+  // Sync selected_team_id when team_id prop changes
+  useEffect(() => {
+    if (team_id !== undefined) {
+      set_selected_team_id(team_id);
+    }
+  }, [team_id]);
+
   const { mood_data, is_loading, average_weekly_score } = useMoodAnalytics({
     period: selected_period,
-    team_id,
+    team_id: selected_team_id,
   });
 
   // SVG Line Chart Constants
@@ -116,15 +130,23 @@ export default function MoodHeatmap({ team_id }: { team_id?: string | null }) {
               <span className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
                 Team
               </span>
-              <Select defaultValue="all">
+              <Select
+                value={selected_team_id || "all"}
+                onValueChange={(value) =>
+                  set_selected_team_id(value === "all" ? null : value)
+                }
+                disabled={is_teams_loading}
+              >
                 <SelectTrigger className="w-[130px] h-9 bg-white border border-gray-200 text-sm">
                   <SelectValue placeholder="All Teams" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Teams</SelectItem>
-                  <SelectItem value="engineering">Engineering</SelectItem>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="product">Product</SelectItem>
+                  {teams.map((team) => (
+                    <SelectItem key={team.id} value={team.id}>
+                      {team.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
