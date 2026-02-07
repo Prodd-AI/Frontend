@@ -14,6 +14,8 @@ import Loader from "../loader.component";
 import AviPlaceholder from "../avi-placeholder.component";
 import HRBadgeIcon from "@/components/ui/hr-badge-icon";
 import { RxHamburgerMenu } from "react-icons/rx";
+import NotificationDropdown from "@/layout/components/notification-dropdown.component";
+import useAppNotifications from "@/shared/hooks/use-socket-notifications";
 
 /**
  * Layout component that provides the team member screen scaffold
@@ -135,6 +137,7 @@ function TeamMemberScreenLayout() {
       document.body.style.overflow = "";
     };
   }, [isMenuOpen]);
+  const notifications = useAppNotifications();
 
   if (isError) {
     useAuthStore.getState().logout();
@@ -162,9 +165,9 @@ function TeamMemberScreenLayout() {
   const isHR = user?.user.user_role === "hr";
   const userFullName = `${user?.user.first_name} ${user?.user.last_name}`;
 
-  // TODO: Implement notification logic
-  const isNotification = true;
-  const notificationCount = isNotification ? 1 : 0;
+  const unreadNotifications = notifications.filter((n) => !n.is_read);
+  const notificationCount = unreadNotifications.length;
+  const isNotification = notificationCount > 0;
 
   return (
     <div className="bg-gradient-to-b from-[#E4D6FA]/60 to-[#F8F8F9] min-h-screen">
@@ -208,21 +211,28 @@ function TeamMemberScreenLayout() {
 
             <div className="flex items-center gap-[30px] sm:gap-[4rem]">
               {/* Notification Bell Button */}
-              <button
-                type="button"
-                className="relative p-2 rounded-lg hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
-                aria-label={`Notifications${
-                  notificationCount > 0 ? `, ${notificationCount} unread` : ""
-                }`}
-              >
-                <Bell size={32} aria-hidden="true" />
-                {isNotification && (
-                  <span
-                    className="size-[14px] bg-[#EF4444] rounded-full absolute top-1 right-1"
-                    aria-hidden="true"
-                  />
-                )}
-              </button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="relative p-2 rounded-lg hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
+                    aria-label={`Notifications${
+                      notificationCount > 0
+                        ? `, ${notificationCount} unread`
+                        : ""
+                    }`}
+                  >
+                    <Bell size={32} aria-hidden="true" />
+                    {isNotification && (
+                      <span
+                        className="size-[14px] bg-[#EF4444] rounded-full absolute top-1 right-1"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </button>
+                </PopoverTrigger>
+                <NotificationDropdown notifications={notifications ?? []} />
+              </Popover>
 
               {/* User Profile Section with Popover */}
               <Popover>
