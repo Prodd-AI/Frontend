@@ -21,63 +21,20 @@ interface TeamEntry {
   }[];
 }
 
-const HOURS_DATA = [
-  { day: "Mon", hours: 6, color: "bg-[#934DFF]" },
-  { day: "Tue", hours: 8, color: "bg-[#934DFF]" },
-  { day: "Wed", hours: 2, color: "bg-[#934DFF]" },
+const HOURS_DATA: any[] = [
+  { day: "Sun", hours: 0, color: "bg-transparent" },
+  { day: "Mon", hours: 0, color: "bg-transparent" },
+  { day: "Tue", hours: 0, color: "bg-transparent" },
+  { day: "Wed", hours: 0, color: "bg-transparent" },
   { day: "Thur", hours: 0, color: "bg-transparent" },
   { day: "Fri", hours: 0, color: "bg-transparent" },
   { day: "Sat", hours: 0, color: "bg-transparent" },
-  { day: "Sun", hours: 6, color: "bg-[#934DFF]" },
 ];
 
-const TEAMS_DATA: TeamEntry[] = [
-  {
-    id: "marketing",
-    team: "Marketing",
-    icon_color: "bg-[#934DFF]",
-    members_count: 2,
-    total_entries: 5,
-    total_hours: 60.5,
-    people: [
-      {
-        id: "sarah",
-        name: "Sarah Chen",
-        role: "Marketing Lead",
-        entries: 3,
-        hours: 32.5,
-      },
-      {
-        id: "james",
-        name: "James Wilson",
-        role: "Content Writer",
-        entries: 2,
-        hours: 28.5,
-      },
-    ],
-  },
-  {
-    id: "engineering",
-    team: "Engineering",
-    icon_color: "bg-[#0EB5C9]",
-    members_count: 3,
-    total_entries: 6,
-    total_hours: 60.5,
-    people: [],
-  },
-  {
-    id: "design",
-    team: "Design",
-    icon_color: "bg-[#DF38D3]",
-    members_count: 2,
-    total_entries: 3,
-    total_hours: 60.5,
-    people: [],
-  },
-];
+const TEAMS_DATA: TeamEntry[] = [];
 
 export default function TimesheetWeeklyOverview() {
-  const totalHours = "14h";
+  const totalHours = "0h";
 
   return (
     <div className="space-y-8">
@@ -135,10 +92,10 @@ export default function TimesheetWeeklyOverview() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatBox value="14h" label="Total Hours" className="bg-[#F9FAFB]" />
-          <StatBox value="2.8h" label="Daily Avg" className="bg-[#F9FAFB]" />
-          <StatBox value="3" label="Teams" className="bg-[#F9FAFB]" />
-          <StatBox value="5" label="Entries" className="bg-[#F9FAFB]" />
+          <StatBox value="0h" label="Total Hours" className="bg-[#F9FAFB]" />
+          <StatBox value="0h" label="Daily Avg" className="bg-[#F9FAFB]" />
+          <StatBox value="0" label="Teams" className="bg-[#F9FAFB]" />
+          <StatBox value="0" label="Entries" className="bg-[#F9FAFB]" />
         </div>
       </div>
 
@@ -146,9 +103,17 @@ export default function TimesheetWeeklyOverview() {
       <div className="space-y-4">
         <h3 className="text-lg font-bold text-[#251F2D]">Team Entries</h3>
         <div className="space-y-3">
-          {TEAMS_DATA.map((team) => (
-            <TeamEntryCard key={team.id} team={team} />
-          ))}
+          {TEAMS_DATA.length > 0 ? (
+            TEAMS_DATA.map((team) => (
+              <TeamEntryCard key={team.id} team={team} />
+            ))
+          ) : (
+            <div className="p-10 text-center text-gray-400 border-2 border-dashed border-gray-100 rounded-xl bg-white">
+              <p className="text-sm italic">
+                No timesheet entries found for this period
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

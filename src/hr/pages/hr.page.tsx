@@ -32,11 +32,13 @@ import { RiHeartPulseLine } from "react-icons/ri";
 import { useFlightRisk } from "../hooks/use-flight-risk";
 import { useTeams } from "@/shared/hooks/use-teams";
 import { useTeamsOverview } from "../hooks/use-teams-overview";
+import { useUpcomingMeetings } from "../hooks/use-upcoming-meetings";
 import { Loader2 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { TeamAnalysisInfo } from "@/shared/typings/team-analysis-card";
+import { MeetingInfo } from "@/shared/typings/meeting-card";
 
 function HrPage() {
   const navigate = useNavigate();
@@ -74,10 +76,12 @@ function HrPage() {
   const { flight_risks, is_loading: is_flight_risk_loading } = useFlightRisk();
   const { teams: analysis_teams, is_loading: is_analysis_loading } =
     useTeamsOverview();
+  const { meeting: upcoming_meeting, is_loading: is_meeting_loading } =
+    useUpcomingMeetings();
 
   const filtered_analysis_teams = analysis_teams.filter(
     (team: any) =>
-      team.team_name?.toLowerCase().includes(search_term.toLowerCase()) ||
+      team.name?.toLowerCase().includes(search_term.toLowerCase()) ||
       team.lead_name?.toLowerCase().includes(search_term.toLowerCase()),
   );
 
@@ -96,20 +100,20 @@ function HrPage() {
   const avg_mood =
     analysis_teams.length > 0
       ? (
-        analysis_teams.reduce(
-          (acc: number, team: any) => acc + (team.avg_score || 0),
-          0,
-        ) / analysis_teams.length
-      ).toFixed(1)
+          analysis_teams.reduce(
+            (acc: number, team: any) => acc + (team.performance_score || 0),
+            0,
+          ) / analysis_teams.length
+        ).toFixed(1)
       : "0";
   const avg_participation =
     analysis_teams.length > 0
       ? (
-        analysis_teams.reduce(
-          (acc: number, team: any) => acc + (team.participation_percent || 0),
-          0,
-        ) / analysis_teams.length
-      ).toFixed(0)
+          analysis_teams.reduce(
+            (acc: number, team: any) => acc + (team.participation_percent || 0),
+            0,
+          ) / analysis_teams.length
+        ).toFixed(0)
       : "0";
 
   const status_items = [
@@ -179,28 +183,7 @@ function HrPage() {
     },
   ];
 
-  const wellness_trends = [
-    {
-      id: "1",
-      title: "Positive Trend",
-      description:
-        "Engineering team mood improved 15% this month after implementing flexible hours",
-      variant: "positive" as const,
-    },
-    {
-      id: "2",
-      title: "Attention Needed",
-      description:
-        "Design team maintained 4.2+ mood rating for 3 consecutive weeks",
-      variant: "achievement" as const,
-    },
-    {
-      id: "4",
-      title: "Burnout Risk Alerts",
-      description: "Sales team showing elevated stress levels during Q1 push",
-      variant: "risk" as const,
-    },
-  ];
+  const wellness_trends: any[] = []; // Removed demo data
 
   console.log(filtered_analysis_teams);
 
@@ -223,13 +206,15 @@ function HrPage() {
                 <Loader2 className="animate-spin text-primary-color" />
               </div>
             ) : (
-              filtered_analysis_teams.map((team: TeamAnalysisInfo, idx: number) => (
-                <TeamPerformanceListItem
-                  key={`${team.team_id}-${idx}`}
-                  team={team}
-                  onClick={() => handle_view_team(team.team_id)}
-                />
-              ))
+              filtered_analysis_teams.map(
+                (team: TeamAnalysisInfo, idx: number) => (
+                  <TeamPerformanceListItem
+                    key={`${team.team_id}-${idx}`}
+                    team={team}
+                    onClick={() => handle_view_team(team.team_id)}
+                  />
+                ),
+              )
             )}
           </div>
         </div>
@@ -388,16 +373,32 @@ function HrPage() {
       <StatusCards items={status_items} />
 
       {/* Meeting Card */}
-      <MeetingCardComponent
-        meeting={{
-          id: "m1",
-          title: "1:1 with Mike Chan",
-          subtitle: "Upcoming Meeting/Call",
-          status: "starting_soon",
-          start_in_minutes: 20,
-          participants_count: 1,
-        }}
-      />
+      {upcoming_meeting && (
+        <MeetingCardComponent
+          meeting={
+            {
+              id: upcoming_meeting.id,
+              title: upcoming_meeting.title,
+              subtitle: upcoming_meeting.type || "Upcoming Meeting/Call",
+              start_in_minutes: upcoming_meeting.start_in_minutes,
+              participants_count: upcoming_meeting.participant_count,
+              status:
+                upcoming_meeting.start_in_minutes <= 30
+                  ? "starting_soon"
+                  : "scheduled",
+            } as MeetingInfo
+          }
+          actions={{
+            on_join: () => {
+              if (upcoming_meeting.meeting_link) {
+                window.open(upcoming_meeting.meeting_link, "_blank");
+              }
+            },
+            on_open_more: () => {},
+          }}
+          className="mt-10"
+        />
+      )}
 
       {/* Tabs & Content */}
       <Tabs
