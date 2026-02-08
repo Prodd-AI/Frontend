@@ -4,13 +4,27 @@ import { useState } from "react";
 import AccountSettingsComponent from "../components/account-settings.component";
 import PreferencesComponent from "../components/preferences.component";
 import PrivacyComponent from "../components/privacy.component";
-import TeamDetailsComponent from "../components/team-details.component";
+// import TeamDetailsComponent from "../components/team-details.component";
 import { SettingsTab } from "@/settings/typings/tab";
+import useAuthStore from "@/config/stores/auth.store";
+import { Navigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { get_current_user_profile } from "@/config/services/users.service";
 
 function SettingsPage() {
-  const [active_tab, set_active_tab] = useState<SettingsTab>(
-    "overview" as SettingsTab
-  );
+  const [active_tab, set_active_tab] = useState<SettingsTab>("overview");
+  const user = useAuthStore((state) => state.user);
+
+  const { data: userProfileResponse } = useQuery({
+    queryKey: ["current-user-profile"],
+    queryFn: get_current_user_profile,
+  });
+
+  const currentUserProfile = userProfileResponse?.data;
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="bg-linear-to-r from-primary-color/5 to-primary-color/5 min-h-screen">
@@ -33,11 +47,19 @@ function SettingsPage() {
           />
 
           <div className="mt-6">
-            {active_tab === "overview" && <ProfileOverviewComponent />}
-            {active_tab === "account" && <AccountSettingsComponent />}
-            {active_tab === "preferences" && <PreferencesComponent />}
-            {active_tab === "privacy" && <PrivacyComponent />}
-            {active_tab === "team" && <TeamDetailsComponent />}
+            {active_tab === "overview" && (
+              <ProfileOverviewComponent user={currentUserProfile} />
+            )}
+            {active_tab === "account" && (
+              <AccountSettingsComponent user={currentUserProfile} />
+            )}
+            {active_tab === "preferences" && (
+              <PreferencesComponent user={currentUserProfile} />
+            )}
+            {active_tab === "privacy" && (
+              <PrivacyComponent user={currentUserProfile} />
+            )}
+            {/* {active_tab === "team" && <TeamDetailsComponent user={user} />} */}
           </div>
         </div>
       </div>
