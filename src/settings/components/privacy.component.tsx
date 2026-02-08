@@ -7,18 +7,37 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import {
-  QUERY_KEY_PRIVACY,
-  simulate_end_session,
-  simulate_fetch_privacy,
-  simulate_update_visibility,
-} from "@/settings/utils/privacy.functions";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   visibility_schema,
   type VisibilityForm,
 } from "@/config/forms/privacy.form";
-import { VisibilityOption } from "@/settings/typings/privacy.typings";
+import { CurrentUserProfile, Visibility } from "@/shared/typings/team-member";
+import { update_account_settings } from "@/config/services/users.service";
+import {
+  get_active_all_sessions,
+  end_a_session,
+  close_account,
+} from "@/config/services/auth.service";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import useAuthStore from "@/config/stores/auth.store";
+import { useNavigate } from "react-router-dom";
+
+interface PrivacyProps {
+  user: CurrentUserProfile | undefined;
+}
 
 const Section = ({ children }: { children: React.ReactNode }) => (
   <div className="rounded-xl border border-[#E5E7EB] p-6">{children}</div>
@@ -30,52 +49,88 @@ const RowCard = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-const PrivacyComponent = () => {
+const PrivacyComponent = ({ user }: PrivacyProps) => {
   const query_client = useQueryClient();
-  const { data } = useQuery({
-    queryKey: QUERY_KEY_PRIVACY,
-    queryFn: simulate_fetch_privacy,
-    staleTime: 60_000,
+  const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
+
+  const { data: sessionsData, isLoading: isLoadingSessions } = useQuery({
+    queryKey: ["active-sessions"],
+    queryFn: get_active_all_sessions,
   });
 
-  const [visibility, set_visibility] = useState<VisibilityForm>({
-    profile_photo: data?.visibility.profile_photo ?? "Everyone",
-    contact_info: data?.visibility.contact_info ?? "Everyone",
-    working_hours: data?.visibility.working_hours ?? "Everyone",
-    activity_status: data?.visibility.activity_status ?? "Everyone",
-  });
+  const sessions = sessionsData?.data ?? [];
 
-  const { mutate: update_visibility } = useMutation({
-    mutationFn: simulate_update_visibility,
-    onMutate: async (payload) => {
-      await query_client.cancelQueries({ queryKey: QUERY_KEY_PRIVACY });
-      const previous = query_client.getQueryData(QUERY_KEY_PRIVACY) as any;
-      query_client.setQueryData(QUERY_KEY_PRIVACY, {
-        ...previous,
-        visibility: payload,
-      });
-      return { previous };
+  const { watch: watchVisibility, setValue: setVisibilityValue } =
+    useForm<VisibilityForm>({
+      resolver: zodResolver(visibility_schema),
+      values: user?.user_profile?.profile_visibility
+        ? {
+            profile_photo: user.user_profile.profile_visibility.profile_photo,
+            contact_info: user.user_profile.profile_visibility.contact_info,
+            working_hours: user.user_profile.profile_visibility.working_hours,
+            activity_status:
+              user.user_profile.profile_visibility.activity_status,
+          }
+        : undefined,
+    });
+
+  const visibility = watchVisibility();
+
+  const { mutate: updateVisibility, isPending: isUpdatingVisibility } =
+    useMutation({
+      mutationFn: (data: VisibilityForm) =>
+        update_account_settings({ profile_visibility: data }),
+      onSuccess: () => {
+        query_client.invalidateQueries({ queryKey: ["current-user-profile"] });
+        toast.success("Visibility settings updated");
+      },
+ 
+    });
+
+  const { mutate: endSession, isPending: isEndingSession } = useMutation({
+    mutationFn: (id: string) => end_a_session(id),
+    onSuccess: () => {
+      query_client.invalidateQueries({ queryKey: ["active-sessions"] });
+      toast.success("Session ended");
     },
-    onError: (_e, _p, ctx) =>
-      ctx?.previous &&
-      query_client.setQueryData(QUERY_KEY_PRIVACY, ctx.previous),
+
   });
 
-  const { mutate: end_session } = useMutation({
-    mutationFn: (id: string) => simulate_end_session(id),
-    onMutate: async (id) => {
-      await query_client.cancelQueries({ queryKey: QUERY_KEY_PRIVACY });
-      const previous = query_client.getQueryData(QUERY_KEY_PRIVACY) as any;
-      const sessions = (previous?.sessions as any[]).filter((s) => s.id !== id);
-      query_client.setQueryData(QUERY_KEY_PRIVACY, { ...previous, sessions });
-      return { previous };
+  const { mutate: deleteAccount, isPending: isDeletingAccount } = useMutation({
+    mutationFn: close_account,
+    onSuccess: () => {
+      toast.success("Account deleted");
+      logout();
+      navigate("/login");
     },
-    onError: (_e, _p, ctx) =>
-      ctx?.previous &&
-      query_client.setQueryData(QUERY_KEY_PRIVACY, ctx.previous),
+
   });
 
-  const options: VisibilityOption[] = ["Everyone", "Team", "Only me"];
+  const handleVisibilityChange = (
+    key: keyof VisibilityForm,
+    value: Visibility,
+  ) => {
+    setVisibilityValue(key, value);
+    const updatedVisibility = { ...visibility, [key]: value };
+    updateVisibility(updatedVisibility);
+  };
+
+  const options: { value: Visibility; label: string }[] = [
+    { value: "everyone", label: "Everyone" },
+    { value: "team", label: "Team" },
+    { value: "only me", label: "Only me" },
+  ];
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -116,25 +171,19 @@ const PrivacyComponent = () => {
                 <p className="text-xs text-gray-500">{row.desc}</p>
               </div>
               <Select
-                value={(visibility as any)[row.key] as string}
-                onValueChange={(v) => {
-                  const next = {
-                    ...visibility,
-                    [row.key]: v,
-                  } as VisibilityForm;
-                  const parsed = visibility_schema.safeParse(next);
-                  if (!parsed.success) return;
-                  set_visibility(parsed.data);
-                  update_visibility(parsed.data);
-                }}
+                value={visibility[row.key]}
+                disabled={isUpdatingVisibility}
+                onValueChange={(v: Visibility) =>
+                  handleVisibilityChange(row.key, v)
+                }
               >
                 <SelectTrigger className="w-40 !h-9">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
                   {options.map((opt) => (
-                    <SelectItem key={opt} value={opt}>
-                      {opt}
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -151,56 +200,50 @@ const PrivacyComponent = () => {
         </p>
 
         <div className="space-y-3">
-          {data?.sessions.map((s) => (
-            <div
-              key={s.id}
-              className="flex items-center justify-between border border-[#E5E7EB] rounded-lg p-3"
-            >
-              <div>
-                <p className="text-sm font-semibold">{s.device}</p>
-                <p className="text-xs text-gray-500">
-                  {s.location}
-                  {s.is_current
-                    ? ""
-                    : s.last_active_desc
-                    ? ` • ${s.last_active_desc}`
-                    : ""}
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => end_session(s.id)}
-                className="shadow-none border-none bg-[#F3F4F6] text-[#6B7280]"
+          {isLoadingSessions ? (
+            <p className="text-sm text-gray-500">Loading sessions...</p>
+          ) : sessions.length === 0 ? (
+            <p className="text-sm text-gray-500">No active sessions</p>
+          ) : (
+            sessions.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-center justify-between border border-[#E5E7EB] rounded-lg p-3"
               >
-                End Session
-              </Button>
-            </div>
-          ))}
+                <div>
+                  <p className="text-sm font-semibold">
+                    {s.device_info || "Unknown Device"}
+                    {s.is_current && (
+                      <span className="ml-2 text-xs text-green-600 font-normal">
+                        (Current)
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Created: {formatDate(s.created_at)}
+                  </p>
+                </div>
+                {!s.is_current && (
+                  <Button
+                    variant="outline"
+                    onClick={() => endSession(s.id)}
+                    disabled={isEndingSession}
+                    className="shadow-none border-none bg-[#F3F4F6] text-[#6B7280]"
+                  >
+                    End Session
+                  </Button>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </Section>
 
       <Section>
         <p className="text-base font-semibold">Data Management</p>
-        <p className="text-xs text-gray-500 mb-4">
-          Export or delete your account data
-        </p>
+        <p className="text-xs text-gray-500 mb-4">Delete your account data</p>
 
         <div className="space-y-3">
-          <div className="flex items-center justify-between border border-[#E5E7EB] rounded-lg p-3">
-            <div>
-              <p className="text-sm font-semibold">Export Data</p>
-              <p className="text-xs text-gray-500">
-                Download a copy of your data
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              className="shadow-none border-none bg-[#F3F4F6] text-[#6B7280]"
-            >
-              Export
-            </Button>
-          </div>
-
           <div className="flex items-center justify-between border border-red-200 rounded-lg p-3">
             <div>
               <p className="text-sm font-semibold text-red-600">
@@ -210,7 +253,30 @@ const PrivacyComponent = () => {
                 Permanently delete your account and data
               </p>
             </div>
-            <Button className="bg-red-600 hover:bg-red-700">Delete</Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button className="bg-red-600 hover:bg-red-700">Delete</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    your account and remove your data from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteAccount()}
+                    disabled={isDeletingAccount}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    {isDeletingAccount ? "Deleting..." : "Delete Account"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </Section>
