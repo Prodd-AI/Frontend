@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import MeetingCardComponent from "@/shared/components/meeting-card.component";
 import StatusCards from "@/shared/components/status-cards.component";
 import TeamAnalysisCardComponent from "@/shared/components/team-analysis-card.component";
 import TeamPerformanceListItem from "../components/team-performance-list-item.component";
@@ -386,18 +385,6 @@ function HrPage() {
 
       {/* Top Metrics */}
       <StatusCards items={status_items} />
-
-      {/* Meeting Card */}
-      <MeetingCardComponent
-        meeting={{
-          id: "m1",
-          title: "1:1 with Mike Chan",
-          subtitle: "Upcoming Meeting/Call",
-          status: "starting_soon",
-          start_in_minutes: 20,
-          participants_count: 1,
-        }}
-      />
 
       {/* Tabs & Content */}
       <Tabs
