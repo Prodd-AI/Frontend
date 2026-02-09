@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { IoPlayOutline, IoStopOutline, IoPauseOutline, IoCheckmarkOutline } from 'react-icons/io5';
 import { LuClock3 } from 'react-icons/lu';
 import ClockOutSummary from '../clock-out-summary.component';
@@ -19,14 +19,32 @@ const TimeClockTab = () => {
 	const [seconds, setSeconds] = useState(0);
 	const [isLoading, setIsLoading] = useState(false);
 
-	// Initialize seconds from accumulated_seconds on mount or session change
+	// Calculate actual elapsed time including time since last_action_at when active
+	const calculateElapsedSeconds = useCallback((session: typeof sessionData) => {
+		if (!session) return 0;
+
+		const accumulated = parseInt(session.accumulated_seconds, 10) || 0;
+
+		// If session is active, add the time elapsed since last_action_at
+		if (session.status === 'active' && session.last_action_at) {
+			const lastActionTime = new Date(session.last_action_at).getTime();
+			const now = Date.now();
+			const elapsedSinceLastAction = Math.floor((now - lastActionTime) / 1000);
+			return accumulated + elapsedSinceLastAction;
+		}
+
+		// If paused or ended, just return accumulated seconds
+		return accumulated;
+	}, []);
+
+	// Initialize seconds from session data on mount or session change
 	useEffect(() => {
 		if (sessionData) {
-			setSeconds(parseInt(sessionData.accumulated_seconds, 10) || 0);
+			setSeconds(calculateElapsedSeconds(sessionData));
 		} else {
 			setSeconds(0);
 		}
-	}, [sessionData]);
+	}, [sessionData, calculateElapsedSeconds]);
 
 	// Timer effect
 	useEffect(() => {
