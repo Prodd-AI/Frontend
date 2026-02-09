@@ -18,21 +18,20 @@ export default function TeamAnalysisCardComponent({
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-base font-bold text-[#605A69]">{team.team_name}</p>
+          <p className="text-base font-bold text-[#605A69]">{team.name}</p>
           <p className="text-xs text-[#6B7280] font-semibold">
             {team.lead_name} · Team Lead
           </p>
         </div>
         <span
-          className={`text-[10px] px-2 py-1 rounded-full font-bold ${
-            Number(team.avg_score.toFixed(2)) > 4
+          className={`text-[10px] px-2 py-1 rounded-full font-bold ${Number(team.performance_score.toFixed(2)) > 4
               ? "bg-success-color/20 text-success-color"
-              : Number(team.avg_score.toFixed(2)) > 3
-              ? "bg-[#E3E6EA] text-[#6B7280]"
-              : "bg-danger-color/20 text-danger-color"
-          }`}
+              : Number(team.performance_score.toFixed(2)) > 3
+                ? "bg-[#E3E6EA] text-[#6B7280]"
+                : "bg-danger-color/20 text-danger-color"
+            }`}
         >
-          {team.avg_score.toFixed(2)} avg
+          {team.performance_score.toFixed(2)} avg
         </span>
       </div>
 
@@ -52,7 +51,7 @@ export default function TeamAnalysisCardComponent({
         <div
           className={cn(
             "text-right text-[#605A69] font-bold",
-            team.at_risk_count > 0 ? "text-danger-color" : "text-emerald-600"
+            team.at_risk_count && team.at_risk_count > 0 ? "text-danger-color" : "text-emerald-600"
           )}
         >
           {team.at_risk_count}
@@ -70,7 +69,7 @@ export default function TeamAnalysisCardComponent({
 
       <Button
         className="h-10 bg-primary-color-purple"
-        onClick={() => actions?.on_view?.(team.id)}
+        onClick={() => actions?.on_view?.(team.team_id)}
       >
         View Details
       </Button>

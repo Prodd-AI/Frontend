@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { useMemo } from "react";
 
 function OnboardingWizardNavigationComponent({
@@ -7,16 +8,17 @@ function OnboardingWizardNavigationComponent({
   completedSteps,
   activeSteps,
   currentStepId,
+  loading,
 }: OnboardingWizardNavigationComponentPropsInt) {
   const isFirstStep = useMemo(
     () => activeSteps[0]?.id === currentStepId,
     [activeSteps, currentStepId]
   );
 
-  const isLastStep = useMemo(
-    () => activeSteps[activeSteps.length - 1]?.id === currentStepId,
-    [activeSteps, currentStepId]
-  );
+  // const isLastStep = useMemo(
+  //   () => activeSteps[activeSteps.length - 1]?.id === currentStepId,
+  //   [activeSteps, currentStepId]
+  // );
 
   const canGoBack = useMemo(
     () => !isFirstStep && completedSteps.length > 0,
@@ -24,21 +26,25 @@ function OnboardingWizardNavigationComponent({
   );
 
   return (
-    <div className="w-full flex justify-between items-center px-4">
+    <div className="w-full flex justify-between items-center gap-4 px-6 py-4">
       <Button
         variant={canGoBack ? "default" : "ghost"}
         onClick={handlePrevStep}
         disabled={!canGoBack}
+        className="min-w-[120px] h-11 font-medium transition-all"
       >
         Previous
       </Button>
-      <Button
-        variant={isLastStep ? "ghost" : "default"}
+      <LoadingButton
         onClick={handleNextStep}
-        disabled={isLastStep}
+        loading={loading}
+        loadingText="Saving..."
+        className="min-w-[160px] h-11 font-medium transition-all"
       >
-        Next
-      </Button>
+        {currentStepId === activeSteps[activeSteps.length - 1]?.id
+          ? "Go to Dashboard"
+          : "Next"}
+      </LoadingButton>
     </div>
   );
 }

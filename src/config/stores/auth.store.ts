@@ -7,7 +7,19 @@ const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   token: null,
   login: (user, token) => set({ user, isAuthenticated: true, token }),
-  logout: () => set({ user: null, isAuthenticated: false, token: null }),
+  logout: async () => {
+    try {
+      const { logout: logoutService } = await import(
+        "@/config/services/auth.service"
+      );
+      await logoutService();
+    } catch (error) {
+      console.error("Logout API failed:", error);
+    } finally {
+      localStorage.removeItem("refresh_token_id");
+      set({ user: null, isAuthenticated: false, token: null });
+    }
+  },
   setEmail: (email) => {
     set({
       email,
@@ -16,11 +28,14 @@ const useAuthStore = create<AuthState>((set) => ({
   setUser: (user, token) => {
     set({ user, token, isAuthenticated: true });
   },
-  register: (user) => {
-    set({
-      user,
-    });
-  },
+  register: (userData) =>
+    set((state) => ({
+      user: state.user
+        ? { ...state.user, user: { ...state.user.user, ...userData } }
+        : null,
+    })),
 }));
 
 export default useAuthStore;
+
+

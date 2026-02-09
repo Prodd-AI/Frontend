@@ -1,51 +1,16 @@
 import { clsx } from "clsx";
 import { TbWaveSawTool } from "react-icons/tb";
 import { TodaysProgresssPropsInt } from "@/shared/typings/todays-progress";
+import { MOOD_EMOJIS } from "@/shared/utils/constants";
 
-/**
- * TodaysProgress - A visual progress dashboard component that displays daily task completion metrics and mood tracking.
- *
- * This component provides an intuitive interface for users to view their daily productivity metrics including:
- * - Task completion progress with animated progress bar
- * - Total completed vs remaining tasks ratio
- * - Average mood rating for the day
- * - Interactive hover effects and smooth transitions
- *
- * The component features a clean, modern design with purple/blue gradient themes and responsive animations
- * that enhance user engagement through visual feedback.
- *
- * @example
- * ```tsx
- * // Basic usage
- * <TodaysProgress
- *   numberOfTaskCompleted={7}
- *   totalNumberOfTask={10}
- *   avgMood={8.5}
- * />
- *
- * // With custom title and styling
- * <TodaysProgress
- *   title="Weekly Progress"
- *   numberOfTaskCompleted={25}
- *   totalNumberOfTask={30}
- *   avgMood={7.2}
- *   className="my-4 shadow-xl"
- * />
- * ```
- *
- * @param {Object} props - Component props
- * @param {string} [props.title="Today's Progress"] - The title displayed at the top of the component
- * @param {number} props.numberOfTaskCompleted - Number of tasks completed (used for progress calculation)
- * @param {number} props.totalNumberOfTask - Total number of tasks assigned (used for progress calculation)
- * @param {number} props.avgMood - Average mood rating (typically 1-10 scale)
- * @param {ClassValue} [props.className] - Additional CSS classes for custom styling
- *
- * @returns {JSX.Element} A styled progress dashboard with animated elements
- *
- * @author Wizzy
- * @version 1.0.0
- * @since 2025-09-03
- */
+const getMoodEmoji = (moodScore: number): string => {
+  if (moodScore >= 5) return MOOD_EMOJIS.great;
+  if (moodScore >= 4) return MOOD_EMOJIS.good;
+  if (moodScore >= 3) return MOOD_EMOJIS.okay;
+  if (moodScore >= 2) return MOOD_EMOJIS.notGreat;
+  return MOOD_EMOJIS.rough;
+};
+
 function TodaysProgress({
   title = "Today's Progress",
   numberOfTaskCompleted,
@@ -53,14 +18,21 @@ function TodaysProgress({
   avgMood,
   className,
 }: TodaysProgresssPropsInt) {
-  const progress_metric = (numberOfTaskCompleted / totalNumberOfTask) * 100;
+  const progress_metric =
+    totalNumberOfTask > 0
+      ? (numberOfTaskCompleted / totalNumberOfTask) * 100
+      : 0;
 
   return (
     <div
       className={clsx(
-        `w-[33.563rem] h-[18rem] border bg-[#F8F8F9] shadow rounded-[20px] px-[1.25rem] py-[1.875rem] transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-[1.02]`,
-        className
+        `w-[33.563rem] h-[18rem]  bg-[#F8F8F9] rounded-[20px] px-[1.25rem] py-[1.875rem]`,
+        className,
       )}
+      style={{
+        boxShadow:
+          "0px 4px 4px -4px rgba(12, 12, 13, 0.05), 0px 16px 16px -8px rgba(12, 12, 13, 0.1)",
+      }}
     >
       <div className="flex items-center gap-2 transition-colors duration-200">
         <TbWaveSawTool
@@ -87,7 +59,7 @@ function TodaysProgress({
             }}
           ></div>
         </div>
-        <div className="flex gap-[14px]">
+        <div className="flex gap-[14px] mt-3">
           <div className=" flex justify-center items-center bg-[#EDE2FE] flex-col w-[14.625rem] h-[5.563rem] rounded-[14px] transition-all duration-300 ease-in-out hover:bg-[#DDD6FE] hover:shadow-md hover:scale-105 cursor-pointer">
             <span className="text-[#6619DE] font-bold text-[1.75rem] p-0 transition-all duration-200 hover:scale-110">
               {numberOfTaskCompleted}
@@ -97,8 +69,8 @@ function TodaysProgress({
             </p>
           </div>
           <div className=" bg-[#1186DA1C] w-[14.625rem] h-[5.563rem] rounded-[14px] flex justify-center items-center flex-col transition-all duration-300 ease-in-out hover:bg-[#1186DA30] hover:shadow-md hover:scale-105 cursor-pointer">
-            <span className="text-[#1186DA] text-[1.75rem] font-bold transition-all duration-200 hover:scale-110">
-              {avgMood}
+            <span className="text-[2rem] transition-all duration-200 hover:scale-110">
+              {getMoodEmoji(avgMood)}
             </span>
             <span className="text-[#6B7280] font-medium transition-colors duration-200">
               Avg. Mood

@@ -2,7 +2,7 @@ import { CiUser } from "react-icons/ci";
 import { PiGearLight } from "react-icons/pi";
 import { CiCircleCheck } from "react-icons/ci";
 import { IoShieldOutline } from "react-icons/io5";
-import { PiUsersLight } from "react-icons/pi";
+// import { PiUsersLight } from "react-icons/pi";
 import { TbFocusCentered } from "react-icons/tb";
 import { IoCheckmark } from "react-icons/io5";
 import { FaRegClock } from "react-icons/fa";
@@ -30,11 +30,11 @@ export const tabs = [
     value: "privacy",
     icon: <IoShieldOutline size={20} />,
   },
-  {
-    label: "Team Details",
-    value: "team",
-    icon: <PiUsersLight size={20} />,
-  },
+  // {
+  //   label: "Team Details",
+  //   value: "team",
+  //   icon: <PiUsersLight size={20} />,
+  // },
 ];
 
 export const tabItems = [

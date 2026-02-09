@@ -3,7 +3,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Label } from "@/components/ui/label";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useForm, Controller } from "react-hook-form";
@@ -15,29 +15,43 @@ import { VerifyEmailFormData } from "@/auth/typings/auth";
 import useAuthStore from "@/config/stores/auth.store";
 import { useMutation } from "@tanstack/react-query";
 import { resend_otp, verify_email } from "@/config/services/auth.service";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 
-const RESEND_COOLDOWN = 60; // 60 seconds cooldown
+const RESEND_COOLDOWN = 60;
 import { Link } from "react-router-dom";
 import { TeamMember } from "@/shared/typings/team-member";
+import Banner from "@/shared/components/banner.component";
 
-function VerifyEmailFormComponent() {
+function VerifyEmailFormComponent({
+  email,
+  code,
+}: {
+  email: string;
+  code?: string;
+}) {
   const [resendCooldown, setResendCooldown] = useState(0);
-
+  const [banner, setBanner] = useState<{
+    message: string;
+    variant: "success" | "critical";
+    isOpen: boolean;
+  }>({
+    message: "",
+    variant: "success",
+    isOpen: false,
+  });
   const {
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<VerifyEmailFormData>({
     resolver: zodResolver(verify_email_schema),
     defaultValues: {
-      code: "",
+      code: code || "",
     },
   });
   const navigate = useNavigate();
-  const { email, login } = useAuthStore();
-
+  const { login } = useAuthStore();
   // Cooldown timer effect
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -48,7 +62,6 @@ function VerifyEmailFormComponent() {
     }
   }, [resendCooldown]);
 
-  // Verify email mutation
   const { mutate, isPending } = useMutation<
     GeneralReturnInt<TeamMember>,
     Error,
@@ -56,14 +69,30 @@ function VerifyEmailFormComponent() {
   >({
     mutationFn: (data) => verify_email(data),
     onSuccess: (res) => {
-      toast.success("Verification Complete. Redirecting you to your Dashboard");
+      setBanner({
+        message: "Verification Complete. Redirecting you to your Dashboard",
+        variant: "success",
+        isOpen: true,
+      });
       login(res.data, res.data?.access_token);
-      setTimeout(() => {
-        navigate("/");
-      }, 1000);
+      localStorage.setItem("refresh_token_id", res.data.refresh_token);
+
+      if (res.data.user.organization_id && res.data.user.is_onboarded) {
+        return navigate(`/dash/${res.data.user.user_role.replace("_", "-")}`);
+      }
+      if (res.data.user.organization_id && !res.data.user.is_onboarded) {
+        return navigate(
+          `/onboarding/${res.data.user.user_role.replace("_", "-")}-setup`,
+        );
+      }
+      return navigate("/onboarding/hr-setup");
     },
     onError(error) {
-      console.error(error);
+      setBanner({
+        message: error.message,
+        variant: "critical",
+        isOpen: true,
+      });
     },
   });
 
@@ -75,17 +104,31 @@ function VerifyEmailFormComponent() {
   >({
     mutationFn: (email) => resend_otp(email),
     onSuccess: () => {
-      toast.success("Verification code resent successfully!");
+      setBanner({
+        message: "Verification code resent successfully!",
+        variant: "success",
+        isOpen: true,
+      });
       setResendCooldown(RESEND_COOLDOWN);
     },
     onError(error) {
-      console.error(error);
+      setBanner({
+        message: error.message,
+        variant: "critical",
+        isOpen: true,
+      });
     },
   });
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isValidEmail = email && emailRegex.test(email);
+
+  if (!isValidEmail) {
+    return <Navigate to="/auth/register" replace />;
+  }
 
   const onSubmit = (values: VerifyEmailFormData) => {
     mutate({
-      otp: values.code,
+      otp: values.code || code || "",
       email: email ?? "",
     });
   };
@@ -99,17 +142,16 @@ function VerifyEmailFormComponent() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      <Banner
+        open={banner.isOpen}
+        description={banner.message}
+        onDismiss={() =>
+          setBanner({ message: "", variant: "success", isOpen: false })
+        }
+        variant={banner.variant}
+        isDismiss
+      />
       <div className="flex flex-col gap-4 items-center">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-[#000000] mb-2">
-            Enter Verification Code
-          </h3>
-          <p className="text-sm text-gray-600">
-            We sent a 6-digit code to{" "}
-            <span className="font-medium">{email}</span>
-          </p>
-        </div>
-
         <div className="flex flex-col gap-2 items-center">
           <Label htmlFor="verification-code" className="sr-only">
             Verification Code
@@ -122,7 +164,12 @@ function VerifyEmailFormComponent() {
                 maxLength={6}
                 pattern={REGEXP_ONLY_DIGITS}
                 value={field.value}
-                onChange={field.onChange}
+                onChange={(value) => {
+                  setValue("code", value);
+                  if (email && code?.length === 6) {
+                    onSubmit({ code: value });
+                  }
+                }}
                 disabled={isPending}
               >
                 <InputOTPGroup className="gap-2 w-[350px] lg:w-full sm:w-full">
@@ -161,13 +208,14 @@ function VerifyEmailFormComponent() {
       </div>
 
       <div className="flex flex-col gap-4">
-        <Button
+        <LoadingButton
           type="submit"
+          loading={isPending}
+          loadingText="Verifying..."
           className="h-11 sm:h-[2.543rem] md:h-14 lg:w-[70%] lg:mx-auto"
-          disabled={isPending}
         >
-          {isPending ? "Verifying..." : "Verify Email"}
-        </Button>
+          Verify Email
+        </LoadingButton>
 
         <div className="text-center">
           <p className="text-sm text-gray-600 mb-2">Didn't receive the code?</p>
@@ -180,8 +228,8 @@ function VerifyEmailFormComponent() {
             {isResending
               ? "Resending..."
               : resendCooldown > 0
-              ? `Resend Code (${resendCooldown}s)`
-              : "Resend Code"}
+                ? `Resend Code (${resendCooldown}s)`
+                : "Resend Code"}
           </button>
         </div>
 

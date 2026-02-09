@@ -20,14 +20,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
           cancelButton:
             "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
           success:
-            "group-[.toaster]:!bg-green-50 group-[.toaster]:!text-success-color group-[.toaster]:!border-success-color/20",
+            "group-[.toaster]:!bg-gradient-to-r group-[.toaster]:!from-emerald-50 group-[.toaster]:!to-emerald-100 group-[.toaster]:!text-emerald-700 group-[.toaster]:!border-emerald-300",
           error:
-            "group-[.toaster]:!bg-red-50 group-[.toaster]:!text-danger-color group-[.toaster]:!border-danger-color/20",
+            "group-[.toaster]:!bg-gradient-to-r group-[.toaster]:!from-red-50 group-[.toaster]:!to-red-100 group-[.toaster]:!text-red-700 group-[.toaster]:!border-red-300",
           warning:
-            "group-[.toaster]:!bg-yellow-50 group-[.toaster]:!text-warning-color group-[.toaster]:!border-warning-color/20",
-          info: "group-[.toaster]:!bg-blue-50 group-[.toaster]:!text-primary-color group-[.toaster]:!border-primary-color/20",
+            "group-[.toaster]:!bg-gradient-to-r group-[.toaster]:!from-amber-50 group-[.toaster]:!to-amber-100 group-[.toaster]:!text-amber-700 group-[.toaster]:!border-amber-300",
+          info: "group-[.toaster]:!bg-gradient-to-r group-[.toaster]:!from-blue-50 group-[.toaster]:!to-sky-100 group-[.toaster]:!text-blue-700 group-[.toaster]:!border-blue-300",
           loading:
-            "group-[.toaster]:!bg-purple-50 group-[.toaster]:!text-primary-color group-[.toaster]:!border-primary-color/20",
+            "group-[.toaster]:!bg-gradient-to-r group-[.toaster]:!from-purple-50 group-[.toaster]:!to-purple-100 group-[.toaster]:!text-purple-700 group-[.toaster]:!border-purple-300",
         },
         style: {
           fontFamily: '"Open Sans", sans-serif',

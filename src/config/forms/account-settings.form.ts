@@ -4,17 +4,17 @@ export const password_update_schema = z
   .object({
     current_password: z.string().min(8, "Minimum 8 characters"),
     new_password: z.string().min(8, "Minimum 8 characters"),
-    confirm_new_password: z.string().min(8, "Minimum 8 characters"),
+    confirm_password: z.string().min(8, "Minimum 8 characters"),
   })
-  .refine((data) => data.new_password === data.confirm_new_password, {
+  .refine((data) => data.new_password === data.confirm_password, {
     message: "Passwords do not match",
-    path: ["confirm_new_password"],
+    path: ["confirm_password"],
   });
 
 export type PasswordUpdateForm = z.infer<typeof password_update_schema>;
 
 export const two_factor_schema = z.object({
-  enabled: z.boolean().default(false),
+  mfa_enabled: z.boolean(),
 });
 
 export type TwoFactorForm = z.infer<typeof two_factor_schema>;
