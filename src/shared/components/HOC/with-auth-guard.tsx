@@ -4,6 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import useAuthStore from "@/config/stores/auth.store";
 import { refresh_auth_with_team_member_profile } from "@/config/services/auth.service";
 import Loader from "../loader.component";
+import { TeamMember } from "@/shared/typings/team-member";
+
+// Props that the HOC injects into the wrapped component
+interface InjectedAuthProps {
+  user: TeamMember | null;
+}
 
 /**
  * Higher Order Component that provides authentication guard with refresh token support.
@@ -16,14 +22,14 @@ import Loader from "../loader.component";
  *
  * Uses TanStack Query with side effects handled directly in queryFn for clean,
  * effect-free implementation.
+ *
+ * The wrapped component receives a `user` prop automatically injected by this HOC.
  */
-function withAuthGuard<P extends object>(WrappedComponent: ComponentType<P>) {
-  return function AuthGuardWrapper(props: P) {
+function withAuthGuard<P extends InjectedAuthProps>(
+  WrappedComponent: ComponentType<P>,
+) {
+  return function AuthGuardWrapper(props: Omit<P, keyof InjectedAuthProps>) {
     const { user, isAuthenticated } = useAuthStore();
-
-    const removeAuthGuard =
-      import.meta.env.VITE_REMOVE_AUTH_GUARD === "true" ||
-      import.meta.env.VITE_REMOVE_AUTH_GUARD === "1";
 
     const { isLoading, isError } = useQuery({
       queryKey: ["auth", "session"],
@@ -33,25 +39,33 @@ function withAuthGuard<P extends object>(WrappedComponent: ComponentType<P>) {
           throw new Error("No refresh token found");
         }
 
-        const res = await refresh_auth_with_team_member_profile({
-          refresh_token_id,
-        });
+        try {
+          const res = await refresh_auth_with_team_member_profile({
+            refresh_token_id,
+          });
 
-        if (res.data?.user) {
-          useAuthStore.getState().setUser(res.data, res.data.access_token);
-          localStorage.setItem("refresh_token_id", res.data.refresh_token);
+          if (res.data?.user) {
+            useAuthStore.getState().setUser(res.data, res.data.access_token);
+            localStorage.setItem("refresh_token_id", res.data.refresh_token);
+          }
+
+          return res.data;
+        } catch (error) {
+          localStorage.removeItem("refresh_token_id");
+          useAuthStore.setState({
+            user: null,
+            isAuthenticated: false,
+            token: null,
+          });
+          throw error;
         }
-
-        return res.data;
       },
-      enabled: !isAuthenticated || !user || !removeAuthGuard,
+      enabled: !isAuthenticated || !user,
       retry: false,
       staleTime: Infinity,
     });
 
-    if (isError && !removeAuthGuard) {
-      useAuthStore.getState().logout();
-
+    if (isError && !isAuthenticated) {
       return <Navigate to="/auth/login" />;
     }
 
@@ -63,15 +77,11 @@ function withAuthGuard<P extends object>(WrappedComponent: ComponentType<P>) {
       );
     }
 
-    if (removeAuthGuard) {
-      return <WrappedComponent {...props} />;
-    }
-
     if (!isAuthenticated || !user) {
       return <Navigate to="/auth/login" />;
     }
 
-    return <WrappedComponent {...props} />;
+    return <WrappedComponent {...(props as P)} user={user} />;
   };
 }
 

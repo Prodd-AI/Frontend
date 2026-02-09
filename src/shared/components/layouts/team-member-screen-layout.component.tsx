@@ -48,20 +48,31 @@ function TeamMemberScreenLayout() {
     queryKey: ["auth", "session"],
     queryFn: async () => {
       const refresh_token_id = localStorage.getItem("refresh_token_id");
+      console.log(refresh_token_id);
       if (!refresh_token_id) {
         throw new Error("No refresh token found");
       }
 
-      const res = await refresh_auth_with_team_member_profile({
-        refresh_token_id,
-      });
+      try {
+        const res = await refresh_auth_with_team_member_profile({
+          refresh_token_id,
+        });
 
-      if (res.data?.user) {
-        useAuthStore.getState().setUser(res.data, res.data.access_token);
-        localStorage.setItem("refresh_token_id", res.data.refresh_token);
+        if (res.data?.user) {
+          useAuthStore.getState().setUser(res.data, res.data.access_token);
+          localStorage.setItem("refresh_token_id", res.data.refresh_token);
+        }
+
+        return res.data;
+      } catch (error) {
+        localStorage.removeItem("refresh_token_id");
+        useAuthStore.setState({
+          user: null,
+          isAuthenticated: false,
+          token: null,
+        });
+        throw error;
       }
-
-      return res.data;
     },
     enabled: !isAuthenticated || !user,
     retry: false,
@@ -138,9 +149,7 @@ function TeamMemberScreenLayout() {
     };
   }, [isMenuOpen]);
   const notifications = useAppNotifications();
-
-  if (isError) {
-    useAuthStore.getState().logout();
+  if (isError && !isAuthenticated) {
     return <Navigate to="/auth/login" />;
   }
 
