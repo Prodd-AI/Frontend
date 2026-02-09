@@ -2,7 +2,7 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Oauth from "@/shared/components/oauth.component";
+// import Oauth from "@/shared/components/oauth.component";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -396,7 +396,7 @@ const RegisterFormComponent = () => {
       >
         Create Account
       </LoadingButton>
-      <Oauth />
+      {/* <Oauth /> */}
       <div className="text-center mt-[19px] font-[600] text-[1rem]">
         <p>
           Already have an account?{" "}

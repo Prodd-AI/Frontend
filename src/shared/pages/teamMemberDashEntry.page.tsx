@@ -1,9 +1,12 @@
-import useAuthStore from "@/config/stores/auth.store";
+import { TeamMember } from "@/shared/typings/team-member";
 import { Navigate } from "react-router-dom";
 
-function TeamMemberDashEntry() {
+interface TeamMemberDashEntryProps {
+  user: TeamMember | null;
+}
+
+function TeamMemberDashEntry({ user }: TeamMemberDashEntryProps) {
   //determine team member role and redirect based on the user role
-  const user = useAuthStore((state) => state.user);
 
   if (!user || !user.user.user_role) {
     return <Navigate to="/auth/login" />;
