@@ -5,7 +5,7 @@ import { login_schema } from "@/lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import Oauth from "@/shared/components/oauth.component";
+// import Oauth from "@/shared/components/oauth.component";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -44,7 +44,7 @@ function LoginFormComponent() {
     onSuccess: (response) => {
       if (response?.data) {
         login(response.data, response.data.access_token);
-
+        console.log(response.data.refresh_token)
         localStorage.setItem("refresh_token_id", response.data.refresh_token);
 
         setBanner({
@@ -222,7 +222,7 @@ function LoginFormComponent() {
         >
           {isPending ? "..." : "Login"}
         </Button>
-        <Oauth />
+        {/* <Oauth /> */}
         <div className="text-center mt-[19px] font-[600] text-[1rem]">
           <p>
             {" "}
