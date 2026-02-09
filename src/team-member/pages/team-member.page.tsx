@@ -8,6 +8,7 @@ import useUrlSearchParams from "@/shared/hooks/use-url-search-params";
 import { useQueries } from "@tanstack/react-query";
 import { getWeeklyStreak } from "@/config/services/tasks.service";
 import { get_average_mood_for_the_week } from "@/config/services/mood-trends.service";
+import useAuthStore from "@/config/stores/auth.store";
 
 function Page() {
   const [openNudgeBanner, setOpenNudgeBanner] = useState(true);
@@ -17,6 +18,9 @@ function Page() {
     updateParam("tab", tab);
     setParams({ tab });
   };
+
+  const user = useAuthStore((state) => state.user);
+
 
   const [weekTasksQuery, averageMoodQuery] = useQueries({
     queries: [
@@ -41,7 +45,7 @@ function Page() {
   return (
     <div className="py-2 sm:py-4 sm:pb-20">
       <WelcomeBackHeader
-        heading={"Welcome back, Saviour! 👋"}
+        heading={`Welcome back, ${user?.user.first_name}! 👋`}
         subHeading={
           "How are you feeling today? Let's make it productive and positive."
         }
