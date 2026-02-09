@@ -1,9 +1,7 @@
 import { cn } from "@/lib/utils";
-import { Calendar } from "lucide-react";
-import {
-  TeamEntryCard,
-  type TeamEntry,
-} from "@/shared/components/team-entry-card.component";
+import { Calendar, Loader2 } from "lucide-react";
+import { TeamEntryCard } from "@/shared/components/team-entry-card.component";
+import { useTeamsWithMembers } from "../hooks/use-teams-with-members";
 
 const HOURS_DATA = [
   { day: "Mon", hours: 6, color: "bg-[#934DFF]" },
@@ -15,53 +13,11 @@ const HOURS_DATA = [
   { day: "Sun", hours: 6, color: "bg-[#934DFF]" },
 ];
 
-const TEAMS_DATA: TeamEntry[] = [
-  {
-    id: "marketing",
-    team: "Marketing",
-    icon_color: "bg-[#934DFF]",
-    members_count: 2,
-    total_entries: 5,
-    total_hours: 60.5,
-    people: [
-      {
-        id: "sarah",
-        name: "Sarah Chen",
-        role: "Marketing Lead",
-        entries: 3,
-        hours: 32.5,
-      },
-      {
-        id: "james",
-        name: "James Wilson",
-        role: "Content Writer",
-        entries: 2,
-        hours: 28.5,
-      },
-    ],
-  },
-  {
-    id: "engineering",
-    team: "Engineering",
-    icon_color: "bg-[#0EB5C9]",
-    members_count: 3,
-    total_entries: 6,
-    total_hours: 60.5,
-    people: [],
-  },
-  {
-    id: "design",
-    team: "Design",
-    icon_color: "bg-[#DF38D3]",
-    members_count: 2,
-    total_entries: 3,
-    total_hours: 60.5,
-    people: [],
-  },
-];
-
 export default function TimesheetWeeklyOverview() {
+  const { teamsWithMembers, is_loading: teamsLoading } = useTeamsWithMembers();
   const totalHours = "14h";
+  const totalTeams = teamsWithMembers.length;
+  const totalEntries = teamsWithMembers.reduce((sum, t) => sum + (t.total_entries ?? 0), 0);
 
   return (
     <div className="space-y-8">
@@ -121,19 +77,27 @@ export default function TimesheetWeeklyOverview() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatBox value="14h" label="Total Hours" className="bg-[#F9FAFB]" />
           <StatBox value="2.8h" label="Daily Avg" className="bg-[#F9FAFB]" />
-          <StatBox value="3" label="Teams" className="bg-[#F9FAFB]" />
-          <StatBox value="5" label="Entries" className="bg-[#F9FAFB]" />
+          <StatBox value={String(totalTeams)} label="Teams" className="bg-[#F9FAFB]" />
+          <StatBox value={String(totalEntries)} label="Entries" className="bg-[#F9FAFB]" />
         </div>
       </div>
 
       {/* Team Entries List */}
       <div className="space-y-4">
         <h3 className="text-lg font-bold text-[#251F2D]">Team Entries</h3>
-        <div className="space-y-3">
-          {TEAMS_DATA.map((team) => (
-            <TeamEntryCard key={team.id} team={team} showPayout={false} />
-          ))}
-        </div>
+        {teamsLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="animate-spin text-primary-color" size={32} />
+          </div>
+        ) : teamsWithMembers.length === 0 ? (
+          <p className="text-sm text-gray-500 py-4">No teams found.</p>
+        ) : (
+          <div className="space-y-3">
+            {teamsWithMembers.map((team) => (
+              <TeamEntryCard key={team.id} team={team} showPayout={false} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

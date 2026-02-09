@@ -1,16 +1,15 @@
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
 import { Clock, DollarSign, Wallet, Loader2 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useHrPayroll } from "../hooks/use-hr-payroll";
-import {
-  TeamEntryCard,
-  type TeamEntry,
-} from "@/shared/components/team-entry-card.component";
+import { useTeamsWithMembers } from "../hooks/use-teams-with-members";
+import { TeamEntryCard } from "@/shared/components/team-entry-card.component";
 
 export default function HrPayroll() {
   const [hourlyRate, setHourlyRate] = useState<number>(50);
   const { payroll_data, is_loading } = useHrPayroll();
+  const { teamsWithMembers, is_loading: teamsLoading } = useTeamsWithMembers();
 
   if (is_loading) {
     return (
@@ -32,93 +31,6 @@ export default function HrPayroll() {
     payroll_data?.overtime_pay ?? overtimeHours * (hourlyRate * 1.5);
   const regularPay = payroll_data?.regular_pay ?? regularHours * hourlyRate;
   const totalWeeklyPay = regularPay + overtimePay;
-
-  // Team payout data: same accordion structure as timesheet, with payout derived from hours × rate
-  const teamsPayoutData: TeamEntry[] = useMemo(
-    () =>
-      [
-        {
-          id: "marketing",
-          team: "Marketing",
-          icon_color: "bg-[#934DFF]",
-          members_count: 2,
-          total_hours: 60.5,
-          people: [
-            {
-              id: "sarah",
-              name: "Sarah Chen",
-              role: "Marketing Lead",
-              hours: 32.5,
-              payout: 32.5 * hourlyRate,
-            },
-            {
-              id: "james",
-              name: "James Wilson",
-              role: "Content Writer",
-              hours: 28.5,
-              payout: 28.5 * hourlyRate,
-            },
-          ],
-        },
-        {
-          id: "engineering",
-          team: "Engineering",
-          icon_color: "bg-[#0EB5C9]",
-          members_count: 3,
-          total_hours: 60.5,
-          people: [
-            {
-              id: "alex",
-              name: "Alex Rivera",
-              role: "Senior Dev",
-              hours: 22,
-              payout: 22 * hourlyRate,
-            },
-            {
-              id: "sam",
-              name: "Sam Kim",
-              role: "Developer",
-              hours: 20.5,
-              payout: 20.5 * hourlyRate,
-            },
-            {
-              id: "jordan",
-              name: "Jordan Lee",
-              role: "Developer",
-              hours: 18,
-              payout: 18 * hourlyRate,
-            },
-          ],
-        },
-        {
-          id: "design",
-          team: "Design",
-          icon_color: "bg-[#DF38D3]",
-          members_count: 2,
-          total_hours: 60.5,
-          people: [
-            {
-              id: "morgan",
-              name: "Morgan Taylor",
-              role: "Design Lead",
-              hours: 32,
-              payout: 32 * hourlyRate,
-            },
-            {
-              id: "casey",
-              name: "Casey Brown",
-              role: "UI Designer",
-              hours: 28.5,
-              payout: 28.5 * hourlyRate,
-            },
-          ],
-        },
-      ].map((t) => ({
-        ...t,
-        total_payout: t.people.reduce((sum, p) => sum + (p.payout ?? 0), 0),
-      })),
-    [hourlyRate],
-  );
 
   return (
     <div className="space-y-8">
@@ -249,11 +161,19 @@ export default function HrPayroll() {
             Payout by team and member (based on hourly rate and logged hours)
           </p>
         </div>
-        <div className="space-y-3">
-          {teamsPayoutData.map((team) => (
-            <TeamEntryCard key={team.id} team={team} showPayout />
-          ))}
-        </div>
+        {teamsLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="animate-spin text-primary-color" size={32} />
+          </div>
+        ) : teamsWithMembers.length === 0 ? (
+          <p className="text-sm text-gray-500 py-4">No teams found.</p>
+        ) : (
+          <div className="space-y-3">
+            {teamsWithMembers.map((team) => (
+              <TeamEntryCard key={team.id} team={team} showPayout />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
