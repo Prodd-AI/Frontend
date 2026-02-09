@@ -82,8 +82,8 @@ function HrSetup() {
     <AuthLayout>
       <></>
       <OnboardingWizardCardLayout
-        heading="Set Up Your Organization"
-        subHeading="Add your company details, invite team leads, and create teams to get started."
+        heading="Welcome to the team"
+        subHeading="Let's get you started on your journey with us."
         Wizard={<SetupWizardFormComponent steps={steps} />}
       />
     </AuthLayout>
