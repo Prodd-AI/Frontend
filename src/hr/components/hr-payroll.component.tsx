@@ -3,10 +3,13 @@ import { formatCurrency } from "@/lib/utils";
 import { Clock, DollarSign, Wallet, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useHrPayroll } from "../hooks/use-hr-payroll";
+import { useTeamsWithMembers } from "../hooks/use-teams-with-members";
+import { TeamEntryCard } from "@/shared/components/team-entry-card.component";
 
 export default function HrPayroll() {
   const [hourlyRate, setHourlyRate] = useState<number>(50);
   const { payroll_data, is_loading } = useHrPayroll();
+  const { teamsWithMembers, is_loading: teamsLoading } = useTeamsWithMembers();
 
   if (is_loading) {
     return (
@@ -28,12 +31,6 @@ export default function HrPayroll() {
     payroll_data?.overtime_pay ?? overtimeHours * (hourlyRate * 1.5);
   const regularPay = payroll_data?.regular_pay ?? regularHours * hourlyRate;
   const totalWeeklyPay = regularPay + overtimePay;
-
-  const projectCosts = payroll_data?.project_costs || [
-    { name: "Product Development", hours: 9, cost: 9 * hourlyRate },
-    { name: "Team Meetings", hours: 2, cost: 2 * hourlyRate },
-    { name: "Code Review", hours: 3, cost: 3 * hourlyRate },
-  ];
 
   return (
     <div className="space-y-8">
@@ -156,35 +153,27 @@ export default function HrPayroll() {
         </div>
       </div>
 
-      {/* Project Cost Breakdown */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm space-y-6">
+      {/* Team Payout */}
+      <div className="space-y-4">
         <div>
-          <h2 className="text-lg font-bold text-[#251F2D]">
-            Project Cost Breakdown
-          </h2>
-          <p className="text-gray-500 text-xs">Hours and costs per project</p>
+          <h2 className="text-lg font-bold text-[#251F2D]">Team Payout</h2>
+          <p className="text-gray-500 text-xs">
+            Payout by team and member (based on hourly rate and logged hours)
+          </p>
         </div>
-
-        <div className="space-y-4">
-          {projectCosts.map((project: any, idx: number) => (
-            <div
-              key={idx}
-              className="flex items-center justify-between group hover:bg-gray-50 p-2 rounded-lg transition-colors"
-            >
-              <span className="font-bold text-[#251F2D] text-sm">
-                {project.name}
-              </span>
-              <div className="flex items-center gap-8">
-                <span className="text-xs font-medium text-gray-500 border border-gray-200 rounded-full px-2 py-0.5 min-w-[32px] text-center">
-                  {project.hours}h
-                </span>
-                <span className="font-bold text-gray-600 text-sm w-[70px] text-right">
-                  {formatCurrency(project.cost)}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+        {teamsLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="animate-spin text-primary-color" size={32} />
+          </div>
+        ) : teamsWithMembers.length === 0 ? (
+          <p className="text-sm text-gray-500 py-4">No teams found.</p>
+        ) : (
+          <div className="space-y-3">
+            {teamsWithMembers.map((team) => (
+              <TeamEntryCard key={team.id} team={team} showPayout />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
