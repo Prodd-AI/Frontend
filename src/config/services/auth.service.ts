@@ -82,7 +82,7 @@ const change_password = (data: {
 // logout
 const logout = () => {
   const refresh_token_id = localStorage.getItem("refresh_token_id") ?? "";
-  return auth_service.post("logout", refresh_token_id, true);
+  return auth_service.post("logout", {session_id:refresh_token_id}, true);
 };
 
 const get_active_all_sessions = () => {
