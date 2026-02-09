@@ -1,8 +1,12 @@
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
 import { Clock, DollarSign, Wallet, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useHrPayroll } from "../hooks/use-hr-payroll";
+import {
+  TeamEntryCard,
+  type TeamEntry,
+} from "@/shared/components/team-entry-card.component";
 
 export default function HrPayroll() {
   const [hourlyRate, setHourlyRate] = useState<number>(50);
@@ -29,11 +33,92 @@ export default function HrPayroll() {
   const regularPay = payroll_data?.regular_pay ?? regularHours * hourlyRate;
   const totalWeeklyPay = regularPay + overtimePay;
 
-  const projectCosts = payroll_data?.project_costs || [
-    { name: "Product Development", hours: 9, cost: 9 * hourlyRate },
-    { name: "Team Meetings", hours: 2, cost: 2 * hourlyRate },
-    { name: "Code Review", hours: 3, cost: 3 * hourlyRate },
-  ];
+  // Team payout data: same accordion structure as timesheet, with payout derived from hours × rate
+  const teamsPayoutData: TeamEntry[] = useMemo(
+    () =>
+      [
+        {
+          id: "marketing",
+          team: "Marketing",
+          icon_color: "bg-[#934DFF]",
+          members_count: 2,
+          total_hours: 60.5,
+          people: [
+            {
+              id: "sarah",
+              name: "Sarah Chen",
+              role: "Marketing Lead",
+              hours: 32.5,
+              payout: 32.5 * hourlyRate,
+            },
+            {
+              id: "james",
+              name: "James Wilson",
+              role: "Content Writer",
+              hours: 28.5,
+              payout: 28.5 * hourlyRate,
+            },
+          ],
+        },
+        {
+          id: "engineering",
+          team: "Engineering",
+          icon_color: "bg-[#0EB5C9]",
+          members_count: 3,
+          total_hours: 60.5,
+          people: [
+            {
+              id: "alex",
+              name: "Alex Rivera",
+              role: "Senior Dev",
+              hours: 22,
+              payout: 22 * hourlyRate,
+            },
+            {
+              id: "sam",
+              name: "Sam Kim",
+              role: "Developer",
+              hours: 20.5,
+              payout: 20.5 * hourlyRate,
+            },
+            {
+              id: "jordan",
+              name: "Jordan Lee",
+              role: "Developer",
+              hours: 18,
+              payout: 18 * hourlyRate,
+            },
+          ],
+        },
+        {
+          id: "design",
+          team: "Design",
+          icon_color: "bg-[#DF38D3]",
+          members_count: 2,
+          total_hours: 60.5,
+          people: [
+            {
+              id: "morgan",
+              name: "Morgan Taylor",
+              role: "Design Lead",
+              hours: 32,
+              payout: 32 * hourlyRate,
+            },
+            {
+              id: "casey",
+              name: "Casey Brown",
+              role: "UI Designer",
+              hours: 28.5,
+              payout: 28.5 * hourlyRate,
+            },
+          ],
+        },
+      ].map((t) => ({
+        ...t,
+        total_payout: t.people.reduce((sum, p) => sum + (p.payout ?? 0), 0),
+      })),
+    [hourlyRate],
+  );
 
   return (
     <div className="space-y-8">
@@ -156,33 +241,17 @@ export default function HrPayroll() {
         </div>
       </div>
 
-      {/* Project Cost Breakdown */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm space-y-6">
+      {/* Team Payout */}
+      <div className="space-y-4">
         <div>
-          <h2 className="text-lg font-bold text-[#251F2D]">
-            Project Cost Breakdown
-          </h2>
-          <p className="text-gray-500 text-xs">Hours and costs per project</p>
+          <h2 className="text-lg font-bold text-[#251F2D]">Team Payout</h2>
+          <p className="text-gray-500 text-xs">
+            Payout by team and member (based on hourly rate and logged hours)
+          </p>
         </div>
-
-        <div className="space-y-4">
-          {projectCosts.map((project: any, idx: number) => (
-            <div
-              key={idx}
-              className="flex items-center justify-between group hover:bg-gray-50 p-2 rounded-lg transition-colors"
-            >
-              <span className="font-bold text-[#251F2D] text-sm">
-                {project.name}
-              </span>
-              <div className="flex items-center gap-8">
-                <span className="text-xs font-medium text-gray-500 border border-gray-200 rounded-full px-2 py-0.5 min-w-[32px] text-center">
-                  {project.hours}h
-                </span>
-                <span className="font-bold text-gray-600 text-sm w-[70px] text-right">
-                  {formatCurrency(project.cost)}
-                </span>
-              </div>
-            </div>
+        <div className="space-y-3">
+          {teamsPayoutData.map((team) => (
+            <TeamEntryCard key={team.id} team={team} showPayout />
           ))}
         </div>
       </div>
