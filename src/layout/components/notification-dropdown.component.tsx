@@ -1,80 +1,30 @@
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { PopoverContent } from "@/components/ui/popover";
-import { RiEmotionHappyLine } from "react-icons/ri";
-import { FaUserTie } from "react-icons/fa";
-import { HiStar } from "react-icons/hi";
-import { MdBusinessCenter, MdPerson } from "react-icons/md";
+import { PopoverContent, PopoverClose } from "@/components/ui/popover";
+import { Link } from "react-router-dom";
+import { formatTimeAgo } from "@/shared/utils/date.utils";
+import { NotificationIcon } from "@/shared/components/notification-icon.component";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { markAllUserNoficationAsRead } from "@/config/services/notifications.service";
+import { toast } from "sonner";
 
-interface Notification {
-  id: string;
-  type: "mood" | "task" | "meeting";
-  message: string;
-  timestamp: string;
-  actionLabel?: string;
-  onAction?: () => void;
-}
+const NotificationDropdown = ({
+  notifications,
+}: {
+  notifications: AppNotification[];
+}) => {
+  const queryClient = useQueryClient();
 
-const NotificationDropdown = () => {
-  // Dummy notifications data
-  const notifications: Notification[] = [
-    {
-      id: "1",
-      type: "mood",
-      message: "You missed today's mood check-in",
-      timestamp: "5 mins ago",
-      actionLabel: "Check-in now",
-      onAction: () => console.log("Check-in clicked"),
+  const markAllAsReadMutation = useMutation({
+    mutationFn: () => markAllUserNoficationAsRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      toast.success("All notifications marked as read");
     },
-    {
-      id: "2",
-      type: "task",
-      message: "Team Lead added a new sprint task",
-      timestamp: "3h ago",
-      actionLabel: "View task",
-      onAction: () => console.log("View task clicked"),
-    },
-    {
-      id: "3",
-      type: "meeting",
-      message: "HR scheduled a 1:1 Meeting/Call with you",
-      timestamp: "3h ago",
-    },
-  ];
+  });
 
-  const renderNotificationIcon = (type: Notification["type"]) => {
-    switch (type) {
-      case "mood":
-        return (
-          <div className="size-10 flex-shrink-0 flex items-center justify-center rounded-full bg-yellow-100">
-            <RiEmotionHappyLine className="size-6 text-yellow-600" />
-          </div>
-        );
-      case "task":
-        return (
-          <div className="size-10 flex-shrink-0 flex items-center justify-center rounded-full bg-gray-100 relative">
-            <div className="size-6 bg-blue-500 rounded-full flex items-center justify-center">
-              <MdPerson className="size-4 text-white" />
-            </div>
-            <div className="absolute -top-0.5 -right-0.5 size-3 bg-blue-500 rounded-full flex items-center justify-center">
-              <HiStar className="size-2 text-white" />
-            </div>
-          </div>
-        );
-      case "meeting":
-        return (
-          <div className="size-10 flex-shrink-0 flex items-center justify-center rounded-full bg-gray-100 relative">
-            <div className="size-6 bg-pink-500 rounded-full flex items-center justify-center">
-              <FaUserTie className="size-4 text-white" />
-            </div>
-            <div className="absolute -bottom-0.5 -right-0.5 size-3 bg-pink-500 rounded-full flex items-center justify-center">
-              <MdBusinessCenter className="size-2 text-white" />
-            </div>
-          </div>
-        );
-    }
+  const handleMarkAllAsRead = () => {
+    markAllAsReadMutation.mutate();
   };
-
   return (
     <PopoverContent
       align="end"
@@ -86,10 +36,11 @@ const NotificationDropdown = () => {
         <h2 className="text-lg font-bold text-[#251F2D]">Notifications</h2>
         <button
           type="button"
-          onClick={() => console.log("Mark all as read")}
-          className="text-sm text-[#6619DE] hover:text-[#6619DE]/80 transition-colors"
+          onClick={handleMarkAllAsRead}
+          disabled={markAllAsReadMutation.isPending}
+          className="text-sm text-[#6619DE] hover:text-[#6619DE]/80 transition-colors disabled:opacity-50"
         >
-          Mark all as read
+          {markAllAsReadMutation.isPending ? "Marking..." : "Mark all as read"}
         </button>
       </div>
 
@@ -106,7 +57,7 @@ const NotificationDropdown = () => {
           >
             <div className="flex items-start gap-4">
               {/* Icon */}
-              {renderNotificationIcon(notification.type)}
+              <NotificationIcon icon={notification.icon} size="sm" />
 
               {/* Content */}
               <div className="flex-1 min-w-0">
@@ -114,18 +65,20 @@ const NotificationDropdown = () => {
                   {notification.message}
                 </p>
                 <p className="text-xs text-[#9CA3AF] mb-3">
-                  {notification.timestamp}
+                  {formatTimeAgo(notification.created_at)}
                 </p>
-                {notification.actionLabel && (
+                {/* {notification.action_url && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={notification.onAction}
+                    onClick={() =>
+                      (window.location.href = notification.action_url!)
+                    }
                     className="border-[#6619DE] text-[#6619DE] hover:bg-[#6619DE]/10"
                   >
-                    {notification.actionLabel}
+                    View
                   </Button>
-                )}
+                )} */}
               </div>
             </div>
           </div>
@@ -134,14 +87,15 @@ const NotificationDropdown = () => {
 
       {/* Footer */}
       <div className="px-6 py-4 border-t border-[#E5E7EB]">
-        <button
-          type="button"
-          onClick={() => console.log("View all notifications")}
-          className="flex items-center justify-center gap-2 w-full text-sm text-[#6619DE] hover:text-[#6619DE]/80 transition-colors"
-        >
-          View all notifications
-          <ArrowRight className="size-4" />
-        </button>
+        <PopoverClose asChild>
+          <Link
+            to="/notifications"
+            className="flex items-center justify-center gap-2 w-full text-sm text-[#6619DE] hover:text-[#6619DE]/80 transition-colors"
+          >
+            View all notifications
+            <ArrowRight className="size-4" />
+          </Link>
+        </PopoverClose>
       </div>
     </PopoverContent>
   );

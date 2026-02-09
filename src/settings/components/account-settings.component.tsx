@@ -1,104 +1,67 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   password_update_schema,
   type PasswordUpdateForm,
-  type TwoFactorForm,
 } from "@/config/forms/account-settings.form";
-import {
-  QUERY_KEY_ACCOUNT_SETTINGS,
-  simulate_fetch_account_settings,
-  simulate_update_password,
-  simulate_update_two_factor,
-  simulate_toggle_app,
-} from "@/settings/utils/account-settings.functions";
-import { ConnectedApp } from "@/settings/typings/account-settings.typings";
+import { change_password } from "@/config/services/auth.service";
+import { update_account_settings } from "@/config/services/users.service";
+import { CurrentUserProfile } from "@/shared/typings/team-member";
+import { toast } from "sonner";
+
+interface AccountSettingsProps {
+  user: CurrentUserProfile | undefined;
+}
 
 const Section = ({ children }: { children: React.ReactNode }) => (
   <div className="rounded-xl border border-[#E5E7EB] p-6">{children}</div>
 );
 
-const AccountSettingsComponent = () => {
+const AccountSettingsComponent = ({ user }: AccountSettingsProps) => {
   const query_client = useQueryClient();
-  const { data } = useQuery({
-    queryKey: QUERY_KEY_ACCOUNT_SETTINGS,
-    queryFn: simulate_fetch_account_settings,
-    staleTime: 60_000,
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<PasswordUpdateForm>({
+    resolver: zodResolver(password_update_schema),
+    defaultValues: {
+      current_password: "",
+      new_password: "",
+      confirm_password: "",
+    },
   });
 
-  const [password_form, set_password_form] = useState<PasswordUpdateForm>({
-    current_password: "",
-    new_password: "",
-    confirm_new_password: "",
-  });
+  const mfaEnabled = user?.user_profile?.mfa_enabled ?? false;
 
-  const [two_factor, set_two_factor] = useState<TwoFactorForm>({
-    enabled: data?.two_factor.enabled ?? false,
-  });
-
-  const { mutate: update_password, isPending: is_updating_password } =
-    useMutation({
-      mutationFn: simulate_update_password,
-    });
-
-  const { mutate: update_two_factor, isPending: is_updating_2fa } = useMutation(
+  const { mutate: updatePassword, isPending: isUpdatingPassword } = useMutation(
     {
-      mutationFn: simulate_update_two_factor,
-      onMutate: async (payload) => {
-        await query_client.cancelQueries({
-          queryKey: QUERY_KEY_ACCOUNT_SETTINGS,
-        });
-        const previous = query_client.getQueryData(
-          QUERY_KEY_ACCOUNT_SETTINGS
-        ) as any;
-        query_client.setQueryData(QUERY_KEY_ACCOUNT_SETTINGS, {
-          ...previous,
-          two_factor: { enabled: payload.enabled },
-        });
-        return { previous };
+      mutationFn: (data: PasswordUpdateForm) => change_password(data),
+      onSuccess: () => {
+        toast.success("Password updated successfully");
+        reset();
       },
-      onError: (_err, _payload, ctx) => {
-        if (ctx?.previous)
-          query_client.setQueryData(QUERY_KEY_ACCOUNT_SETTINGS, ctx.previous);
-      },
-    }
+    },
   );
 
-  const { mutate: toggle_app } = useMutation({
-    mutationFn: ({ id, connect }: { id: string; connect: boolean }) =>
-      simulate_toggle_app(id, connect),
-    onMutate: async ({ id, connect }) => {
-      await query_client.cancelQueries({
-        queryKey: QUERY_KEY_ACCOUNT_SETTINGS,
-      });
-      const previous = query_client.getQueryData(
-        QUERY_KEY_ACCOUNT_SETTINGS
-      ) as any;
-      const apps = (previous?.apps as ConnectedApp[]).map((a) =>
-        a.id === id
-          ? { ...a, status: connect ? "connected" : "disconnected" }
-          : a
-      );
-      query_client.setQueryData(QUERY_KEY_ACCOUNT_SETTINGS, {
-        ...previous,
-        apps,
-      });
-      return { previous };
+  const { mutate: updateMfa, isPending: isUpdatingMfa } = useMutation({
+    mutationFn: (enabled: boolean) =>
+      update_account_settings({ mfa_enabled: enabled }),
+    onSuccess: () => {
+      query_client.invalidateQueries({ queryKey: ["current-user-profile"] });
+      toast.success("Two-factor authentication updated");
     },
-    onError: (_e, _p, ctx) =>
-      ctx?.previous &&
-      query_client.setQueryData(QUERY_KEY_ACCOUNT_SETTINGS, ctx.previous),
   });
 
-  const on_submit_password = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const parsed = password_update_schema.safeParse(password_form);
-    if (!parsed.success) return;
-    update_password(parsed.data);
+  const onSubmitPassword = (data: PasswordUpdateForm) => {
+    updatePassword(data);
   };
 
   return (
@@ -109,7 +72,7 @@ const AccountSettingsComponent = () => {
           Manage your password and security settings
         </p>
 
-        <form onSubmit={on_submit_password} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmitPassword)} className="space-y-4">
           <div className="flex flex-col">
             <Label className="mb-2 text-[13px] font-semibold text-[#111827]">
               Current Password
@@ -117,14 +80,13 @@ const AccountSettingsComponent = () => {
             <Input
               type="password"
               className="h-11 rounded-lg border-[#E5E7EB] placeholder:text-gray-400 focus-visible:border-[var(--primary-color)] focus-visible:ring-0"
-              value={password_form.current_password}
-              onChange={(e) =>
-                set_password_form((p) => ({
-                  ...p,
-                  current_password: e.target.value,
-                }))
-              }
+              {...register("current_password")}
             />
+            {errors.current_password && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.current_password.message}
+              </p>
+            )}
           </div>
           <div className="flex flex-col">
             <Label className="mb-2 text-[13px] font-semibold text-[#111827]">
@@ -133,14 +95,13 @@ const AccountSettingsComponent = () => {
             <Input
               type="password"
               className="h-11 rounded-lg border-[#E5E7EB] placeholder:text-gray-400 focus-visible:border-[var(--primary-color)] focus-visible:ring-0"
-              value={password_form.new_password}
-              onChange={(e) =>
-                set_password_form((p) => ({
-                  ...p,
-                  new_password: e.target.value,
-                }))
-              }
+              {...register("new_password")}
             />
+            {errors.new_password && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.new_password.message}
+              </p>
+            )}
           </div>
           <div className="flex flex-col">
             <Label className="mb-2 text-[13px] font-semibold text-[#111827]">
@@ -149,21 +110,21 @@ const AccountSettingsComponent = () => {
             <Input
               type="password"
               className="h-11 rounded-lg border-[#E5E7EB] placeholder:text-gray-400 focus-visible:border-[var(--primary-color)] focus-visible:ring-0"
-              value={password_form.confirm_new_password}
-              onChange={(e) =>
-                set_password_form((p) => ({
-                  ...p,
-                  confirm_new_password: e.target.value,
-                }))
-              }
+              {...register("confirm_password")}
             />
+            {errors.confirm_password && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.confirm_password.message}
+              </p>
+            )}
           </div>
 
           <Button
-            disabled={is_updating_password}
+            type="submit"
+            disabled={isUpdatingPassword}
             className="h-10 bg-[var(--primary-color)]"
           >
-            Update Password
+            {isUpdatingPassword ? "Updating..." : "Update Password"}
           </Button>
         </form>
       </Section>
@@ -182,17 +143,13 @@ const AccountSettingsComponent = () => {
             </p>
           </div>
           <Switch
-            checked={two_factor.enabled}
-            onCheckedChange={(checked) => {
-              set_two_factor({ enabled: Boolean(checked) });
-              update_two_factor({ enabled: Boolean(checked) });
-            }}
-            disabled={is_updating_2fa}
+            checked={mfaEnabled}
+            onCheckedChange={(checked) => updateMfa(checked)}
+            disabled={isUpdatingMfa}
           />
         </div>
       </Section>
-
-      <Section>
+      {/* <Section>
         <p className="text-base font-semibold">Connected Apps</p>
         <p className="text-xs text-gray-500 mb-4">
           Manage your external integrations
@@ -235,7 +192,7 @@ const AccountSettingsComponent = () => {
             </div>
           ))}
         </div>
-      </Section>
+      </Section> */}
     </div>
   );
 };

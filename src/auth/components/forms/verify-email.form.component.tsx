@@ -22,7 +22,13 @@ import { Link } from "react-router-dom";
 import { TeamMember } from "@/shared/typings/team-member";
 import Banner from "@/shared/components/banner.component";
 
-function VerifyEmailFormComponent({ email, code }: { email: string, code?: string }) {
+function VerifyEmailFormComponent({
+  email,
+  code,
+}: {
+  email: string;
+  code?: string;
+}) {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [banner, setBanner] = useState<{
     message: string;
@@ -37,6 +43,7 @@ function VerifyEmailFormComponent({ email, code }: { email: string, code?: strin
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<VerifyEmailFormData>({
     resolver: zodResolver(verify_email_schema),
     defaultValues: {
@@ -74,7 +81,9 @@ function VerifyEmailFormComponent({ email, code }: { email: string, code?: strin
         return navigate(`/dash/${res.data.user.user_role.replace("_", "-")}`);
       }
       if (res.data.user.organization_id && !res.data.user.is_onboarded) {
-        return navigate(`/onboarding/${res.data.user.user_role.replace("_", "-")}-setup`);
+        return navigate(
+          `/onboarding/${res.data.user.user_role.replace("_", "-")}-setup`,
+        );
       }
       return navigate("/onboarding/hr-setup");
     },
@@ -86,12 +95,6 @@ function VerifyEmailFormComponent({ email, code }: { email: string, code?: strin
       });
     },
   });
-
-  useEffect(() => {
-    if (code && email) {
-      onSubmit({ code: code });
-    }
-  }, [code, email]);
 
   // Resend OTP mutation
   const { mutate: resendMutate, isPending: isResending } = useMutation<
@@ -161,7 +164,12 @@ function VerifyEmailFormComponent({ email, code }: { email: string, code?: strin
                 maxLength={6}
                 pattern={REGEXP_ONLY_DIGITS}
                 value={field.value}
-                onChange={field.onChange}
+                onChange={(value) => {
+                  setValue("code", value);
+                  if (email && code?.length === 6) {
+                    onSubmit({ code: value });
+                  }
+                }}
                 disabled={isPending}
               >
                 <InputOTPGroup className="gap-2 w-[350px] lg:w-full sm:w-full">

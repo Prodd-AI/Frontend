@@ -1,6 +1,10 @@
 import { SERVER_URL } from "@/shared/utils/constants";
 import { ApiService } from "./root.service";
-import { TeamMember } from "@/shared/typings/team-member";
+import {
+  CurrentUserProfile,
+  TeamMember,
+  TeamMemberAccount,
+} from "@/shared/typings/team-member";
 
 const user_api_client = new ApiService(SERVER_URL + "users");
 
@@ -19,6 +23,20 @@ const update_user = (data: Partial<TeamMember["user"]>) => {
   >("profile", transformedData, true);
 };
 
+const update_account_settings = (data: Partial<TeamMemberAccount>) => {
+  return user_api_client.patch<GeneralReturnInt<unknown>, typeof data>(
+    "profile",
+    data,
+    true,
+  );
+};
 
+const get_current_user_profile = () => {
+  return user_api_client.get<GeneralReturnInt<CurrentUserProfile>>(
+    "profile",
+    undefined,
+    true,
+  );
+};
 
-export { update_user };
+export { update_user, update_account_settings, get_current_user_profile };

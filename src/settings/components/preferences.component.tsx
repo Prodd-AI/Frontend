@@ -1,7 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
+import { TimePicker } from "@/components/ui/time-picker";
 import {
   Select,
   SelectContent,
@@ -9,20 +9,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-// Using shadcn Input time variant per docs
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   notifications_schema,
   type NotificationsForm,
   working_hours_schema,
   type WorkingHoursForm,
 } from "@/config/forms/preferences.form";
-import {
-  QUERY_KEY_PREFERENCES,
-  simulate_fetch_preferences,
-  simulate_update_notifications,
-  simulate_update_working_hours,
-} from "@/settings/utils/preferences.functions";
+import { update_account_settings } from "@/config/services/users.service";
+import { CurrentUserProfile } from "@/shared/typings/team-member";
+import { COMMON_TIMEZONES } from "@/shared/utils/constants";
+import { toast } from "sonner";
+
+interface PreferencesProps {
+  user: CurrentUserProfile | undefined;
+}
 
 const Section = ({ children }: { children: React.ReactNode }) => (
   <div className="rounded-xl border border-[#E5E7EB] p-6">{children}</div>
@@ -34,60 +36,87 @@ const RowCard = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-const PreferencesComponent = () => {
+const PreferencesComponent = ({ user }: PreferencesProps) => {
   const query_client = useQueryClient();
-  const { data } = useQuery({
-    queryKey: QUERY_KEY_PREFERENCES,
-    queryFn: simulate_fetch_preferences,
-    staleTime: 60_000,
-  });
 
-  const [notifications, set_notifications] = useState<NotificationsForm>({
-    email: data?.notifications.email ?? true,
-    push: data?.notifications.push ?? false,
-    in_app: data?.notifications.in_app ?? false,
-    task_reminders: data?.notifications.task_reminders ?? false,
-    team_updates: data?.notifications.team_updates ?? false,
-  });
+  const { watch: watchNotifications, setValue: setNotificationValue } =
+    useForm<NotificationsForm>({
+      resolver: zodResolver(notifications_schema),
+      values: user?.user_profile?.notification_setting
+        ? {
+            email_notifications:
+              user.user_profile.notification_setting.email_notifications ??
+              true,
+            push_notifications:
+              user.user_profile.notification_setting.push_notifications ??
+              false,
+            in_app_notifications:
+              user.user_profile.notification_setting.in_app_notifications ??
+              false,
+            task_reminders:
+              user.user_profile.notification_setting.task_reminders ?? false,
+            team_updates:
+              user.user_profile.notification_setting.team_updates ?? false,
+          }
+        : undefined,
+    });
 
-  const [working_hours, set_working_hours] = useState<WorkingHoursForm>({
-    start_time: data?.working_hours.start_time ?? "09:00",
-    end_time: data?.working_hours.end_time ?? "17:00",
-    time_zone: data?.working_hours.time_zone ?? "West African Time",
-    availability: data?.working_hours.availability ?? "Available",
-  });
+  const { watch: watchWorkingHours, setValue: setWorkingHoursValue } =
+    useForm<WorkingHoursForm>({
+      resolver: zodResolver(working_hours_schema),
+      values: user?.user_profile?.working_hours
+        ? {
+            start_time: user.user_profile.working_hours.start_time ?? "9:00 AM",
+            end_time: user.user_profile.working_hours.end_time ?? "5:00 PM",
+            timezone:
+              user.user_profile.working_hours.timezone ?? "Africa/Lagos",
+            availability_status:
+              user.user_profile.working_hours.availability_status ??
+              "available",
+          }
+        : undefined,
+    });
 
-  const { mutate: update_notifications } = useMutation({
-    mutationFn: simulate_update_notifications,
-    onMutate: async (payload) => {
-      await query_client.cancelQueries({ queryKey: QUERY_KEY_PREFERENCES });
-      const previous = query_client.getQueryData(QUERY_KEY_PREFERENCES) as any;
-      query_client.setQueryData(QUERY_KEY_PREFERENCES, {
-        ...previous,
-        notifications: payload,
-      });
-      return { previous };
-    },
-    onError: (_e, _p, ctx) =>
-      ctx?.previous &&
-      query_client.setQueryData(QUERY_KEY_PREFERENCES, ctx.previous),
-  });
+  const notifications = watchNotifications();
+  const working_hours = watchWorkingHours();
 
-  const { mutate: update_hours } = useMutation({
-    mutationFn: simulate_update_working_hours,
-    onMutate: async (payload) => {
-      await query_client.cancelQueries({ queryKey: QUERY_KEY_PREFERENCES });
-      const previous = query_client.getQueryData(QUERY_KEY_PREFERENCES) as any;
-      query_client.setQueryData(QUERY_KEY_PREFERENCES, {
-        ...previous,
-        working_hours: payload,
-      });
-      return { previous };
-    },
-    onError: (_e, _p, ctx) =>
-      ctx?.previous &&
-      query_client.setQueryData(QUERY_KEY_PREFERENCES, ctx.previous),
-  });
+  const { mutate: updateNotifications, isPending: isUpdatingNotifications } =
+    useMutation({
+      mutationFn: (data: NotificationsForm) =>
+        update_account_settings({ notification_setting: data }),
+      onSuccess: () => {
+        query_client.invalidateQueries({ queryKey: ["current-user-profile"] });
+        toast.success("Notification settings updated");
+      },
+    });
+
+  const { mutate: updateWorkingHours, isPending: isUpdatingWorkingHours } =
+    useMutation({
+      mutationFn: (data: WorkingHoursForm) =>
+        update_account_settings({ working_hours: data }),
+      onSuccess: () => {
+        query_client.invalidateQueries({ queryKey: ["current-user-profile"] });
+        toast.success("Working hours updated");
+      },
+    });
+
+  const handleNotificationChange = (
+    key: keyof NotificationsForm,
+    checked: boolean,
+  ) => {
+    setNotificationValue(key, checked);
+    const updatedNotifications = { ...notifications, [key]: checked };
+    updateNotifications(updatedNotifications);
+  };
+
+  const handleWorkingHoursChange = (
+    key: keyof WorkingHoursForm,
+    value: WorkingHoursForm[keyof WorkingHoursForm],
+  ) => {
+    setWorkingHoursValue(key, value);
+    const updatedWorkingHours = { ...working_hours, [key]: value };
+    updateWorkingHours(updatedWorkingHours as WorkingHoursForm);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -101,17 +130,17 @@ const PreferencesComponent = () => {
           {(
             [
               {
-                key: "email",
+                key: "email_notifications",
                 title: "Email Notifications",
                 desc: "Receive updates via email",
               },
               {
-                key: "push",
+                key: "push_notifications",
                 title: "Push Notifications",
                 desc: "Get notified on your device",
               },
               {
-                key: "in_app",
+                key: "in_app_notifications",
                 title: "In-App Notifications",
                 desc: "See notifications within the app",
               },
@@ -133,17 +162,11 @@ const PreferencesComponent = () => {
                 <p className="text-xs text-gray-500">{row.desc}</p>
               </div>
               <Switch
-                checked={Boolean((notifications as any)[row.key])}
-                onCheckedChange={(checked) => {
-                  const next = {
-                    ...notifications,
-                    [row.key]: Boolean(checked),
-                  } as NotificationsForm;
-                  const parsed = notifications_schema.safeParse(next);
-                  if (!parsed.success) return;
-                  set_notifications(parsed.data);
-                  update_notifications(parsed.data);
-                }}
+                checked={Boolean(notifications[row.key])}
+                disabled={isUpdatingNotifications}
+                onCheckedChange={(checked) =>
+                  handleNotificationChange(row.key, checked)
+                }
               />
             </RowCard>
           ))}
@@ -157,40 +180,16 @@ const PreferencesComponent = () => {
         </p>
 
         <div className="grid md:grid-cols-2 gap-4">
-          <div className="flex flex-col">
-            <Label className="mb-2 text-[13px] font-semibold text-[#111827]">
-              Start Time
-            </Label>
-            <Input
-              type="time"
-              className="h-11 rounded-lg border-[#E5E7EB] bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none focus-visible:border-[var(--primary-color)] focus-visible:ring-0"
-              value={working_hours.start_time}
-              onChange={(e) => {
-                const next = { ...working_hours, start_time: e.target.value };
-                const parsed = working_hours_schema.safeParse(next);
-                if (!parsed.success) return;
-                set_working_hours(parsed.data);
-                update_hours(parsed.data);
-              }}
-            />
-          </div>
-          <div className="flex flex-col">
-            <Label className="mb-2 text-[13px] font-semibold text-[#111827]">
-              End Time
-            </Label>
-            <Input
-              type="time"
-              className="h-11 rounded-lg border-[#E5E7EB] bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none focus-visible:border-[var(--primary-color)] focus-visible:ring-0"
-              value={working_hours.end_time}
-              onChange={(e) => {
-                const next = { ...working_hours, end_time: e.target.value };
-                const parsed = working_hours_schema.safeParse(next);
-                if (!parsed.success) return;
-                set_working_hours(parsed.data);
-                update_hours(parsed.data);
-              }}
-            />
-          </div>
+          <TimePicker
+            label="Start Time"
+            value={working_hours.start_time}
+            onChange={(value) => handleWorkingHoursChange("start_time", value)}
+          />
+          <TimePicker
+            label="End Time"
+            value={working_hours.end_time}
+            onChange={(value) => handleWorkingHoursChange("end_time", value)}
+          />
         </div>
 
         <div className="mt-4 space-y-3">
@@ -199,27 +198,17 @@ const PreferencesComponent = () => {
               Time Zone
             </Label>
             <Select
-              value={working_hours.time_zone}
-              onValueChange={(v) => {
-                const next = { ...working_hours, time_zone: v };
-                const parsed = working_hours_schema.safeParse(next);
-                if (!parsed.success) return;
-                set_working_hours(parsed.data);
-                update_hours(parsed.data);
-              }}
+              value={working_hours.timezone}
+              disabled={isUpdatingWorkingHours}
+              onValueChange={(v) => handleWorkingHoursChange("timezone", v)}
             >
               <SelectTrigger className="w-full !h-11">
                 <SelectValue placeholder="Select time zone" />
               </SelectTrigger>
               <SelectContent className="w-full">
-                {[
-                  "West African Time",
-                  "UTC",
-                  "Central European Time",
-                  "Eastern Time",
-                ].map((tz) => (
-                  <SelectItem key={tz} value={tz}>
-                    {tz}
+                {COMMON_TIMEZONES.map((tz) => (
+                  <SelectItem key={tz.value} value={tz.value}>
+                    {tz.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -230,22 +219,25 @@ const PreferencesComponent = () => {
               Availability Status
             </Label>
             <Select
-              value={working_hours.availability}
-              onValueChange={(v: any) => {
-                const next = { ...working_hours, availability: v };
-                const parsed = working_hours_schema.safeParse(next);
-                if (!parsed.success) return;
-                set_working_hours(parsed.data);
-                update_hours(parsed.data);
-              }}
+              value={working_hours.availability_status}
+              disabled={isUpdatingWorkingHours}
+              onValueChange={(v: "available" | "busy" | "away") =>
+                handleWorkingHoursChange("availability_status", v)
+              }
             >
               <SelectTrigger className="w-full !h-11">
                 <SelectValue placeholder="Select availability" />
               </SelectTrigger>
               <SelectContent className="w-full">
-                {(["Available", "Busy", "Away"] as const).map((opt) => (
-                  <SelectItem key={opt} value={opt}>
-                    {opt}
+                {(
+                  [
+                    { value: "available", label: "Available" },
+                    { value: "busy", label: "Busy" },
+                    { value: "away", label: "Away" },
+                  ] as const
+                ).map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
                   </SelectItem>
                 ))}
               </SelectContent>
