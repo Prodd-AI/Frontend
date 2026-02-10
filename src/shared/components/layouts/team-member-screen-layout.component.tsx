@@ -148,7 +148,7 @@ function TeamMemberScreenLayout() {
       document.body.style.overflow = "";
     };
   }, [isMenuOpen]);
-  const notifications = useAppNotifications();
+  const { notifications, markAllAsRead } = useAppNotifications();
   if (isError && !isAuthenticated) {
     return <Navigate to="/auth/login" />;
   }
@@ -240,7 +240,10 @@ function TeamMemberScreenLayout() {
                     )}
                   </button>
                 </PopoverTrigger>
-                <NotificationDropdown notifications={notifications ?? []} />
+                <NotificationDropdown
+                  notifications={notifications}
+                  onMarkAllAsRead={markAllAsRead}
+                />
               </Popover>
 
               {/* User Profile Section with Popover */}

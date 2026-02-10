@@ -27,14 +27,15 @@ const PersonalDashboardSection = ({
   const numberOfTaskCompleted = weekTasks
     ? Object.values(weekTasks)
         .flat()
-        .filter((task) => task.task?.status === "COMPLETED").length
+        .filter((task) => task.task?.status === "completed").length
     : 0;
-
+   
   const todaysTasks = weekTasks?.[todayDayName as keyof typeof weekTasks] ?? [];
   const totalNumberOfTaskForTheDay = todaysTasks.length;
   const numberOfTaskCompletedForTheDay = todaysTasks.filter(
     (task) => task.task.status === "completed",
   ).length;
+
 
   const MoodEmojisMapper = {
     Rough: 1,

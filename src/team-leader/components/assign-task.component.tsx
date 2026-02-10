@@ -32,7 +32,13 @@ import { TeamMemberSelector } from "@/shared/components/team-member-selector.com
 import { DatePickerField } from "@/shared/components/date-picker-field.component";
 
 const schema = z.object({
-  external_link: z.url("External link must be a valid URL"),
+  external_link: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^https?:\/\/.+\..+/.test(val),
+      "External link must be a valid URL",
+    ),
 
   title: z
     .string()

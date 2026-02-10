@@ -15,7 +15,8 @@ import { toast } from "sonner";
 
 function NotificationsPage() {
   const queryClient = useQueryClient();
-  const realtimeNotifications = useAppNotifications();
+  const { notifications: realtimeNotifications, markAllAsRead } =
+    useAppNotifications();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["notifications"],
@@ -46,6 +47,7 @@ function NotificationsPage() {
   const markAllAsReadMutation = useMutation({
     mutationFn: () => markAllUserNoficationAsRead(),
     onSuccess: () => {
+      markAllAsRead();
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
       toast.success("All notifications marked as read");
     },
