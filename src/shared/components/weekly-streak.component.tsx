@@ -5,7 +5,7 @@ import { FaMinus, FaCheck } from "react-icons/fa6";
 import { FaGift } from "react-icons/fa";
 import { WeeklyStreakPropsInt, DayName } from "@/shared/typings/weekly-streak";
 
-const DAYS_ORDER: DayName[] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const DAYS_ORDER: DayName[] = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 
 const WeeklyStreak = ({
   className,
@@ -20,27 +20,32 @@ const WeeklyStreak = ({
       ? (numberOfTaskCompletedForTheDay / totalNumberOfTaskForTheDay) * 100
       : 0;
 
-  const isDayCompleted = (day: DayName): boolean => {
-    if (!weekTasks) return false;
+  const isDayCompleted = (day: DayName): boolean | null => {
+    if (!weekTasks) return null;
     const dayTasks = weekTasks[day];
-    if (dayTasks.length === 0) return false;
+    if (!dayTasks || dayTasks.length === 0) return null; // No tasks = skip
     return dayTasks.every((task) => task.task.status === "completed");
   };
 
   const calculateStreak = (): number => {
+    const todayIndex = DAYS_ORDER.indexOf(
+      new Date().toLocaleDateString("en-US", { weekday: "short" }) as DayName,
+    );
     let streak = 0;
-    for (const day of DAYS_ORDER) {
-      if (isDayCompleted(day)) {
+    // Count backwards from today
+    for (let i = Math.min(todayIndex, DAYS_ORDER.length - 1); i >= 0; i--) {
+      const result = isDayCompleted(DAYS_ORDER[i]);
+      if (result === true) {
         streak++;
-      } else {
-        break;
+      } else if (result === false) {
+        break; // Had tasks but didn't complete them — streak broken
       }
+      // result === null (no tasks) — skip, don't break streak
     }
     return streak;
   };
 
   const currentStreak = calculateStreak();
-
   const getProgressIndicator = () => {
     if (numberOfTaskCompleted === 0) {
       return { emoji: "📋", message: "Let's get started!" };
