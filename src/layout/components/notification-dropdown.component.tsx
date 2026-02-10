@@ -9,14 +9,17 @@ import { toast } from "sonner";
 
 const NotificationDropdown = ({
   notifications,
+  onMarkAllAsRead,
 }: {
   notifications: AppNotification[];
+  onMarkAllAsRead: () => void;
 }) => {
   const queryClient = useQueryClient();
 
   const markAllAsReadMutation = useMutation({
     mutationFn: () => markAllUserNoficationAsRead(),
     onSuccess: () => {
+      onMarkAllAsRead();
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
       toast.success("All notifications marked as read");
     },
@@ -25,6 +28,9 @@ const NotificationDropdown = ({
   const handleMarkAllAsRead = () => {
     markAllAsReadMutation.mutate();
   };
+
+  const hasUnread = notifications.some((n) => !n.is_read);
+
   return (
     <PopoverContent
       align="end"
@@ -37,7 +43,7 @@ const NotificationDropdown = ({
         <button
           type="button"
           onClick={handleMarkAllAsRead}
-          disabled={markAllAsReadMutation.isPending}
+          disabled={markAllAsReadMutation.isPending || !hasUnread}
           className="text-sm text-[#6619DE] hover:text-[#6619DE]/80 transition-colors disabled:opacity-50"
         >
           {markAllAsReadMutation.isPending ? "Marking..." : "Mark all as read"}
@@ -50,6 +56,8 @@ const NotificationDropdown = ({
           <div
             key={notification.id}
             className={`px-6 py-4 ${
+              !notification.is_read ? "bg-[#F3EBFF]/40" : ""
+            } ${
               index < notifications.length - 1
                 ? "border-b border-[#E5E7EB]"
                 : ""
@@ -67,19 +75,12 @@ const NotificationDropdown = ({
                 <p className="text-xs text-[#9CA3AF] mb-3">
                   {formatTimeAgo(notification.created_at)}
                 </p>
-                {/* {notification.action_url && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      (window.location.href = notification.action_url!)
-                    }
-                    className="border-[#6619DE] text-[#6619DE] hover:bg-[#6619DE]/10"
-                  >
-                    View
-                  </Button>
-                )} */}
               </div>
+
+              {/* Unread indicator */}
+              {!notification.is_read && (
+                <span className="size-2 rounded-full bg-[#6619DE] mt-2 shrink-0" />
+              )}
             </div>
           </div>
         ))}
