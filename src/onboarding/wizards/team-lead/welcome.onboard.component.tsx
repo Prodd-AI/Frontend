@@ -10,7 +10,7 @@ const WelcomeTeamLeadOnBoard = () => (
         Welcome on Board 🎉
       </h3>
       <p className=" text-[#6F7277] font-medium text-[16px]">
-        You've been added as a team lead in <b>ACME Corp</b>
+        You've been added as a team lead
       </p>
     </div>
   </div>

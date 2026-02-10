@@ -5,11 +5,10 @@ import NudgeBanner from "@/shared/components/nudge-banner.component";
 import PersonalDashboardSection from "@/team-leader/components/personal-dashboard-section.component";
 import PersonalTabsSection from "@/team-leader/components/personal-tabs-section.component";
 import useUrlSearchParams from "@/shared/hooks/use-url-search-params";
-import MeetingCardComponent from "@/shared/components/meeting-card.component";
-import { sample_meetings } from "@/shared/utils/meeting.constants";
 import { useQueries } from "@tanstack/react-query";
 import { getWeeklyStreak } from "@/config/services/tasks.service";
 import { get_average_mood_for_the_week } from "@/config/services/mood-trends.service";
+import useAuthStore from "@/config/stores/auth.store";
 
 function Page() {
   const [openNudgeBanner, setOpenNudgeBanner] = useState(true);
@@ -19,6 +18,9 @@ function Page() {
     updateParam("tab", tab);
     setParams({ tab });
   };
+
+  const user = useAuthStore((state) => state.user);
+
 
   const [weekTasksQuery, averageMoodQuery] = useQueries({
     queries: [
@@ -43,7 +45,7 @@ function Page() {
   return (
     <div className="py-2 sm:py-4 sm:pb-20">
       <WelcomeBackHeader
-        heading={"Welcome back, Saviour! 👋"}
+        heading={`Welcome back, ${user?.user.first_name}! 👋`}
         subHeading={
           "How are you feeling today? Let's make it productive and positive."
         }
@@ -70,15 +72,6 @@ function Page() {
       <PersonalDashboardSection
         weekTasksQuery={weekTasksQuery}
         averageMoodQuery={averageMoodQuery}
-      />
-
-      <MeetingCardComponent
-        meeting={sample_meetings[0]}
-        actions={{
-          on_join: () => {},
-          on_open_more: () => {},
-        }}
-        className="mt-[25px] sm:mt-[1.7rem]"
       />
 
       <PersonalTabsSection
