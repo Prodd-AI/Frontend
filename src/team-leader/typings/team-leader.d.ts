@@ -72,7 +72,7 @@ declare module "@/team-leader/typings/team-leader" {
 
   export interface CreateTaskDto {
     title: string;
-    external_link: string;
+    external_link?: string;
     description: string;
     assigned_to: string[];
     due_date: string;

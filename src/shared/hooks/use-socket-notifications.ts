@@ -1,6 +1,6 @@
 import useAuthStore from "@/config/stores/auth.store";
 import client_socket from "@/socket";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const useAppNotifications = () => {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -23,7 +23,11 @@ const useAppNotifications = () => {
     };
   }, []);
 
-  return notifications;
+  const markAllAsRead = useCallback(() => {
+    setNotifications((notifs) => notifs.map((n) => ({ ...n, is_read: true })));
+  }, []);
+
+  return { notifications, markAllAsRead };
 };
 
 export default useAppNotifications;

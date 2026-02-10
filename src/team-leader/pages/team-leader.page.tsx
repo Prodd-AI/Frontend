@@ -22,7 +22,7 @@ function TeamLeaderPage() {
         queryFn: () =>
           getWeeklyStreak({
             duration: "week",
-            status: "completed",
+            status: "all",
           }),
       },
       {
