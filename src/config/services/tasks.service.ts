@@ -10,7 +10,7 @@ const task_service = new ApiService(`${SERVER_URL}tasks`);
 
 const getWeeklyStreak = (params: {
   duration: "day" | "week" | "month";
-  status: "pending" | "completed";
+  status: "pending" | "completed" | "all";
 }) =>
   task_service.get<GeneralReturnInt<WeekTasksResponse>>(
     "my-tasks",
@@ -19,9 +19,12 @@ const getWeeklyStreak = (params: {
   );
 
 const assignTasks = (data: CreateTaskDto) => {
-  return task_service.post<GeneralReturnInt<unknown>, typeof data>(
+  const { external_link, ...rest } = data;
+  const payload = external_link ? { ...rest, external_link } : rest;
+
+  return task_service.post<GeneralReturnInt<unknown>, typeof payload>(
     "",
-    data,
+    payload,
     true,
   );
 };
