@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { Outlet, Navigate, useMatches, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Logo from "../Logo.component";
@@ -48,7 +48,6 @@ function TeamMemberScreenLayout() {
     queryKey: ["auth", "session"],
     queryFn: async () => {
       const refresh_token_id = localStorage.getItem("refresh_token_id");
-      console.log(refresh_token_id);
       if (!refresh_token_id) {
         throw new Error("No refresh token found");
       }
@@ -395,7 +394,15 @@ function TeamMemberScreenLayout() {
         className="max-w-[1920px] mx-auto px-2 sm:px-[2.75rem]"
         tabIndex={-1}
       >
-        <Outlet />
+        <Suspense
+          fallback={
+            <div className="h-[50vh] flex justify-center items-center">
+              <Loader />
+            </div>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   );
