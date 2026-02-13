@@ -13,7 +13,7 @@ function TeamParticipationSlider({
     <div
       className={clsx(
         className,
-        ` bg-[#F8F8F9] border h-[12.375rem] rounded-[20px] shadow-xl px-[15px] py-[30px] transition-all duration-300 ease-in-out hover:shadow-2xl hover:scale-[1.02] cursor-pointer`
+        ` bg-[#F8F8F9] border h-[12.375rem] rounded-[20px] shadow-xl px-[15px] py-[30px] transition-all duration-300 ease-in-out hover:shadow-2xl hover:scale-[1.02] cursor-pointer`,
       )}
     >
       <div className="">
@@ -32,7 +32,7 @@ function TeamParticipationSlider({
             {`${activeTeamMembers}/${totalTeamMembers}`} Team members are active
           </span>
         </div>
-        <div className=" min-w-[81.375rem] relative h-[12px] bg-[#EAEBEB] mx-4 rounded-[100px] mt-[15px] overflow-hidden">
+        <div className="relative h-[12px] bg-[#EAEBEB] mx-4 rounded-[100px] mt-[15px] overflow-hidden">
           <div
             className=" w-full absolute h-full rounded-[100px] bg-linear-to-r from-[#251F2D] to-[#686371] transition-all duration-1000 ease-out"
             style={{
