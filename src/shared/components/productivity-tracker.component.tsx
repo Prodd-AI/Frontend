@@ -311,7 +311,7 @@ const ProductivityTrackerSkeleton = memo(() => (
 
 ProductivityTrackerSkeleton.displayName = "ProductivityTrackerSkeleton";
 
-const TeamMemberProductivityTracker = ({
+const ProductivityTracker = ({
   moodData,
   isLoading = false,
 }: ProductivityTrackerProps) => {
@@ -433,4 +433,4 @@ const TeamMemberProductivityTracker = ({
   );
 };
 
-export default memo(TeamMemberProductivityTracker);
+export default memo(ProductivityTracker);
