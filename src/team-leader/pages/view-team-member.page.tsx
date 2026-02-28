@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import GoBackBtn from "@/shared/components/go-back-btn";
 import TeamMemberProfileRow from "../components/team-member-profile-row.component";
-import TeamMemberProductivityTracker from "../components/team-member-productivity-tracker.component";
+import ProductivityTracker from "@/shared/components/productivity-tracker.component";
 import TeamMemberOverviewCard from "../components/team-member-overview.component";
 import { get_user_mood_history } from "@/config/services/mood-trends.service";
 import { get_team_member_overview } from "@/config/services/team-member.service";
@@ -65,10 +65,7 @@ function ViewTeamMember() {
         isLoading={isOverviewLoading}
       />
       <section className=" grid grid-cols-2 gap-x-[1.125rem] mt-[2.875rem]">
-        <TeamMemberProductivityTracker
-          moodData={moodData}
-          isLoading={isMoodLoading}
-        />
+        <ProductivityTracker moodData={moodData} isLoading={isMoodLoading} />
         <TeamMemberOverviewCard
           joinDate={memberOverview?.join_date}
           performanceTrend={memberOverview?.performance_trend}
