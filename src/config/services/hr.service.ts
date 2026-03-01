@@ -27,7 +27,7 @@ const get_flight_risk = (params?: {
  * Get the Healthy/At Risk card view for all teams
  */
 const get_teams_overview_cards = () => {
-  return hr_analytics_service.get<GeneralReturnInt<any>>("teams-overview-cards", undefined, true);
+  return hr_analytics_service.get<GeneralReturnInt<TeamOverviewCardResponse[]>>("teams-overview-cards", undefined, true);
 };
 
 /**
@@ -51,3 +51,5 @@ export {
   get_team_detail,
   get_employee_detail,
 };
+
+

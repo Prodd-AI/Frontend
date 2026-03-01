@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import GoBackBtn from "@/shared/components/go-back-btn";
 import TeamMemberProfileRow from "@/team-leader/components/team-member-profile-row.component";
-import TeamMemberProductivityTracker from "@/team-leader/components/team-member-productivity-tracker.component";
+import ProductivityTracker from "@/shared/components/productivity-tracker.component";
 import TeamMemberOverviewCard from "@/team-leader/components/team-member-overview.component";
 import { get_user_mood_history } from "@/config/services/mood-trends.service";
 import { get_employee_detail } from "@/config/services/hr.service";
@@ -76,10 +76,7 @@ export default function EmployeeDetailPage() {
       />
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-        <TeamMemberProductivityTracker
-          moodData={mood_data}
-          isLoading={is_mood_loading}
-        />
+        <ProductivityTracker moodData={mood_data} isLoading={is_mood_loading} />
         <TeamMemberOverviewCard
           joinDate={employee_detail?.join_date}
           performanceTrend={employee_detail?.performance_trend}

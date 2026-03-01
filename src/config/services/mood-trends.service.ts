@@ -44,7 +44,7 @@ const get_user_mood_history = (
   >(`user/${user_id}/history`, params, true);
 };
 const get_mood_distribution = (params: {
-  date_filter: string;
+  date_filter: "this_week" | "last_week";
   team_id?: string;
   employee_id?: string;
 }) => {
@@ -59,9 +59,25 @@ const get_mood_distribution = (params: {
   >("mood-distribution", params, true);
 };
 
+const get_mood_distribution_history = (params: {
+  date_filter: "this_week" | "last_week";
+  team_id?: string;
+  employee_id?: string;
+}) => {
+  return mood_trend_service.get<
+    GeneralReturnInt<
+      Array<{
+        date: string;
+        mood: "great" | "good" | "okay" | "notGreat" | "rough" | null;
+      }>
+    >
+  >("mood-distribution/history", params, true);
+};
+
 export {
   submit_check_in_mood,
   get_average_mood_for_the_week,
   get_user_mood_history,
   get_mood_distribution,
+  get_mood_distribution_history,
 };
