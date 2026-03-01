@@ -35,7 +35,6 @@ import { Loader2 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { TeamAnalysisInfo } from "@/shared/typings/team-analysis-card";
 
 function HrPage() {
   const navigate = useNavigate();
@@ -95,20 +94,20 @@ function HrPage() {
   const avg_mood =
     analysis_teams.length > 0
       ? (
-        analysis_teams.reduce(
-          (acc: number, team: any) => acc + (team.avg_score || 0),
-          0,
-        ) / analysis_teams.length
-      ).toFixed(1)
+          analysis_teams.reduce(
+            (acc: number, team: any) => acc + (team.avg_score || 0),
+            0,
+          ) / analysis_teams.length
+        ).toFixed(1)
       : "0";
   const avg_participation =
     analysis_teams.length > 0
       ? (
-        analysis_teams.reduce(
-          (acc: number, team: any) => acc + (team.participation_percent || 0),
-          0,
-        ) / analysis_teams.length
-      ).toFixed(0)
+          analysis_teams.reduce(
+            (acc: number, team: any) => acc + (team.participation_percent || 0),
+            0,
+          ) / analysis_teams.length
+        ).toFixed(0)
       : "0";
 
   const status_items = [
@@ -222,7 +221,7 @@ function HrPage() {
                 <Loader2 className="animate-spin text-primary-color" />
               </div>
             ) : (
-              filtered_analysis_teams.map((team: TeamAnalysisInfo, idx: number) => (
+              filtered_analysis_teams.map((team: any, idx: number) => (
                 <TeamPerformanceListItem
                   key={`${team.team_id}-${idx}`}
                   team={team}
