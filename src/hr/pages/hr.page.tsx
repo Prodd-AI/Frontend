@@ -78,15 +78,15 @@ function HrPage() {
   const scheduleMeetingDefaultValues: ScheduleMeetingDefaultValues | undefined =
     scheduleMeetingPrefill
       ? {
-          title: `1:1 with ${scheduleMeetingPrefill.member_name}`,
-          type: "1:1",
-          description:
-            "Check-in and wellbeing conversation. Discuss workload, blockers, and support needed.",
-          attendee_emails: resolvedPrefillEmail
-            ? [resolvedPrefillEmail]
-            : [],
-          defaultTeamId: scheduleMeetingPrefill.team_id,
-        }
+        title: `1:1 with ${scheduleMeetingPrefill.member_name}`,
+        type: "1:1",
+        description:
+          "Check-in and wellbeing conversation. Discuss workload, blockers, and support needed.",
+        attendee_emails: resolvedPrefillEmail
+          ? [resolvedPrefillEmail]
+          : [],
+        defaultTeamId: scheduleMeetingPrefill.team_id,
+      }
       : undefined;
 
   const handle_schedule_one_to_one = (person: FlightRiskInfo) => {
@@ -426,7 +426,7 @@ function HrPage() {
       </div>
 
       {/* Top Metrics */}
-      <StatusCards items={status_items} />
+      <div className="bg-white p-4 rounded-xl shadow-sm"><StatusCards items={status_items} /></div>
 
       {/* Tabs & Content */}
       <Tabs
