@@ -63,6 +63,31 @@ export interface WeeklySummaryResponse {
 	success: boolean;
 }
 
+// Team entries (time entries grouped by team and member)
+export interface TeamEntryMember {
+	user_id: string;
+	full_name: string;
+	role: string;
+	entries_count: number;
+	total_hours: number;
+}
+
+export interface TeamEntryTeam {
+	team_id: string;
+	team_name: string;
+	member_count: number;
+	total_entries: number;
+	total_hours: number;
+	members: TeamEntryMember[];
+}
+
+export interface TeamEntriesResponse {
+	message?: string;
+	data: TeamEntryTeam[];
+	timestamp?: string;
+	success?: boolean;
+}
+
 // Service
 const timeTrackingService = new ApiService(`${SERVER_URL}time-tracking`);
 
@@ -91,4 +116,11 @@ const getWeeklySummary = () => {
 	return timeTrackingService.get<WeeklySummaryResponse>('weekly-summary', undefined, true);
 };
 
-export { clockAction, allocateTime, getWeeklySummary };
+/**
+ * Get detailed time entries grouped by team and member
+ */
+const getTeamEntries = () => {
+	return timeTrackingService.get<TeamEntriesResponse>('team-entries', undefined, true);
+};
+
+export { clockAction, allocateTime, getWeeklySummary, getTeamEntries };
