@@ -10,6 +10,7 @@ import { get_teams_overview_cards } from "@/config/services/hr.service";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Plus, Search } from "lucide-react";
+import type { TeamOverviewCardResponse } from "@/shared/typings/hr-service";
 
 function Teams() {
   const navigate = useNavigate();

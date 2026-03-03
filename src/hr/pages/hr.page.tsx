@@ -1,77 +1,118 @@
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import StatusCards from "@/shared/components/status-cards.component";
 import TeamAnalysisCardComponent from "@/shared/components/team-analysis-card.component";
 import TeamPerformanceListItem from "../components/team-performance-list-item.component";
 import FlightRiskCardComponent from "@/hr/components/flight-risk-card.component";
-import WellnessTrendCards from "@/hr/components/wellness-trend-cards.component";
+// import WellnessTrendCards from "@/hr/components/wellness-trend-cards.component";
 import MoodHeatmap from "../components/mood-heatmap.component";
 import TimesheetWeeklyOverview from "../components/timesheet-overview.component";
 import HrPayroll from "../components/hr-payroll.component";
 import useTeamStore from "@/config/stores/team.store";
-import useDateStore from "@/config/stores/date.store";
-import { DatePeriod } from "@/shared/typings/date.store";
-import { FiDownload, FiFilter } from "react-icons/fi";
-import { GoGraph, GoArrowUpRight } from "react-icons/go";
+import InviteTeamMembersDialog from "../components/invite-team-members-dialog.component";
+import ScheduleMeeting, {
+  type ScheduleMeetingDefaultValues,
+} from "@/shared/components/schedule-meeting.component";
+import type { FlightRiskInfo } from "@/hr/typings/flight-risk-card";
+import { FiDownload } from "react-icons/fi";
+import { GoGraph } from "react-icons/go";
 import { HiOutlineUserGroup } from "react-icons/hi";
 import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDashboard } from "react-icons/md";
 import { PiUsersThree } from "react-icons/pi";
 import { RiHeartPulseLine } from "react-icons/ri";
+import { useQuery } from "@tanstack/react-query";
+import { getTeamMembers } from "@/config/services/teams.service";
+import { get_upcoming_meetings_today } from "@/config/services/meeting.service";
+import { UpcomingSchedule } from "@/shared/components/upcoming-schedule.component";
 import { useFlightRisk } from "../hooks/use-flight-risk";
-import { useTeams } from "@/shared/hooks/use-teams";
 import { useTeamsOverview } from "../hooks/use-teams-overview";
 import { Loader2 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 function HrPage() {
   const navigate = useNavigate();
   const [active_tab, set_active_tab] = useState("overview");
 
-  const handle_view_employee = (id: string) => {
-    navigate(`/dash/hr/employee/${id}`);
+  const handle_view_employee = (team_id: string | undefined, id: string) => {
+    if (team_id) {
+      navigate(`/dash/hr/teams/${team_id}/${id}`);
+    } else {
+      navigate(`/dash/hr/employee/${id}`);
+    }
   };
 
   const handle_view_team = (id: string) => {
-    navigate(`/dash/hr/team/${id}`);
+    navigate(`/dash/hr/teams/${id}`);
   };
+
+  const [scheduleMeetingOpen, set_schedule_meeting_open] = useState(false);
+  const [scheduleMeetingPrefill, set_schedule_meeting_prefill] =
+    useState<FlightRiskInfo | null>(null);
+
+  const { data: prefillTeamMembersData } = useQuery({
+    queryKey: [
+      "schedule-prefill-members",
+      scheduleMeetingPrefill?.team_id,
+      scheduleMeetingPrefill?.id,
+    ],
+    queryFn: () =>
+      getTeamMembers(scheduleMeetingPrefill!.team_id!),
+    enabled:
+      !!scheduleMeetingPrefill?.team_id &&
+      !!scheduleMeetingPrefill?.id &&
+      !scheduleMeetingPrefill?.email,
+  });
+
+  const resolvedPrefillEmail =
+    scheduleMeetingPrefill?.email ??
+    prefillTeamMembersData?.data?.find(
+      (m: { id: string; email?: string }) => m.id === scheduleMeetingPrefill?.id,
+    )?.email;
+
+  const scheduleMeetingDefaultValues: ScheduleMeetingDefaultValues | undefined =
+    scheduleMeetingPrefill
+      ? {
+        title: `1:1 with ${scheduleMeetingPrefill.member_name}`,
+        type: "1:1",
+        description:
+          "Check-in and wellbeing conversation. Discuss workload, blockers, and support needed.",
+        attendee_emails: resolvedPrefillEmail
+          ? [resolvedPrefillEmail]
+          : [],
+        defaultTeamId: scheduleMeetingPrefill.team_id,
+      }
+      : undefined;
+
+  const handle_schedule_one_to_one = (person: FlightRiskInfo) => {
+    set_schedule_meeting_prefill(person);
+    set_schedule_meeting_open(true);
+  };
+
   const [active_team_sub_tab, set_active_team_sub_tab] = useState<
     "analysis" | "timesheet" | "payroll"
   >("analysis");
 
-  const [invite_email, set_invite_email] = useState("");
+  const { search_term } = useTeamStore();
 
-  const handle_invite = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!invite_email) return toast.error("Please enter an email address");
-    toast.success(`Invitation sent to ${invite_email}!`);
-    set_invite_email("");
-  };
-
-  const {
-    selectedTeamId: selected_team_id,
-    setSelectedTeamId: set_selected_team_id,
-    search_term,
-    set_search_term,
-  } = useTeamStore();
-  const { selected_period, set_selected_period } = useDateStore();
-
-  const { teams: real_teams, is_loading: is_teams_loading } = useTeams();
   const { flight_risks, is_loading: is_flight_risk_loading } = useFlightRisk();
   const { teams: analysis_teams, is_loading: is_analysis_loading } =
     useTeamsOverview();
+
+  const { data: upcomingMeetingsData, isLoading: upcomingMeetingsLoading } =
+    useQuery({
+      queryKey: ["upcoming-meetings-today"],
+      queryFn: () => get_upcoming_meetings_today(),
+    });
+  const upcomingMeetingData = upcomingMeetingsData?.data;
+  const upcomingRemainingCount = upcomingMeetingData?.remaining_meetings?.length ?? 0;
 
   const filtered_analysis_teams = analysis_teams.filter(
     (team: any) =>
@@ -94,20 +135,20 @@ function HrPage() {
   const avg_mood =
     analysis_teams.length > 0
       ? (
-          analysis_teams.reduce(
-            (acc: number, team: any) => acc + (team.avg_score || 0),
-            0,
-          ) / analysis_teams.length
-        ).toFixed(1)
+        analysis_teams.reduce(
+          (acc: number, team: any) => acc + (team.avg_score || 0),
+          0,
+        ) / analysis_teams.length
+      ).toFixed(1)
       : "0";
   const avg_participation =
     analysis_teams.length > 0
       ? (
-          analysis_teams.reduce(
-            (acc: number, team: any) => acc + (team.participation_percent || 0),
-            0,
-          ) / analysis_teams.length
-        ).toFixed(0)
+        analysis_teams.reduce(
+          (acc: number, team: any) => acc + (team.participation_percent || 0),
+          0,
+        ) / analysis_teams.length
+      ).toFixed(0)
       : "0";
 
   const status_items = [
@@ -177,34 +218,32 @@ function HrPage() {
     },
   ];
 
-  const wellness_trends = [
-    {
-      id: "1",
-      title: "Positive Trend",
-      description:
-        "Engineering team mood improved 15% this month after implementing flexible hours",
-      variant: "positive" as const,
-    },
-    {
-      id: "2",
-      title: "Attention Needed",
-      description:
-        "Design team maintained 4.2+ mood rating for 3 consecutive weeks",
-      variant: "achievement" as const,
-    },
-    {
-      id: "4",
-      title: "Burnout Risk Alerts",
-      description: "Sales team showing elevated stress levels during Q1 push",
-      variant: "risk" as const,
-    },
-  ];
-
-  console.log(filtered_analysis_teams);
+  // const wellness_trends = [
+  //   {
+  //     id: "1",
+  //     title: "Positive Trend",
+  //     description:
+  //       "Engineering team mood improved 15% this month after implementing flexible hours",
+  //     variant: "positive" as const,
+  //   },
+  //   {
+  //     id: "2",
+  //     title: "Attention Needed",
+  //     description:
+  //       "Design team maintained 4.2+ mood rating for 3 consecutive weeks",
+  //     variant: "achievement" as const,
+  //   },
+  //   {
+  //     id: "4",
+  //     title: "Burnout Risk Alerts",
+  //     description: "Sales team showing elevated stress levels during Q1 push",
+  //     variant: "risk" as const,
+  //   },
+  // ];
 
   const overview_content = (
     <div className="space-y-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-bold flex items-center gap-2 text-[#251F2D]">
@@ -232,7 +271,7 @@ function HrPage() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        {/* <div className="space-y-6">
           <div>
             <h3 className="text-lg font-bold flex items-center gap-2 text-[#251F2D]">
               <RiHeartPulseLine className="text-success-color" /> Wellness
@@ -243,29 +282,7 @@ function HrPage() {
             </p>
           </div>
           <WellnessTrendCards items={wellness_trends} />
-        </div>
-      </div>
-
-      {/* Invite Attendee Section */}
-      <div className="w-full max-w-md">
-        <h4 className="text-sm font-bold text-[#251F2D] mb-3">
-          Invite Attendee
-        </h4>
-        <form onSubmit={handle_invite} className="flex items-center gap-3">
-          <Input
-            placeholder="email address"
-            className="bg-[#F9FAFB] border border-[#E5E7EB] h-[48px] focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-[#6619DE]"
-            value={invite_email}
-            onChange={(e) => set_invite_email(e.target.value)}
-            type="email"
-          />
-          <Button
-            type="submit"
-            className="bg-[#6619DE] hover:bg-[#5214B3] w-[56px] h-[48px] shrink-0 rounded-[8px]"
-          >
-            <GoArrowUpRight size={24} />
-          </Button>
-        </form>
+        </div> */}
       </div>
     </div>
   );
@@ -300,7 +317,8 @@ function HrPage() {
               key={person.id}
               person={person}
               actions={{
-                on_view_profile: (id) => handle_view_employee(id),
+                on_schedule_one_to_one: handle_schedule_one_to_one,
+                on_view_profile: (team_id, id) => handle_view_employee(team_id, id),
               }}
             />
           ))}
@@ -311,6 +329,28 @@ function HrPage() {
 
   return (
     <div className="py-4 md:py-6 space-y-8">
+      <Dialog
+        open={scheduleMeetingOpen}
+        onOpenChange={(open) => {
+          set_schedule_meeting_open(open);
+          if (!open) set_schedule_meeting_prefill(null);
+        }}
+      >
+        <DialogContent className="max-w-[720px] p-8 rounded-2xl border-gray-200/80 shadow-xl">
+          <ScheduleMeeting
+            defaultValues={scheduleMeetingDefaultValues}
+            onCancel={() => {
+              set_schedule_meeting_open(false);
+              set_schedule_meeting_prefill(null);
+            }}
+            onSchedule={() => {
+              set_schedule_meeting_open(false);
+              set_schedule_meeting_prefill(null);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
       {/* Header & Filters */}
       <div className="flex flex-col gap-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -322,12 +362,25 @@ function HrPage() {
               Strategic insights into team wellbeing and productivity
             </p>
           </div>
-          <Button className="w-full md:w-auto cursor-pointer h-[44px] bg-gradient-to-r px-6 from-primary-color to-[#1C75BC] hover:scale-105 transition-all duration-300 gap-2">
-            <FiDownload /> Export Report
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <InviteTeamMembersDialog
+              trigger={
+                <Button
+                  variant="outline"
+                  className="w-full md:w-auto h-[44px] gap-2 border-gray-300"
+                >
+                  <HiOutlineUserGroup className="size-4" />
+                  Invite new team member
+                </Button>
+              }
+            />
+            <Button className="w-full md:w-auto cursor-pointer h-[44px] bg-gradient-to-r px-6 from-primary-color to-[#1C75BC] hover:scale-105 transition-all duration-300 gap-2">
+              <FiDownload /> Export Report
+            </Button>
+          </div>
         </div>
 
-        <div className="mt-4 bg-white p-6 rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-12 items-center gap-4">
+        {/* <div className="mt-4 bg-white p-6 rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-12 items-center gap-4">
           <div className="md:col-span-1 flex items-center gap-2 text-gray-500 font-medium whitespace-nowrap">
             <FiFilter /> Filters:
           </div>
@@ -379,11 +432,20 @@ function HrPage() {
               onChange={(e) => set_search_term(e.target.value)}
             />
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Top Metrics */}
-      <StatusCards items={status_items} />
+      <div className="bg-white p-4 rounded-xl shadow-sm"><StatusCards items={status_items} /></div>
+
+      {/* Upcoming Meetings */}
+      <div className="mt-4">
+        <UpcomingSchedule
+          meeting={upcomingMeetingData}
+          remainingCount={upcomingRemainingCount}
+          isLoading={upcomingMeetingsLoading}
+        />
+      </div>
 
       {/* Tabs & Content */}
       <Tabs

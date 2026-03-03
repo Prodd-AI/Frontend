@@ -9,9 +9,7 @@ import { DatePeriod } from "@/shared/typings/date.store";
 // Map date period to API date_filter format
 const mapDatePeriodToFilter = (period: DatePeriod): string => {
   if (period === "this_week") return "this_week";
-  if (period === "this_month") return "this_month";
-  if (period === "last_week" || period === "7days") return "this_week";
-  if (period === "last_month" || period === "30days") return "this_month";
+  if (period === "last_week") return "last_week";
   return "this_week"; // default
 };
 
@@ -72,9 +70,9 @@ export const useMoodAnalytics = (options?: {
   const average_weekly_score =
     formatted_data.length > 0
       ? (
-          formatted_data.reduce((acc, curr) => acc + curr.score, 0) /
-          formatted_data.length
-        ).toFixed(1)
+        formatted_data.reduce((acc, curr) => acc + curr.score, 0) /
+        formatted_data.length
+      ).toFixed(1)
       : "0.0";
 
   return {

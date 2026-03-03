@@ -1,4 +1,4 @@
-export type DatePeriod = "7days" | "30days" | "last_week" | "last_month" | "this_week" | "this_month";
+export type DatePeriod = "last_week" | "this_week"
 
 export interface DateState {
   selected_period: DatePeriod;
