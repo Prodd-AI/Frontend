@@ -1,4 +1,8 @@
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -12,6 +16,10 @@ import TimesheetWeeklyOverview from "../components/timesheet-overview.component"
 import HrPayroll from "../components/hr-payroll.component";
 import useTeamStore from "@/config/stores/team.store";
 import InviteTeamMembersDialog from "../components/invite-team-members-dialog.component";
+import ScheduleMeeting, {
+  type ScheduleMeetingDefaultValues,
+} from "@/shared/components/schedule-meeting.component";
+import type { FlightRiskInfo } from "@/hr/typings/flight-risk-card";
 import { FiDownload } from "react-icons/fi";
 import { GoGraph } from "react-icons/go";
 import { HiOutlineUserGroup } from "react-icons/hi";
@@ -19,6 +27,8 @@ import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDashboard } from "react-icons/md";
 import { PiUsersThree } from "react-icons/pi";
 import { RiHeartPulseLine } from "react-icons/ri";
+import { useQuery } from "@tanstack/react-query";
+import { getTeamMembers } from "@/config/services/teams.service";
 import { useFlightRisk } from "../hooks/use-flight-risk";
 import { useTeamsOverview } from "../hooks/use-teams-overview";
 import { Loader2 } from "lucide-react";
@@ -40,6 +50,50 @@ function HrPage() {
   const handle_view_team = (id: string) => {
     navigate(`/dash/hr/teams/${id}`);
   };
+
+  const [scheduleMeetingOpen, set_schedule_meeting_open] = useState(false);
+  const [scheduleMeetingPrefill, set_schedule_meeting_prefill] =
+    useState<FlightRiskInfo | null>(null);
+
+  const { data: prefillTeamMembersData } = useQuery({
+    queryKey: [
+      "schedule-prefill-members",
+      scheduleMeetingPrefill?.team_id,
+      scheduleMeetingPrefill?.id,
+    ],
+    queryFn: () =>
+      getTeamMembers(scheduleMeetingPrefill!.team_id!),
+    enabled:
+      !!scheduleMeetingPrefill?.team_id &&
+      !!scheduleMeetingPrefill?.id &&
+      !scheduleMeetingPrefill?.email,
+  });
+
+  const resolvedPrefillEmail =
+    scheduleMeetingPrefill?.email ??
+    prefillTeamMembersData?.data?.find(
+      (m: { id: string; email?: string }) => m.id === scheduleMeetingPrefill?.id,
+    )?.email;
+
+  const scheduleMeetingDefaultValues: ScheduleMeetingDefaultValues | undefined =
+    scheduleMeetingPrefill
+      ? {
+          title: `1:1 with ${scheduleMeetingPrefill.member_name}`,
+          type: "1:1",
+          description:
+            "Check-in and wellbeing conversation. Discuss workload, blockers, and support needed.",
+          attendee_emails: resolvedPrefillEmail
+            ? [resolvedPrefillEmail]
+            : [],
+          defaultTeamId: scheduleMeetingPrefill.team_id,
+        }
+      : undefined;
+
+  const handle_schedule_one_to_one = (person: FlightRiskInfo) => {
+    set_schedule_meeting_prefill(person);
+    set_schedule_meeting_open(true);
+  };
+
   const [active_team_sub_tab, set_active_team_sub_tab] = useState<
     "analysis" | "timesheet" | "payroll"
   >("analysis");
@@ -253,6 +307,7 @@ function HrPage() {
               key={person.id}
               person={person}
               actions={{
+                on_schedule_one_to_one: handle_schedule_one_to_one,
                 on_view_profile: (team_id, id) => handle_view_employee(team_id, id),
               }}
             />
@@ -264,6 +319,28 @@ function HrPage() {
 
   return (
     <div className="py-4 md:py-6 space-y-8">
+      <Dialog
+        open={scheduleMeetingOpen}
+        onOpenChange={(open) => {
+          set_schedule_meeting_open(open);
+          if (!open) set_schedule_meeting_prefill(null);
+        }}
+      >
+        <DialogContent className="max-w-[720px] p-8 rounded-2xl border-gray-200/80 shadow-xl">
+          <ScheduleMeeting
+            defaultValues={scheduleMeetingDefaultValues}
+            onCancel={() => {
+              set_schedule_meeting_open(false);
+              set_schedule_meeting_prefill(null);
+            }}
+            onSchedule={() => {
+              set_schedule_meeting_open(false);
+              set_schedule_meeting_prefill(null);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
       {/* Header & Filters */}
       <div className="flex flex-col gap-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

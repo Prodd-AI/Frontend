@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,9 +34,28 @@ import {
 } from "./team-member-selector.component";
 import { DatePickerField } from "./date-picker-field.component";
 
+export type ScheduleMeetingType =
+  | "1:1"
+  | "Team Sync"
+  | "Review"
+  | "All Hands"
+  | "Workshop"
+  | "other";
+
+export interface ScheduleMeetingDefaultValues {
+  title?: string;
+  type?: ScheduleMeetingType;
+  description?: string;
+  attendee_emails?: string[];
+  /** When set (e.g. from flight risk 1:1), this team is selected first so prefilled attendees appear in the list */
+  defaultTeamId?: string;
+}
+
 interface ScheduleMeetingProps {
   onCancel?: () => void;
   onSchedule?: () => void;
+  /** Prefill form when opening (e.g. from flight risk "Schedule 1:1") */
+  defaultValues?: ScheduleMeetingDefaultValues;
 }
 
 const schema = z.object({
@@ -74,11 +93,22 @@ const schema = z.object({
 
 type ScheduleMeetingFormData = z.infer<typeof schema>;
 
-const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
-  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+const ScheduleMeeting = ({
+  onCancel,
+  onSchedule,
+  defaultValues: defaultValuesProp,
+}: ScheduleMeetingProps) => {
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(
+    defaultValuesProp?.defaultTeamId ?? null,
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [isAttendeePopoverOpen, setIsAttendeePopoverOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
+
+  useEffect(() => {
+    if (defaultValuesProp?.defaultTeamId)
+      setSelectedTeamId(defaultValuesProp.defaultTeamId);
+  }, [defaultValuesProp?.defaultTeamId]);
 
   const {
     register,
@@ -91,17 +121,29 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
   } = useForm<ScheduleMeetingFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      attendee_emails: [],
-      description: "",
+      title: defaultValuesProp?.title ?? "",
+      type: defaultValuesProp?.type ?? undefined,
+      description: defaultValuesProp?.description ?? "",
+      attendee_emails: defaultValuesProp?.attendee_emails ?? [],
     },
   });
+
+  useEffect(() => {
+    if (!defaultValuesProp) return;
+    reset({
+      title: defaultValuesProp.title ?? "",
+      type: defaultValuesProp.type,
+      description: defaultValuesProp.description ?? "",
+      attendee_emails: defaultValuesProp.attendee_emails ?? [],
+    } as Partial<ScheduleMeetingFormData>);
+  }, [defaultValuesProp, reset]);
 
   const selectedAttendeeEmails = watch("attendee_emails");
 
   const { data: teamsData, isLoading: teamsLoading } = useQuery({
     queryKey: ["schedule-meeting-teams"],
     queryFn: () => getTeams(),
-    enabled: isAttendeePopoverOpen,
+    enabled: isAttendeePopoverOpen || !!defaultValuesProp?.defaultTeamId,
   });
 
   const teams =
@@ -185,6 +227,11 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
   const getSelectedMemberDetails = () => {
     return teamMembers.filter((m) => selectedAttendeeEmails.includes(m.email));
   };
+
+  /** Emails that are selected but not in current team list (e.g. prefilled from another team before it loaded) */
+  const selectedEmailsNotInList = selectedAttendeeEmails.filter(
+    (email) => !teamMembers.some((m) => m.email === email),
+  );
 
   return (
     <form
@@ -447,11 +494,12 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
                 </div>
               </div>
 
-              {getSelectedMemberDetails().length > 0 && (
+              {(getSelectedMemberDetails().length > 0 ||
+                selectedEmailsNotInList.length > 0) && (
                 <>
                   <div className="w-px h-8 bg-gray-200/80" />
 
-                  {/* Selected attendees */}
+                  {/* Selected attendees (from current team list) */}
                   <div className="flex items-center gap-2 flex-1 flex-wrap">
                     {getSelectedMemberDetails().map((member) => (
                       <div
@@ -474,6 +522,29 @@ const ScheduleMeeting = ({ onCancel, onSchedule }: ScheduleMeetingProps) => {
                         <button
                           type="button"
                           onClick={() => removeAttendee(member.email)}
+                          className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200"
+                        >
+                          <X className="w-2.5 h-2.5 text-muted-foreground" />
+                        </button>
+                      </div>
+                    ))}
+                    {/* Prefilled attendees not yet in current team list (e.g. still loading) */}
+                    {selectedEmailsNotInList.map((email) => (
+                      <div
+                        key={email}
+                        className="group relative flex items-center gap-2 pl-1 pr-2 py-1 bg-white rounded-full border border-gray-200/80 shadow-sm transition-all duration-150 hover:border-gray-300"
+                      >
+                        <Avatar className="w-6 h-6">
+                          <AvatarFallback className="bg-gray-100 text-muted-foreground text-[10px] font-medium">
+                            {email[0]?.toUpperCase() ?? "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-xs font-medium text-foreground truncate max-w-[120px]">
+                          {email}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeAttendee(email)}
                           className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200"
                         >
                           <X className="w-2.5 h-2.5 text-muted-foreground" />

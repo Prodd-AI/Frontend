@@ -73,7 +73,7 @@ export default function FlightRiskCardComponent({
         <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <Button
             className="flex-1 md:flex-none h-9 text-xs font-semibold bg-[#F3F4F6] text-[#251F2D] hover:bg-[#E5E7EB] shadow-none border border-transparent"
-            onClick={() => actions?.on_schedule_one_to_one?.(person.id)}
+            onClick={() => actions?.on_schedule_one_to_one?.(person)}
           >
             Schedule 1:1
           </Button>

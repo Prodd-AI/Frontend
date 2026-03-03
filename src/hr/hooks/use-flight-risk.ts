@@ -14,6 +14,7 @@ interface FlightRiskApiItem {
   job_title: string;
   team_name: string;
   avatar_url: string | null;
+  email?: string;
   avg_mood_30d: number;
   task_completion_rate: number;
   weekly_streak_days: number;
@@ -50,6 +51,7 @@ function mapApiItemToFlightRiskInfo(
     role_title: item.job_title,
     team_id: teamNameToId[item.team_name] ?? undefined,
     team_name: item.team_name,
+    email: item.email,
     avg_mood_score: item.avg_mood_30d,
     task_completion_percent: taskPercent,
     weekly_streak_days: item.weekly_streak_days,
