@@ -29,6 +29,8 @@ import { PiUsersThree } from "react-icons/pi";
 import { RiHeartPulseLine } from "react-icons/ri";
 import { useQuery } from "@tanstack/react-query";
 import { getTeamMembers } from "@/config/services/teams.service";
+import { get_upcoming_meetings_today } from "@/config/services/meeting.service";
+import { UpcomingSchedule } from "@/shared/components/upcoming-schedule.component";
 import { useFlightRisk } from "../hooks/use-flight-risk";
 import { useTeamsOverview } from "../hooks/use-teams-overview";
 import { Loader2 } from "lucide-react";
@@ -103,6 +105,14 @@ function HrPage() {
   const { flight_risks, is_loading: is_flight_risk_loading } = useFlightRisk();
   const { teams: analysis_teams, is_loading: is_analysis_loading } =
     useTeamsOverview();
+
+  const { data: upcomingMeetingsData, isLoading: upcomingMeetingsLoading } =
+    useQuery({
+      queryKey: ["upcoming-meetings-today"],
+      queryFn: () => get_upcoming_meetings_today(),
+    });
+  const upcomingMeetingData = upcomingMeetingsData?.data;
+  const upcomingRemainingCount = upcomingMeetingData?.remaining_meetings?.length ?? 0;
 
   const filtered_analysis_teams = analysis_teams.filter(
     (team: any) =>
@@ -427,6 +437,15 @@ function HrPage() {
 
       {/* Top Metrics */}
       <div className="bg-white p-4 rounded-xl shadow-sm"><StatusCards items={status_items} /></div>
+
+      {/* Upcoming Meetings */}
+      <div className="mt-4">
+        <UpcomingSchedule
+          meeting={upcomingMeetingData}
+          remainingCount={upcomingRemainingCount}
+          isLoading={upcomingMeetingsLoading}
+        />
+      </div>
 
       {/* Tabs & Content */}
       <Tabs

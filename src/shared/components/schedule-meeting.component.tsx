@@ -20,7 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Video, Users, Plus, X, Search } from "lucide-react";
 import { TimePicker } from "@/components/ui/time-picker";
 import { format } from "date-fns";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getTeamMembers, getTeams } from "@/config/services/teams.service";
 import { schedule_meeting } from "@/config/services/meeting.service";
 import { z } from "zod";
@@ -104,6 +104,7 @@ const ScheduleMeeting = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isAttendeePopoverOpen, setIsAttendeePopoverOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (defaultValuesProp?.defaultTeamId)
@@ -174,6 +175,7 @@ const ScheduleMeeting = ({
     onSuccess: () => {
       reset();
       toast.success("Meeting scheduled successfully!");
+      queryClient.invalidateQueries({ queryKey: ["upcoming-meetings-today"] });
       onSchedule?.();
     },
   });
@@ -496,64 +498,64 @@ const ScheduleMeeting = ({
 
               {(getSelectedMemberDetails().length > 0 ||
                 selectedEmailsNotInList.length > 0) && (
-                <>
-                  <div className="w-px h-8 bg-gray-200/80" />
+                  <>
+                    <div className="w-px h-8 bg-gray-200/80" />
 
-                  {/* Selected attendees (from current team list) */}
-                  <div className="flex items-center gap-2 flex-1 flex-wrap">
-                    {getSelectedMemberDetails().map((member) => (
-                      <div
-                        key={member.id}
-                        className="group relative flex items-center gap-2 pl-1 pr-2 py-1 bg-white rounded-full border border-gray-200/80 shadow-sm transition-all duration-150 hover:border-gray-300"
-                      >
-                        <Avatar className="w-6 h-6">
-                          <AvatarImage
-                            src={member.avatar_url ?? ""}
-                            alt={`${member.first_name} ${member.last_name}`}
-                          />
-                          <AvatarFallback className="bg-gray-100 text-muted-foreground text-[10px] font-medium">
-                            {member.first_name[0]}
-                            {member.last_name[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs font-medium text-foreground">
-                          {member.first_name}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => removeAttendee(member.email)}
-                          className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200"
+                    {/* Selected attendees (from current team list) */}
+                    <div className="flex items-center gap-2 flex-1 flex-wrap">
+                      {getSelectedMemberDetails().map((member) => (
+                        <div
+                          key={member.id}
+                          className="group relative flex items-center gap-2 pl-1 pr-2 py-1 bg-white rounded-full border border-gray-200/80 shadow-sm transition-all duration-150 hover:border-gray-300"
                         >
-                          <X className="w-2.5 h-2.5 text-muted-foreground" />
-                        </button>
-                      </div>
-                    ))}
-                    {/* Prefilled attendees not yet in current team list (e.g. still loading) */}
-                    {selectedEmailsNotInList.map((email) => (
-                      <div
-                        key={email}
-                        className="group relative flex items-center gap-2 pl-1 pr-2 py-1 bg-white rounded-full border border-gray-200/80 shadow-sm transition-all duration-150 hover:border-gray-300"
-                      >
-                        <Avatar className="w-6 h-6">
-                          <AvatarFallback className="bg-gray-100 text-muted-foreground text-[10px] font-medium">
-                            {email[0]?.toUpperCase() ?? "?"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs font-medium text-foreground truncate max-w-[120px]">
-                          {email}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => removeAttendee(email)}
-                          className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200"
+                          <Avatar className="w-6 h-6">
+                            <AvatarImage
+                              src={member.avatar_url ?? ""}
+                              alt={`${member.first_name} ${member.last_name}`}
+                            />
+                            <AvatarFallback className="bg-gray-100 text-muted-foreground text-[10px] font-medium">
+                              {member.first_name[0]}
+                              {member.last_name[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-xs font-medium text-foreground">
+                            {member.first_name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeAttendee(member.email)}
+                            className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200"
+                          >
+                            <X className="w-2.5 h-2.5 text-muted-foreground" />
+                          </button>
+                        </div>
+                      ))}
+                      {/* Prefilled attendees not yet in current team list (e.g. still loading) */}
+                      {selectedEmailsNotInList.map((email) => (
+                        <div
+                          key={email}
+                          className="group relative flex items-center gap-2 pl-1 pr-2 py-1 bg-white rounded-full border border-gray-200/80 shadow-sm transition-all duration-150 hover:border-gray-300"
                         >
-                          <X className="w-2.5 h-2.5 text-muted-foreground" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
+                          <Avatar className="w-6 h-6">
+                            <AvatarFallback className="bg-gray-100 text-muted-foreground text-[10px] font-medium">
+                              {email[0]?.toUpperCase() ?? "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-xs font-medium text-foreground truncate max-w-[120px]">
+                            {email}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeAttendee(email)}
+                            className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200"
+                          >
+                            <X className="w-2.5 h-2.5 text-muted-foreground" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
             </div>
           </div>
           {errors.attendee_emails && (
