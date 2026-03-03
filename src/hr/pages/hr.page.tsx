@@ -307,7 +307,7 @@ function HrPage() {
           </div>
         </div>
 
-        <div className="mt-4 bg-white p-6 rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-12 items-center gap-4">
+        {/* <div className="mt-4 bg-white p-6 rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-12 items-center gap-4">
           <div className="md:col-span-1 flex items-center gap-2 text-gray-500 font-medium whitespace-nowrap">
             <FiFilter /> Filters:
           </div>
@@ -359,7 +359,7 @@ function HrPage() {
               onChange={(e) => set_search_term(e.target.value)}
             />
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Top Metrics */}
