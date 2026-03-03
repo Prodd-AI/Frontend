@@ -2,14 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import StatusCards from "@/shared/components/status-cards.component";
 import TeamAnalysisCardComponent from "@/shared/components/team-analysis-card.component";
 import TeamPerformanceListItem from "../components/team-performance-list-item.component";
@@ -19,10 +11,8 @@ import MoodHeatmap from "../components/mood-heatmap.component";
 import TimesheetWeeklyOverview from "../components/timesheet-overview.component";
 import HrPayroll from "../components/hr-payroll.component";
 import useTeamStore from "@/config/stores/team.store";
-import useDateStore from "@/config/stores/date.store";
-import { DatePeriod } from "@/shared/typings/date.store";
 import InviteTeamMembersDialog from "../components/invite-team-members-dialog.component";
-import { FiDownload, FiFilter } from "react-icons/fi";
+import { FiDownload } from "react-icons/fi";
 import { GoGraph } from "react-icons/go";
 import { HiOutlineUserGroup } from "react-icons/hi";
 import { IoWarningOutline } from "react-icons/io5";
@@ -30,7 +20,6 @@ import { MdOutlineDashboard } from "react-icons/md";
 import { PiUsersThree } from "react-icons/pi";
 import { RiHeartPulseLine } from "react-icons/ri";
 import { useFlightRisk } from "../hooks/use-flight-risk";
-import { useTeams } from "@/shared/hooks/use-teams";
 import { useTeamsOverview } from "../hooks/use-teams-overview";
 import { Loader2 } from "lucide-react";
 
@@ -51,15 +40,8 @@ function HrPage() {
     "analysis" | "timesheet" | "payroll"
   >("analysis");
 
-  const {
-    selectedTeamId: selected_team_id,
-    setSelectedTeamId: set_selected_team_id,
-    search_term,
-    set_search_term,
-  } = useTeamStore();
-  const { selected_period, set_selected_period } = useDateStore();
+  const { search_term } = useTeamStore();
 
-  const { teams: real_teams, is_loading: is_teams_loading } = useTeams();
   const { flight_risks, is_loading: is_flight_risk_loading } = useFlightRisk();
   const { teams: analysis_teams, is_loading: is_analysis_loading } =
     useTeamsOverview();
