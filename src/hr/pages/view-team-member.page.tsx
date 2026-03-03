@@ -1,14 +1,14 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import GoBackBtn from "@/shared/components/go-back-btn";
-import TeamMemberProfileRow from "../components/team-member-profile-row.component";
+import TeamMemberProfileRow from "@/team-leader/components/team-member-profile-row.component";
 import ProductivityTracker from "@/shared/components/productivity-tracker.component";
-import TeamMemberOverviewCard from "../components/team-member-overview.component";
+import TeamMemberOverviewCard from "@/team-leader/components/team-member-overview.component";
 import { get_user_mood_history } from "@/config/services/mood-trends.service";
 import { get_team_member_overview } from "@/config/services/team-member.service";
 import { getAssignedTasksForTeamMember } from "@/config/services/tasks.service";
 import { DataTable } from "@/shared/components/data-table/data-table";
-import { memberAssignedTasksColumns } from "../components/columns/member-assigned-tasks-columns";
+import { memberAssignedTasksColumns } from "@/team-leader/components/columns/member-assigned-tasks-columns";
 
 type MoodLevel = "rough" | "notGreat" | "okay" | "good" | "great" | null;
 
@@ -17,46 +17,46 @@ interface DayMood {
   mood: MoodLevel;
 }
 
-function ViewTeamMember() {
-  const { id } = useParams<{ id: string }>();
+export default function HrViewTeamMember() {
+  const { id, memberId } = useParams<{ id: string; memberId: string }>();
 
   const { data: moodData = [], isLoading: isMoodLoading } = useQuery({
-    queryKey: ["user-mood-history", id],
+    queryKey: ["user-mood-history", memberId],
     queryFn: async () => {
-      if (!id) return [];
-      const response = await get_user_mood_history(id);
+      if (!memberId) return [];
+      const response = await get_user_mood_history(memberId);
       const parsedData: DayMood[] = response.data.map((item) => ({
         date: new Date(item.date),
         mood: item.mood,
       }));
       return parsedData;
     },
-    enabled: !!id,
+    enabled: !!memberId,
   });
 
   const { data: memberOverview, isLoading: isOverviewLoading } = useQuery({
-    queryKey: ["team-member-overview", id],
+    queryKey: ["team-member-overview", memberId],
     queryFn: async () => {
-      if (!id) return null;
-      const response = await get_team_member_overview(id);
+      if (!memberId) return null;
+      const response = await get_team_member_overview(memberId);
       return response.data;
     },
-    enabled: !!id,
+    enabled: !!memberId,
   });
 
   const { data: assignedTasksData = [] } = useQuery({
-    queryKey: ["member-assigned-tasks", id],
+    queryKey: ["member-assigned-tasks", memberId],
     queryFn: async () => {
-      if (!id) return [];
-      const response = await getAssignedTasksForTeamMember(id);
+      if (!memberId) return [];
+      const response = await getAssignedTasksForTeamMember(memberId);
       return response.data;
     },
-    enabled: !!id,
+    enabled: !!memberId,
   });
 
   return (
     <div className="pb-12">
-      <GoBackBtn title="Back to team" />
+      <GoBackBtn title="Back to team" path={`/dash/hr/teams/${id}`} />
       <TeamMemberProfileRow
         name={memberOverview?.name}
         role={memberOverview?.job_title}
@@ -64,7 +64,7 @@ function ViewTeamMember() {
         avatar_url={memberOverview?.avatar_url}
         isLoading={isOverviewLoading}
       />
-      <section className=" grid grid-cols-2 gap-x-[1.125rem] mt-[2.875rem]">
+      <section className="grid grid-cols-2 gap-x-[1.125rem] mt-[2.875rem]">
         <ProductivityTracker moodData={moodData} isLoading={isMoodLoading} />
         <TeamMemberOverviewCard
           joinDate={memberOverview?.join_date}
@@ -83,5 +83,3 @@ function ViewTeamMember() {
     </div>
   );
 }
-
-export default ViewTeamMember;

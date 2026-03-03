@@ -79,7 +79,10 @@ export const UpcomingSchedule = ({
           <div className="flex items-center gap-1.5">
             <Clock className="w-4 h-4" />
             <span className="text-sm text-[#6B7280]">
-              in {meeting.start_in_minutes} minutes
+              in{" "}
+              {meeting.start_in_minutes >= 60
+                ? `${Math.floor(meeting.start_in_minutes / 60)}h ${meeting.start_in_minutes % 60 > 0 ? `${meeting.start_in_minutes % 60}m` : ""}`
+                : `${meeting.start_in_minutes} ${meeting.start_in_minutes === 1 ? "min" : "mins"}`}
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-[#6B7280]">

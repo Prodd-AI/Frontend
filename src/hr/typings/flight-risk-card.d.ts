@@ -5,7 +5,9 @@ declare module "@/hr/typings/flight-risk-card" {
     id: string;
     member_name: string; // e.g., "Alex Chan"
     role_title: string; // e.g., "Frontend Develop"
+    team_id?: string; // resolved from GET /teams/me by team_name
     team_name: string; // e.g., "Engineering Team"
+    email?: string; // for prefilling schedule meeting attendees
     avg_mood_score: number; // e.g., 2.1
     avg_mood_scale?: number; // e.g., 5
     task_completion_percent: number; // e.g., 55
@@ -17,9 +19,9 @@ declare module "@/hr/typings/flight-risk-card" {
   }
 
   export interface FlightRiskActions {
-    on_schedule_one_to_one?: (id: string) => void;
+    on_schedule_one_to_one?: (person: FlightRiskInfo) => void;
     on_contact_team_lead?: (id: string) => void;
-    on_view_profile?: (id: string) => void;
+    on_view_profile?: (team_id: string | undefined, id: string) => void;
     on_see_more?: (id: string) => void;
   }
 

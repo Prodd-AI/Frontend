@@ -1,6 +1,6 @@
 import { SERVER_URL } from "@/shared/utils/constants";
 import { ApiService } from "./root.service";
-import { TeamMember } from "@/shared/typings/team-member";
+import { MyTeamMembership, TeamMember } from "@/shared/typings/team-member";
 import {
   BulkAddTeamMembersData,
   CreateTeamData,
@@ -35,6 +35,15 @@ const getTeams = (params?: { page?: string; limit?: string }) => {
     true,
   );
 };
+const getMyTeams = (params?: { page?: string; limit?: string }) => {
+  return teams_service.get<GeneralReturnInt<MyTeamMembership[]>>(
+    "me",
+    params
+      ? { page: params.page || "1", limit: params.limit || "100" }
+      : undefined,
+    true,
+  );
+};
 
 const getTeamMembers = (team_id: string) => {
   return teams_service.get<GeneralReturnInt<TeamMember["user"][]>>(
@@ -44,6 +53,13 @@ const getTeamMembers = (team_id: string) => {
   );
 };
 
+const getTeamData = (team_id: string) => {
+  return teams_service.get<GeneralReturnInt<Team>>(
+    `${team_id}`,
+    undefined,
+    true,
+  );
+};
 const getAnalysisMetricForSingleTeam = (
   team_id: string,
   params: {
@@ -58,10 +74,14 @@ const getAnalysisMetricForSingleTeam = (
   );
 };
 
+
 export {
   addTeamMembers,
   createTeam,
   getTeams,
   getTeamMembers,
   getAnalysisMetricForSingleTeam,
+  getMyTeams,
+  getTeamData,
+
 };

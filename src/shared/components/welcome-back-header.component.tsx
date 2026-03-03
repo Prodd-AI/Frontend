@@ -2,8 +2,8 @@ import { WelcomeBackHeaderPropsInt } from "@/shared/typings/welcome-back-header"
 import { clsx } from "clsx";
 
 function WelcomeBackHeader({
-  heading = "Glad to have you back! 🤗",
-  subHeading = "Here’s your team’s pulse and tasks at a glance — lead with clarity, collaborate with ease",
+  heading = "",
+  subHeading = "",
   badge = false,
   child,
   className,
@@ -12,7 +12,7 @@ function WelcomeBackHeader({
     <div
       className={clsx(
         className,
-        "min-h-[5rem] flex justify-between items-center"
+        "min-h-[5rem] flex justify-between items-center",
       )}
     >
       <div className="flex flex-col gap-2 sm:gap-[11px]">

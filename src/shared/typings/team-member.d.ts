@@ -97,4 +97,29 @@ declare module "@/shared/typings/team-member" {
     organization_id: string | null;
     user_profile: UserProfile;
   } & BaseTeamMember;
+
+
+  export interface Team {
+    id: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    name: string;
+    description: string;
+    size: string;
+    created_by_id: string;
+    organization_id: string;
+  }
+
+  export interface MyTeamMembership {
+    id: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    team_id: string;
+    user_id: string;
+    role: TeamMemberRole;
+    team: Team;
+  }
 }
+

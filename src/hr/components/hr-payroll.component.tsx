@@ -1,15 +1,44 @@
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
 import { Clock, DollarSign, Wallet, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useHrPayroll } from "../hooks/use-hr-payroll";
 import { useTeamsWithMembers } from "../hooks/use-teams-with-members";
 import { TeamEntryCard } from "@/shared/components/team-entry-card.component";
+import type { TeamEntry } from "@/shared/components/team-entry-card.component";
 
 export default function HrPayroll() {
-  const [hourlyRate, setHourlyRate] = useState<number>(50);
-  const { payroll_data, is_loading } = useHrPayroll();
+  const [hourlyRateInput, setHourlyRateInput] = useState<number>(50);
+  const {
+    payroll_data,
+    periodLabel,
+    isWeek,
+    is_loading,
+  } = useHrPayroll(); // GET /api/v1/hr-analytics/payroll/team-summary
   const { teamsWithMembers, is_loading: teamsLoading } = useTeamsWithMembers();
+
+  const avgRate = payroll_data?.avg_hourly_rate ?? 0;
+  const hourlyRate = avgRate > 0 ? avgRate : hourlyRateInput;
+
+  const totalHours = payroll_data?.total_hours ?? 0;
+  const totalPayout = payroll_data?.total_payout ?? 0;
+  const regularHours = payroll_data?.regular?.hours ?? 0;
+  const regularCost = payroll_data?.regular?.cost ?? 0;
+  const overtimeHours = payroll_data?.overtime?.hours ?? 0;
+  const overtimeCost = payroll_data?.overtime?.cost ?? 0;
+
+  const teamsWithPayout: TeamEntry[] = useMemo(
+    () =>
+      teamsWithMembers.map((team) => ({
+        ...team,
+        total_payout: (team.total_hours ?? 0) * hourlyRate,
+        people: team.people.map((p) => ({
+          ...p,
+          payout: (p.hours ?? 0) * hourlyRate,
+        })),
+      })),
+    [teamsWithMembers, hourlyRate],
+  );
 
   if (is_loading) {
     return (
@@ -18,19 +47,6 @@ export default function HrPayroll() {
       </div>
     );
   }
-
-  // Use live data if available, otherwise fallback to calculated mocks OR zeros
-  const weeklyHours = payroll_data?.weekly_hours ?? 0;
-  const regularHours = payroll_data?.regular_hours ?? 0;
-  const overtimeHours = payroll_data?.overtime_hours ?? 0;
-  const monthlyEstHours = weeklyHours * 4; // Estimation
-
-  const weeklyPay = payroll_data?.weekly_pay ?? weeklyHours * hourlyRate;
-  const monthlyPay = payroll_data?.monthly_pay ?? monthlyEstHours * hourlyRate;
-  const overtimePay =
-    payroll_data?.overtime_pay ?? overtimeHours * (hourlyRate * 1.5);
-  const regularPay = payroll_data?.regular_pay ?? regularHours * hourlyRate;
-  const totalWeeklyPay = regularPay + overtimePay;
 
   return (
     <div className="space-y-8">
@@ -50,12 +66,17 @@ export default function HrPayroll() {
           <span className="text-xl font-bold text-[#251F2D]">$</span>
           <Input
             type="number"
-            value={hourlyRate}
-            onChange={(e) => setHourlyRate(Number(e.target.value))}
+            value={hourlyRateInput}
+            onChange={(e) => setHourlyRateInput(Number(e.target.value))}
             className="max-w-[120px] h-[48px] text-lg"
           />
           <span className="text-gray-500">/ hour</span>
         </div>
+        {(payroll_data?.avg_hourly_rate ?? 0) > 0 && (
+          <p className="text-xs text-gray-500 mt-2">
+            API avg rate used when available; override above to recalculate.
+          </p>
+        )}
       </div>
 
       {/* Payment Summary Card */}
@@ -67,7 +88,7 @@ export default function HrPayroll() {
               Payment Summary
             </h2>
             <p className="text-gray-500 text-xs">
-              Calculated earnings based on logged hours
+              {periodLabel} · Calculated from payroll/team-summary
             </p>
           </div>
         </div>
@@ -75,26 +96,29 @@ export default function HrPayroll() {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex flex-col items-center justify-center p-4">
-            <span className="text-xs text-gray-400 mb-1">Daily Hours</span>
-            <span className="text-xl font-bold text-[#251F2D]">0h</span>
-            <span className="text-sm text-gray-500 font-semibold">$0.00</span>
-          </div>
-          <div className="flex flex-col items-center justify-center p-4">
-            <span className="text-xs text-gray-400 mb-1">Weekly Hours</span>
+            <span className="text-xs text-gray-400 mb-1">Total Employees</span>
             <span className="text-xl font-bold text-[#251F2D]">
-              {weeklyHours}h
-            </span>
-            <span className="text-sm text-gray-500 font-semibold">
-              {formatCurrency(weeklyPay)}
+              {payroll_data?.total_employees ?? 0}
             </span>
           </div>
           <div className="flex flex-col items-center justify-center p-4">
-            <span className="text-xs text-gray-400 mb-1">Monthly Est.</span>
+            <span className="text-xs text-gray-400 mb-1">
+              Total Hours ({isWeek ? "Week" : "Month"})
+            </span>
             <span className="text-xl font-bold text-[#251F2D]">
-              {monthlyEstHours}h
+              {totalHours}h
             </span>
             <span className="text-sm text-gray-500 font-semibold">
-              {formatCurrency(monthlyPay)}
+              {formatCurrency(totalPayout)}
+            </span>
+          </div>
+          <div className="flex flex-col items-center justify-center p-4">
+            <span className="text-xs text-gray-400 mb-1">Period</span>
+            <span className="text-xl font-bold text-[#251F2D]">
+              {periodLabel}
+            </span>
+            <span className="text-sm text-gray-500 font-semibold">
+              {payroll_data?.currency ?? "USD"}
             </span>
           </div>
           <div className="bg-[#F9FAFB] border border-[#F3F4F6] rounded-xl flex flex-col items-center justify-center p-4">
@@ -124,7 +148,7 @@ export default function HrPayroll() {
                 {regularHours}h
               </p>
               <p className="text-sm text-gray-500 font-semibold">
-                {formatCurrency(regularPay)}
+                {formatCurrency(regularCost)}
               </p>
             </div>
             <div>
@@ -135,7 +159,7 @@ export default function HrPayroll() {
                 {overtimeHours}h
               </p>
               <p className="text-sm text-gray-500 font-semibold">
-                {formatCurrency(overtimePay)}
+                {formatCurrency(overtimeCost)}
               </p>
             </div>
           </div>
@@ -145,10 +169,10 @@ export default function HrPayroll() {
 
         <div className="flex items-center justify-between">
           <span className="text-base font-bold text-[#251F2D]">
-            Total Weekly Pay
+            Total {isWeek ? "Weekly" : "Monthly"} Pay
           </span>
           <span className="text-xl font-bold text-[#251F2D]">
-            {formatCurrency(totalWeeklyPay)}
+            {formatCurrency(totalPayout)}
           </span>
         </div>
       </div>
@@ -158,18 +182,19 @@ export default function HrPayroll() {
         <div>
           <h2 className="text-lg font-bold text-[#251F2D]">Team Payout</h2>
           <p className="text-gray-500 text-xs">
-            Payout by team and member (based on hourly rate and logged hours)
+            {periodLabel} · Payout by team and member (hours × hourly rate from
+            team entries)
           </p>
         </div>
         {teamsLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="animate-spin text-primary-color" size={32} />
           </div>
-        ) : teamsWithMembers.length === 0 ? (
+        ) : teamsWithPayout.length === 0 ? (
           <p className="text-sm text-gray-500 py-4">No teams found.</p>
         ) : (
           <div className="space-y-3">
-            {teamsWithMembers.map((team) => (
+            {teamsWithPayout.map((team) => (
               <TeamEntryCard key={team.id} team={team} showPayout />
             ))}
           </div>
