@@ -10,7 +10,7 @@ import StatusCards from "@/shared/components/status-cards.component";
 import TeamAnalysisCardComponent from "@/shared/components/team-analysis-card.component";
 import TeamPerformanceListItem from "../components/team-performance-list-item.component";
 import FlightRiskCardComponent from "@/hr/components/flight-risk-card.component";
-import WellnessTrendCards from "@/hr/components/wellness-trend-cards.component";
+// import WellnessTrendCards from "@/hr/components/wellness-trend-cards.component";
 import MoodHeatmap from "../components/mood-heatmap.component";
 import TimesheetWeeklyOverview from "../components/timesheet-overview.component";
 import HrPayroll from "../components/hr-payroll.component";
@@ -208,32 +208,32 @@ function HrPage() {
     },
   ];
 
-  const wellness_trends = [
-    {
-      id: "1",
-      title: "Positive Trend",
-      description:
-        "Engineering team mood improved 15% this month after implementing flexible hours",
-      variant: "positive" as const,
-    },
-    {
-      id: "2",
-      title: "Attention Needed",
-      description:
-        "Design team maintained 4.2+ mood rating for 3 consecutive weeks",
-      variant: "achievement" as const,
-    },
-    {
-      id: "4",
-      title: "Burnout Risk Alerts",
-      description: "Sales team showing elevated stress levels during Q1 push",
-      variant: "risk" as const,
-    },
-  ];
+  // const wellness_trends = [
+  //   {
+  //     id: "1",
+  //     title: "Positive Trend",
+  //     description:
+  //       "Engineering team mood improved 15% this month after implementing flexible hours",
+  //     variant: "positive" as const,
+  //   },
+  //   {
+  //     id: "2",
+  //     title: "Attention Needed",
+  //     description:
+  //       "Design team maintained 4.2+ mood rating for 3 consecutive weeks",
+  //     variant: "achievement" as const,
+  //   },
+  //   {
+  //     id: "4",
+  //     title: "Burnout Risk Alerts",
+  //     description: "Sales team showing elevated stress levels during Q1 push",
+  //     variant: "risk" as const,
+  //   },
+  // ];
 
   const overview_content = (
     <div className="space-y-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-bold flex items-center gap-2 text-[#251F2D]">
@@ -261,7 +261,7 @@ function HrPage() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        {/* <div className="space-y-6">
           <div>
             <h3 className="text-lg font-bold flex items-center gap-2 text-[#251F2D]">
               <RiHeartPulseLine className="text-success-color" /> Wellness
@@ -272,7 +272,7 @@ function HrPage() {
             </p>
           </div>
           <WellnessTrendCards items={wellness_trends} />
-        </div>
+        </div> */}
       </div>
     </div>
   );
