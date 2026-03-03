@@ -29,8 +29,12 @@ function HrPage() {
   const navigate = useNavigate();
   const [active_tab, set_active_tab] = useState("overview");
 
-  const handle_view_employee = (id: string) => {
-    navigate(`/dash/hr/employee/${id}`);
+  const handle_view_employee = (team_id: string | undefined, id: string) => {
+    if (team_id) {
+      navigate(`/dash/hr/teams/${team_id}/${id}`);
+    } else {
+      navigate(`/dash/hr/employee/${id}`);
+    }
   };
 
   const handle_view_team = (id: string) => {
@@ -249,7 +253,7 @@ function HrPage() {
               key={person.id}
               person={person}
               actions={{
-                on_view_profile: (id) => handle_view_employee(id),
+                on_view_profile: (team_id, id) => handle_view_employee(team_id, id),
               }}
             />
           ))}

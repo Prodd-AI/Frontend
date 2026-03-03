@@ -77,15 +77,15 @@ export default function FlightRiskCardComponent({
           >
             Schedule 1:1
           </Button>
-          <Button
+          {/* <Button
             className="flex-1 md:flex-none h-9 text-xs font-semibold bg-[#F3F4F6] text-[#251F2D] hover:bg-[#E5E7EB] shadow-none border border-transparent"
             onClick={() => actions?.on_contact_team_lead?.(person.id)}
           >
             Contact Team Lead
-          </Button>
+          </Button> */}
           <Button
             className="flex-1 md:flex-none h-9 text-xs font-semibold bg-[#F3F4F6] text-[#251F2D] hover:bg-[#E5E7EB] shadow-none border border-transparent"
-            onClick={() => actions?.on_view_profile?.(person.id)}
+            onClick={() => actions?.on_view_profile?.(person.team_id, person.id)}
           >
             View Profile
           </Button>
