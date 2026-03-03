@@ -113,15 +113,14 @@ export default function MoodHeatmap({ team_id }: { team_id?: string | null }) {
               <Select
                 value={selected_period}
                 onValueChange={(val: DatePeriod) => set_selected_period(val)}
+                defaultValue="this_week"
               >
                 <SelectTrigger className="w-[120px] h-9 bg-white border border-gray-200 text-sm">
-                  <SelectValue placeholder="Last week" />
+                  <SelectValue placeholder="This week" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="this_week">This week</SelectItem>
                   <SelectItem value="last_week">Last week</SelectItem>
-                  <SelectItem value="last_month">Last month</SelectItem>
-                  <SelectItem value="7days">7 Days</SelectItem>
-                  <SelectItem value="30days">30 Days</SelectItem>
                 </SelectContent>
               </Select>
             </div>
