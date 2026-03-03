@@ -1,16 +1,25 @@
 import { SERVER_URL } from "@/shared/utils/constants";
+import type {
+  PayrollTeamSummaryData,
+  TeamOverviewCardResponse,
+} from "@/shared/typings/hr-service";
 import { ApiService } from "./root.service";
 
 const hr_analytics_service = new ApiService(`${SERVER_URL}hr-analytics`);
 
 /**
  * Get payroll breakdown for a Team or the whole Organization
+ * GET /api/v1/hr-analytics/payroll/team-summary
  */
 const get_team_payroll_summary = (params: {
   date_filter: "today" | "this_week" | "last_week" | "this_month" | "last_month";
   team_id?: string;
 }) => {
-  return hr_analytics_service.get<GeneralReturnInt<any>>("payroll/team-summary", params, true);
+  return hr_analytics_service.get<GeneralReturnInt<PayrollTeamSummaryData>>(
+    "payroll/team-summary",
+    params,
+    true,
+  );
 };
 
 /**

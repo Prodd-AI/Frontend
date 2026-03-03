@@ -136,14 +136,14 @@ const TeamTabsSection = ({
       ToggleViewComponent={
         onViewPersonalDashboard
           ? () => (
-              <Button
-                className="bg-[#E5E5E5] text-[#494451] font-semibold"
-                variant="ghost"
-                onClick={onViewPersonalDashboard}
-              >
-                View Personal Dashboard <MdOutlineRemoveRedEye />
-              </Button>
-            )
+            <Button
+              className="bg-[#E5E5E5] text-[#494451] font-semibold"
+              variant="ghost"
+              onClick={onViewPersonalDashboard}
+            >
+              View Personal Dashboard <MdOutlineRemoveRedEye />
+            </Button>
+          )
           : undefined
       }
     />
