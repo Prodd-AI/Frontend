@@ -45,7 +45,7 @@ function HrPage() {
   };
 
   const handle_view_team = (id: string) => {
-    navigate(`/dash/hr/team/${id}`);
+    navigate(`/dash/hr/teams/${id}`);
   };
   const [active_team_sub_tab, set_active_team_sub_tab] = useState<
     "analysis" | "timesheet" | "payroll"
@@ -94,20 +94,20 @@ function HrPage() {
   const avg_mood =
     analysis_teams.length > 0
       ? (
-          analysis_teams.reduce(
-            (acc: number, team: any) => acc + (team.avg_score || 0),
-            0,
-          ) / analysis_teams.length
-        ).toFixed(1)
+        analysis_teams.reduce(
+          (acc: number, team: any) => acc + (team.avg_score || 0),
+          0,
+        ) / analysis_teams.length
+      ).toFixed(1)
       : "0";
   const avg_participation =
     analysis_teams.length > 0
       ? (
-          analysis_teams.reduce(
-            (acc: number, team: any) => acc + (team.participation_percent || 0),
-            0,
-          ) / analysis_teams.length
-        ).toFixed(0)
+        analysis_teams.reduce(
+          (acc: number, team: any) => acc + (team.participation_percent || 0),
+          0,
+        ) / analysis_teams.length
+      ).toFixed(0)
       : "0";
 
   const status_items = [
