@@ -35,9 +35,23 @@ export const useHrPayroll = () => {
     }),
   });
 
+  const isWeek =
+    date_filter === "this_week" || date_filter === "last_week";
+  const periodLabel =
+    date_filter === "this_week"
+      ? "This week"
+      : date_filter === "last_week"
+        ? "Last week"
+        : date_filter === "this_month"
+          ? "This month"
+          : "Last month";
+
   return {
     payroll_data: data?.data,
+    date_filter,
+    periodLabel,
+    isWeek,
     is_loading,
-    error
+    error,
   };
 };
