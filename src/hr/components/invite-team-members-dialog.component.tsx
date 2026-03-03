@@ -18,8 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addTeamMembers } from "@/config/services/teams.service";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { addTeamMembers, getTeams } from "@/config/services/teams.service";
 import { Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -48,46 +48,61 @@ const ROLE_OPTIONS = [
 
 interface InviteTeamMembersDialogProps {
   trigger: React.ReactNode;
-  teamId: string;
+  /** When provided (e.g. team detail page), team is fixed and not editable */
+  teamId?: string;
   teamName?: string;
 }
 
 export default function InviteTeamMembersDialog({
   trigger,
-  teamId,
+  teamId: fixedTeamId,
   teamName,
 }: InviteTeamMembersDialogProps) {
   const [open, setOpen] = useState(false);
   const [members, setMembers] = useState<MemberEntry[]>([EMPTY_MEMBER()]);
+  const [selectedTeamId, setSelectedTeamId] = useState("");
 
   const queryClient = useQueryClient();
+
+  const { data: teamsResponse } = useQuery({
+    queryKey: ["teams"],
+    queryFn: () => getTeams({ limit: "100" }),
+    enabled: open && !fixedTeamId,
+  });
+  const teams = teamsResponse?.data ?? [];
+  const effectiveTeamId = fixedTeamId ?? selectedTeamId;
 
   const { mutate, isPending } = useMutation({
     mutationFn: () =>
       addTeamMembers({
-        members: members.map((m) => ({
-          email: m.email.trim(),
-          first_name: m.first_name.trim(),
-          last_name: m.last_name.trim(),
-          user_role: m.user_role,
-          team_id: teamId,
-        })),
+        members: members
+          .filter(isMemberValid)
+          .map((m) => ({
+            email: m.email.trim(),
+            first_name: m.first_name.trim(),
+            last_name: m.last_name.trim(),
+            user_role: m.user_role,
+            team_id: effectiveTeamId,
+          })),
       }),
     onSuccess: () => {
+      const count = members.filter(isMemberValid).length;
       toast.success(
-        `${members.length} member${members.length > 1 ? "s" : ""} invited successfully`,
+        `${count} member${count > 1 ? "s" : ""} invited successfully`,
       );
       queryClient.invalidateQueries({ queryKey: ["get-Team-Data"] });
       queryClient.invalidateQueries({ queryKey: ["teams-overview-cards"] });
+      queryClient.invalidateQueries({ queryKey: ["team-members"] });
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
       handleClose();
     },
-
   });
 
   const handleClose = useCallback(() => {
     setOpen(false);
     setMembers([EMPTY_MEMBER()]);
-  }, []);
+    if (!fixedTeamId) setSelectedTeamId("");
+  }, [fixedTeamId]);
 
   const updateMember = useCallback(
     (id: string, field: keyof Omit<MemberEntry, "id">, value: string) => {
@@ -112,7 +127,10 @@ export default function InviteTeamMembersDialog({
   const isMemberValid = (m: MemberEntry) =>
     m.first_name.trim() && m.email.trim() && m.user_role;
 
-  const isFormValid = members.length > 0 && members.every(isMemberValid);
+  const isFormValid =
+    members.length > 0 &&
+    members.every(isMemberValid) &&
+    !!effectiveTeamId;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,6 +176,29 @@ export default function InviteTeamMembersDialog({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+          {!fixedTeamId && (
+            <div className="space-y-2">
+              <Label>Team</Label>
+              <Select
+                value={selectedTeamId}
+                onValueChange={setSelectedTeamId}
+                disabled={isPending}
+                required
+              >
+                <SelectTrigger className="w-full bg-[#F9FAFB]">
+                  <SelectValue placeholder="Select team" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teams.map((team: { id: string; name: string }) => (
+                    <SelectItem key={team.id} value={team.id}>
+                      {team.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           {members.map((member, index) => (
             <div key={member.id} className="space-y-4 relative">
               {members.length > 1 && (
@@ -242,7 +283,7 @@ export default function InviteTeamMembersDialog({
                 </Select>
               </div>
 
-              {teamName && (
+              {fixedTeamId && teamName && (
                 <div className="space-y-2">
                   <Label>Team</Label>
                   <Input

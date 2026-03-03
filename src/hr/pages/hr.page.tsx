@@ -21,8 +21,9 @@ import HrPayroll from "../components/hr-payroll.component";
 import useTeamStore from "@/config/stores/team.store";
 import useDateStore from "@/config/stores/date.store";
 import { DatePeriod } from "@/shared/typings/date.store";
+import InviteTeamMembersDialog from "../components/invite-team-members-dialog.component";
 import { FiDownload, FiFilter } from "react-icons/fi";
-import { GoGraph, GoArrowUpRight } from "react-icons/go";
+import { GoGraph } from "react-icons/go";
 import { HiOutlineUserGroup } from "react-icons/hi";
 import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDashboard } from "react-icons/md";
@@ -34,7 +35,6 @@ import { useTeamsOverview } from "../hooks/use-teams-overview";
 import { Loader2 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 function HrPage() {
   const navigate = useNavigate();
@@ -50,15 +50,6 @@ function HrPage() {
   const [active_team_sub_tab, set_active_team_sub_tab] = useState<
     "analysis" | "timesheet" | "payroll"
   >("analysis");
-
-  const [invite_email, set_invite_email] = useState("");
-
-  const handle_invite = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!invite_email) return toast.error("Please enter an email address");
-    toast.success(`Invitation sent to ${invite_email}!`);
-    set_invite_email("");
-  };
 
   const {
     selectedTeamId: selected_team_id,
@@ -243,28 +234,6 @@ function HrPage() {
           <WellnessTrendCards items={wellness_trends} />
         </div>
       </div>
-
-      {/* Invite Attendee Section */}
-      <div className="w-full max-w-md">
-        <h4 className="text-sm font-bold text-[#251F2D] mb-3">
-          Invite Attendee
-        </h4>
-        <form onSubmit={handle_invite} className="flex items-center gap-3">
-          <Input
-            placeholder="email address"
-            className="bg-[#F9FAFB] border border-[#E5E7EB] h-[48px] focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-[#6619DE]"
-            value={invite_email}
-            onChange={(e) => set_invite_email(e.target.value)}
-            type="email"
-          />
-          <Button
-            type="submit"
-            className="bg-[#6619DE] hover:bg-[#5214B3] w-[56px] h-[48px] shrink-0 rounded-[8px]"
-          >
-            <GoArrowUpRight size={24} />
-          </Button>
-        </form>
-      </div>
     </div>
   );
 
@@ -320,9 +289,22 @@ function HrPage() {
               Strategic insights into team wellbeing and productivity
             </p>
           </div>
-          <Button className="w-full md:w-auto cursor-pointer h-[44px] bg-gradient-to-r px-6 from-primary-color to-[#1C75BC] hover:scale-105 transition-all duration-300 gap-2">
-            <FiDownload /> Export Report
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <InviteTeamMembersDialog
+              trigger={
+                <Button
+                  variant="outline"
+                  className="w-full md:w-auto h-[44px] gap-2 border-gray-300"
+                >
+                  <HiOutlineUserGroup className="size-4" />
+                  Invite new team member
+                </Button>
+              }
+            />
+            <Button className="w-full md:w-auto cursor-pointer h-[44px] bg-gradient-to-r px-6 from-primary-color to-[#1C75BC] hover:scale-105 transition-all duration-300 gap-2">
+              <FiDownload /> Export Report
+            </Button>
+          </div>
         </div>
 
         <div className="mt-4 bg-white p-6 rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-12 items-center gap-4">
