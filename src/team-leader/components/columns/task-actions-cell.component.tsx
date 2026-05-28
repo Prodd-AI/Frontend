@@ -31,8 +31,22 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Task } from "@/team-leader/typings/team-leader";
 import { updateTask, deleteTask } from "@/config/services/tasks.service";
+
+// Minimal shape this cell needs — both UserTaskAssignment.task (the ambient
+// `Task`) and AssignedTask.task (the team-leader typing) satisfy it without
+// dragging in fields like `deleted_at` that aren't always present. Status is
+// kept loose because the team-leader typing also allows "cancelled"; we only
+// ever toggle between pending/completed.
+type CellTask = {
+  id: string;
+  title: string;
+  description: string;
+  external_link?: string | null;
+  due_date: string;
+  priority: "high" | "medium" | "low";
+  status: string;
+};
 import { RequestChangesDialog } from "@/shared/components/request-changes-dialog.component";
 import EditTaskDialog from "@/team-leader/components/edit-task-dialog.component";
 import { getTaskDetailPath } from "@/shared/utils/task-routes";
@@ -42,7 +56,7 @@ export const TaskActionsCell = ({
   task,
   canRequestChanges = true,
 }: {
-  task: Task;
+  task: CellTask;
   /** When false, hides the "Request Changes" item. Team-member personal lists pass false. */
   canRequestChanges?: boolean;
 }) => {
@@ -77,7 +91,7 @@ export const TaskActionsCell = ({
       mutationFn: async (newDescription: string) => {
         await updateTask(task.id, {
           description: newDescription,
-          status: task.status,
+          status: task.status as "pending" | "completed" | "cancelled",
         });
       },
       onSuccess: () => {

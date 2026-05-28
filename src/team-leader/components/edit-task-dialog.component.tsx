@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ExternalLink } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,10 +55,23 @@ const schema = z.object({
 
 type EditTaskFormData = z.infer<typeof schema>;
 
+// Minimal shape accepted by this dialog so both ambient `Task` (from
+// UserTaskAssignment) and the team-leader `Task` typing satisfy it. Status
+// is kept loose because the team-leader typing allows "cancelled" too.
+type EditableTask = {
+  id: string;
+  title: string;
+  description: string;
+  external_link?: string | null;
+  due_date: string;
+  priority: "high" | "medium" | "low";
+  status: string;
+};
+
 interface EditTaskDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  task: Task;
+  task: EditableTask;
 }
 
 // Backend stores wall-clock-as-UTC. Split a stored ISO into picker values
@@ -148,7 +161,7 @@ export const EditTaskDialog = ({
         priority: values.priority,
         due_date,
         external_link: values.external_link || undefined,
-        status: task.status,
+        status: task.status as "pending" | "completed" | "cancelled",
       });
     },
     onSuccess: (res) => {

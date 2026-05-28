@@ -32,8 +32,9 @@ function ViewTeamMembers() {
       id: member.member_id,
       name: member.member_name,
       role: member.job_title || "Team Member",
-      status:
-        member.flight_risk_indicator === "at risk" ? "At risk" : "On track",
+      status: (member.flight_risk_indicator === "at risk"
+        ? "At risk"
+        : "On track") as "At risk" | "On track",
       taskCompletion: member.task_completion,
       tasksCompleted: member.completed_task,
       totalTasks: member.total_task,

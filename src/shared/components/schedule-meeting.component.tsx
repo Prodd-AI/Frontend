@@ -148,31 +148,37 @@ const ScheduleMeeting = ({
 
   const selectedAttendeeEmails = watch("attendee_emails");
 
-  const { data: teamsData, isLoading: teamsLoading } = useQuery({
+  // The two team endpoints return different shapes; normalize to a common
+  // `{ data: TeamRow[] }` so React Query has a single type to infer.
+  type TeamRow = {
+    id?: string;
+    name?: string;
+    team?: { id: string; name: string };
+  };
+  const { data: teamsData, isLoading: teamsLoading } = useQuery<{
+    data: TeamRow[];
+  }>({
     queryKey: [
       "schedule-meeting-teams",
       restrictToOwnTeams ? "mine" : "all",
     ],
-    queryFn: () => (restrictToOwnTeams ? getMyTeams() : getTeams()),
+    queryFn: async () => {
+      const res = restrictToOwnTeams ? await getMyTeams() : await getTeams();
+      return { data: (res?.data ?? []) as TeamRow[] };
+    },
   });
 
   // /teams/me returns rows like { team: {...} }; /teams returns the team
   // directly. Normalize both into a single { team_id, team_name }[] list.
-  const teams = (() => {
-    const rows = teamsData?.data ?? [];
-    type Row = {
-      id?: string;
-      name?: string;
-      team?: { id: string; name: string };
-    };
-    return rows
-      .map((row: Row) => {
-        const t = row.team ?? row;
-        if (!t?.id || !t?.name) return null;
-        return { team_id: t.id, team_name: t.name };
-      })
-      .filter((x): x is { team_id: string; team_name: string } => x !== null);
-  })();
+  const teams = (teamsData?.data ?? [])
+    .map((row) => {
+      const t = row.team ?? row;
+      if (!t?.id || !t?.name) return null;
+      return { team_id: t.id, team_name: t.name };
+    })
+    .filter(
+      (x): x is { team_id: string; team_name: string } => x !== null,
+    );
 
   const activeTeamId = selectedTeamId ?? teams[0]?.team_id;
 
