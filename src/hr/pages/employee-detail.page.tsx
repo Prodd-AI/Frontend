@@ -1,6 +1,8 @@
-import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import GoBackBtn from "@/shared/components/go-back-btn";
+import { get_member_overview } from "@/config/services/users.service";
+import BackBreadcrumb from "@/shared/components/back-breadcrumb.component";
 import TeamMemberProfileRow from "@/team-leader/components/team-member-profile-row.component";
 import ProductivityTracker from "@/shared/components/productivity-tracker.component";
 import TeamMemberOverviewCard from "@/team-leader/components/team-member-overview.component";
@@ -10,6 +12,8 @@ import { DataTable } from "@/shared/components/data-table/data-table";
 import { memberAssignedTasksColumns } from "@/team-leader/components/columns/member-assigned-tasks-columns";
 import { getAssignedTasksForTeamMember } from "@/config/services/tasks.service";
 import { Loader2 } from "lucide-react";
+import { getTaskDetailPath } from "@/shared/utils/task-routes";
+import useAuthStore from "@/config/stores/auth.store";
 
 type MoodLevel = "rough" | "notGreat" | "okay" | "good" | "great" | null;
 
@@ -20,6 +24,23 @@ interface DayMood {
 
 export default function EmployeeDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const role = useAuthStore((s) => s.user?.user.user_role);
+
+  // Capture: response shape not in OpenAPI spec.
+  const { data: memberOverviewResponse } = useQuery({
+    queryKey: ["member-overview", id],
+    queryFn: () => get_member_overview(id!),
+    enabled: !!id,
+  });
+  useEffect(() => {
+    if (memberOverviewResponse) {
+      console.log(
+        `[capture] GET /users/${id}/member-overview`,
+        memberOverviewResponse,
+      );
+    }
+  }, [memberOverviewResponse, id]);
 
   const { data: mood_data = [], isLoading: is_mood_loading } = useQuery({
     queryKey: ["user-mood-history", id],
@@ -65,7 +86,14 @@ export default function EmployeeDetailPage() {
 
   return (
     <div className="pb-12 space-y-8">
-      <GoBackBtn title="Back to Dashboard" />
+      <BackBreadcrumb
+        trail={[
+          { label: "Overview", to: "/dash/hr" },
+          { label: "Flight Risks", to: "/dash/hr/flight-risks" },
+          { label: employee_detail?.name ?? "Employee" },
+        ]}
+        backTo="/dash/hr/flight-risks"
+      />
 
       <TeamMemberProfileRow
         name={employee_detail?.name}
@@ -91,6 +119,7 @@ export default function EmployeeDetailPage() {
         tableName="Assigned Tasks"
         tableDescription="Tasks currently assigned to this employee"
         className="mt-10"
+        onRowClick={(row) => navigate(getTaskDetailPath(role, row.task.id))}
       />
     </div>
   );

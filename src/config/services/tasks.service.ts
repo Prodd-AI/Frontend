@@ -3,6 +3,7 @@ import { ApiService } from "./root.service";
 import {
   AssignedTask,
   CreateTaskDto,
+  Task,
   UpdateTaskDto,
 } from "@/team-leader/typings/team-leader";
 
@@ -29,10 +30,26 @@ const assignTasks = (data: CreateTaskDto) => {
   );
 };
 
+const getTaskDetails = (task_id: string) => {
+  return task_service.get<GeneralReturnInt<AssignedTask & { task: Task }>>(
+    `${task_id}`,
+    undefined,
+    true,
+  );
+};
+
 const updateTask = (task_id: string, data: UpdateTaskDto) => {
   return task_service.patch<GeneralReturnInt<unknown>, typeof data>(
     `${task_id}`,
     data,
+    true,
+  );
+};
+
+const deleteTask = (task_id: string) => {
+  return task_service.delete<GeneralReturnInt<unknown>>(
+    `${task_id}`,
+    undefined,
     true,
   );
 };
@@ -65,7 +82,9 @@ export {
   getWeeklyStreak,
   assignTasks,
   getAllTasksAssignedToTeamMembersByTeamLead,
+  getTaskDetails,
   updateTask,
+  deleteTask,
   getAllTasksAssignedToTeamMembersByTeamLeadViaTeadId,
   getAssignedTasksForTeamMember,
 };

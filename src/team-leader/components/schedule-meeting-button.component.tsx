@@ -15,7 +15,7 @@ const ScheduleMeetingButton = () => {
           Schedule Meeting
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[720px] p-8 rounded-2xl border-gray-200/80 shadow-xl">
+      <DialogContent className="!min-w-[40rem] p-8 rounded-2xl border-gray-200/80 shadow-xl">
         <ScheduleMeeting
           onCancel={() => setOpen(false)}
           onSchedule={() => {

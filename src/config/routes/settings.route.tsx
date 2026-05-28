@@ -1,13 +1,17 @@
-import withAuthGuard from "@/shared/components/HOC/with-auth-guard";
 import { lazy } from "react";
 import type { RouteObject } from "react-router-dom";
+import TeamMemberScreenLayout from "@/shared/components/layouts/team-member-screen-layout.component";
 
 const SettingsPage = lazy(() => import("@/settings/pages"));
 
-const SettingsPageWithAuthGuard = withAuthGuard(SettingsPage);
 export const settings_routes: RouteObject[] = [
   {
-    index: true,
-    element: <SettingsPageWithAuthGuard />,
+    element: <TeamMemberScreenLayout />,
+    children: [
+      {
+        index: true,
+        element: <SettingsPage />,
+      },
+    ],
   },
 ];

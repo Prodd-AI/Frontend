@@ -16,11 +16,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GoPlus } from "react-icons/go";
 import { DialogClose } from "@radix-ui/react-dialog";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getTeamMembers, getTeams } from "@/config/services/teams.service";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  getMyTeams,
+  getTeamMembers,
+  getTeams,
+} from "@/config/services/teams.service";
 import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +34,8 @@ import { toast } from "sonner";
 import { TeamTabs } from "@/shared/components/team-tabs.component";
 import { TeamMemberSelector } from "@/shared/components/team-member-selector.component";
 import { DatePickerField } from "@/shared/components/date-picker-field.component";
+import { TimePicker } from "@/components/ui/time-picker";
+import useAuthStore from "@/config/stores/auth.store";
 
 const schema = z.object({
   external_link: z
@@ -64,6 +70,10 @@ const schema = z.object({
     .string({ error: "Due date is required" })
     .min(1, "Due date is required"),
 
+  due_time: z
+    .string({ error: "Due time is required" })
+    .min(1, "Due time is required"),
+
   priority: z.enum(["low", "medium", "high"], {
     error: "Priority must be low, medium, or high",
   }),
@@ -71,18 +81,33 @@ const schema = z.object({
 
 type AssignTaskFormData = z.infer<typeof schema>;
 
-const AssignTask = () => {
+type AssignTaskMode = "assign" | "self-assign";
+
+interface AssignTaskProps {
+  /** "assign" (default) opens the team/member picker. "self-assign" pre-fills the current user and hides the picker. */
+  mode?: AssignTaskMode;
+  /** Override the trigger button label. Defaults to "Assign Task" / "Create Task" by mode. */
+  buttonLabel?: string;
+}
+
+const AssignTask = ({ mode = "assign", buttonLabel }: AssignTaskProps) => {
   const [open, setOpen] = useState(false);
+  const label =
+    buttonLabel ?? (mode === "self-assign" ? "Create Task" : "Assign Task");
 
   return (
     <>
       <Button onClick={() => setOpen(true)}>
         <GoPlus />
-        Assign Task
+        {label}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className=" !min-w-[40rem]">
-          <AssignTaskForm isOpen={open} onSuccess={() => setOpen(false)} />
+          <AssignTaskForm
+            isOpen={open}
+            mode={mode}
+            onSuccess={() => setOpen(false)}
+          />
         </DialogContent>
       </Dialog>
     </>
@@ -93,11 +118,21 @@ export default AssignTask;
 
 interface AssignTaskFormProps {
   isOpen?: boolean;
+  mode?: AssignTaskMode;
   onSuccess?: () => void;
 }
 
-const AssignTaskForm = ({ isOpen = false, onSuccess }: AssignTaskFormProps) => {
+const AssignTaskForm = ({
+  isOpen = false,
+  mode = "assign",
+  onSuccess,
+}: AssignTaskFormProps) => {
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const currentUserId = useAuthStore((s) => s.user?.user.id);
+  const currentUserRole = useAuthStore((s) => s.user?.user.user_role);
+  const isSelfAssign = mode === "self-assign";
+  // Team leads can only assign within teams they actually lead.
+  const restrictToOwnTeams = currentUserRole === "team_lead";
 
   const {
     register,
@@ -110,39 +145,73 @@ const AssignTaskForm = ({ isOpen = false, onSuccess }: AssignTaskFormProps) => {
   } = useForm<AssignTaskFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      assigned_to: [],
+      assigned_to: isSelfAssign && currentUserId ? [currentUserId] : [],
       priority: "medium",
+      due_time: "5:00 PM",
+      // Default to today (local yyyy-MM-dd) so picking a date isn't required
+      // for same-day tasks.
+      due_date: (() => {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      })(),
     },
   });
+
+  // Self-assign mode: keep assigned_to in sync with the current user even if
+  // the auth store hydrates after the form mounts.
+  useEffect(() => {
+    if (isSelfAssign && currentUserId) {
+      setValue("assigned_to", [currentUserId]);
+    }
+  }, [isSelfAssign, currentUserId, setValue]);
 
   const selectedAssignees = watch("assigned_to");
 
   const { data: teamsData, isLoading: teamsLoading } = useQuery({
-    queryKey: ["assign-task-teams"],
-    queryFn: () => getTeams(),
-    enabled: isOpen,
+    queryKey: ["assign-task-teams", restrictToOwnTeams ? "mine" : "all"],
+    queryFn: () => (restrictToOwnTeams ? getMyTeams() : getTeams()),
+    enabled: isOpen && !isSelfAssign,
   });
 
-  const teams =
-    teamsData?.data?.map((team) => ({
-      team_id: team.id,
-      team_name: team.name,
-    })) ?? [];
+  // /teams/me returns rows shaped { team: {...} } per the membership join.
+  // Normalize so both endpoints feed the same { team_id, team_name } list.
+  const teams = (() => {
+    const rows = teamsData?.data ?? [];
+    type Row = { id?: string; name?: string; team?: { id: string; name: string } };
+    return rows
+      .map((row: Row) => {
+        const t = row.team ?? row;
+        if (!t?.id || !t?.name) return null;
+        return { team_id: t.id, team_name: t.name };
+      })
+      .filter((x): x is { team_id: string; team_name: string } => x !== null);
+  })();
 
   const activeTeamId = selectedTeamId ?? teams[0]?.team_id;
 
   const { data: teamMembersData, isLoading: membersLoading } = useQuery({
     queryKey: ["team-members", activeTeamId],
     queryFn: () => getTeamMembers(activeTeamId ?? ""),
-    enabled: !!activeTeamId,
+    enabled: !!activeTeamId && !isSelfAssign,
   });
 
   const teamMembers = teamMembersData?.data ?? [];
+
+  const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
     mutationFn: assignTasks,
     onSuccess: (res) => {
       toast.success(`${res.message}`);
+      // Refresh anything that lists tasks so newly-created tasks appear
+      // without a page reload.
+      queryClient.invalidateQueries({ queryKey: ["streaks"] });
+      queryClient.invalidateQueries({ queryKey: ["team-assigned-tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["team-assigned-tasks-by-team"] });
+      queryClient.invalidateQueries({ queryKey: ["member-assigned-tasks"] });
       reset();
       setTimeout(() => {
         onSuccess?.();
@@ -151,7 +220,23 @@ const AssignTaskForm = ({ isOpen = false, onSuccess }: AssignTaskFormProps) => {
   });
 
   const onSubmit = (values: AssignTaskFormData) => {
-    mutate(values);
+    // Combine the picked local date + time into a single yyyy-MM-dd HH:mm value
+    // for the backend. We keep the local wall-clock (no UTC conversion) so the
+    // user sees back exactly what they picked.
+    const [timePart, period] = values.due_time.split(" ");
+    const [hStr, mStr] = timePart.split(":");
+    let hh = Number(hStr);
+    const mm = Number(mStr);
+    if (period === "PM" && hh !== 12) hh += 12;
+    if (period === "AM" && hh === 12) hh = 0;
+    const due_date = `${values.due_date} ${hh
+      .toString()
+      .padStart(2, "0")}:${mm.toString().padStart(2, "0")}`;
+
+    // due_time is internal-only; strip before sending.
+    const { due_time: _due_time, ...rest } = values;
+    void _due_time;
+    mutate({ ...rest, due_date });
   };
 
   const toggleAssignee = (id: string) => {
@@ -172,7 +257,7 @@ const AssignTaskForm = ({ isOpen = false, onSuccess }: AssignTaskFormProps) => {
     >
       <DialogHeader>
         <DialogTitle className=" text-black text-[1.375rem]">
-          Assign New Task
+          {isSelfAssign ? "Create New Task" : "Assign New Task"}
         </DialogTitle>
       </DialogHeader>
 
@@ -243,41 +328,41 @@ const AssignTaskForm = ({ isOpen = false, onSuccess }: AssignTaskFormProps) => {
         )}
       </div>
 
-      {/* Assign to */}
-      <div className="mb-5">
-        <Label className="block text-sm font-medium text-foreground mb-2">
-          Assign to <span className="text-destructive">*</span>
-        </Label>
+      {/* Assign to — hidden in self-assign mode (task auto-routes to current user) */}
+      {!isSelfAssign && (
+        <div className="mb-5">
+          <Label className="block text-sm font-medium text-foreground mb-2">
+            Assign to <span className="text-destructive">*</span>
+          </Label>
 
-        {/* Team Tabs */}
-        <TeamTabs
-          teams={teams}
-          activeTeamId={activeTeamId}
-          onSelectTeam={setSelectedTeamId}
-          isLoading={teamsLoading}
-          className="mb-3"
-        />
-
-        {/* Team Members List */}
-        <div className="border border-gray-200/60 rounded-xl max-h-48 overflow-y-auto">
-          <TeamMemberSelector
-            members={teamMembers}
-            selectedValues={selectedAssignees}
-            onToggle={toggleAssignee}
-            isLoading={membersLoading}
-            emptyMessage="No team members found"
-            valueKey="id"
+          <TeamTabs
+            teams={teams}
+            activeTeamId={activeTeamId}
+            onSelectTeam={setSelectedTeamId}
+            isLoading={teamsLoading}
+            className="mb-3"
           />
-        </div>
-        {errors.assigned_to && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.assigned_to.message}
-          </p>
-        )}
-      </div>
 
-      {/* Due Date & Priority Row */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="border border-gray-200/60 rounded-xl max-h-48 overflow-y-auto">
+            <TeamMemberSelector
+              members={teamMembers}
+              selectedValues={selectedAssignees}
+              onToggle={toggleAssignee}
+              isLoading={membersLoading}
+              emptyMessage="No team members found"
+              valueKey="id"
+            />
+          </div>
+          {errors.assigned_to && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.assigned_to.message}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Due Date, Time & Priority */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="space-y-2">
           <Label className="block text-sm font-medium text-foreground">
             Due Date <span className="text-destructive">*</span>
@@ -298,6 +383,27 @@ const AssignTaskForm = ({ isOpen = false, onSuccess }: AssignTaskFormProps) => {
           {errors.due_date && (
             <p className="text-red-500 text-sm mt-1">
               {errors.due_date.message}
+            </p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label className="block text-sm font-medium text-foreground">
+            Due Time <span className="text-destructive">*</span>
+          </Label>
+          <Controller
+            name="due_time"
+            control={control}
+            render={({ field }) => (
+              <TimePicker
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="Select time"
+              />
+            )}
+          />
+          {errors.due_time && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.due_time.message}
             </p>
           )}
         </div>

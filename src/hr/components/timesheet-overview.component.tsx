@@ -19,7 +19,7 @@ export default function TimesheetWeeklyOverview() {
   return (
     <div className="space-y-8">
       {/* Weekly Summary Card */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm">
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
         {summaryLoading ? (
           <div className="flex flex-col items-center justify-center py-12">
             <Loader2 className="animate-spin text-primary-color mb-2" size={28} />
@@ -122,7 +122,7 @@ function StatBox({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center p-4 rounded-xl",
+        "flex flex-col items-center justify-center p-4 rounded-xl border border-gray-200",
         className,
       )}
     >
