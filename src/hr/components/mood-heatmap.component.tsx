@@ -88,7 +88,7 @@ export default function MoodHeatmap({ team_id }: { team_id?: string | null }) {
   }
 
   return (
-    <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm space-y-8 overflow-hidden">
+    <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-200 space-y-8 overflow-hidden">
       {/* Header Section */}
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -235,10 +235,8 @@ export default function MoodHeatmap({ team_id }: { team_id?: string | null }) {
             Overall Weekly Mood Score:{" "}
             <span className="text-primary-color">{average_weekly_score}/5</span>
           </h3>
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">
-            <span>↑ 0.4</span>
-            <span className="text-gray-400 font-normal">vs last week</span>
-          </div>
+          {/* "vs last week" delta removed — no weekly-delta API exists in the
+              docs. Re-enable once a mood trend endpoint surfaces it. */}
         </div>
 
         {/* SVG Line Chart Container */}

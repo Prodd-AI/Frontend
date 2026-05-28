@@ -18,16 +18,22 @@ import {
 } from "@/config/services/meeting.service";
 import { useQuery } from "@tanstack/react-query";
 import { format, isToday, isTomorrow } from "date-fns";
+import { parseWallClockIso } from "@/shared/utils/date.utils";
 import { MeetingData } from "@/team-leader/typings/team-leader";
 import { getAllTasksAssignedToTeamMembersByTeamLeadViaTeadId } from "@/config/services/tasks.service";
 import { columns } from "./columns/assigned-tasks-columns";
 import { useTeams } from "@/team-leader/hooks/use-teams";
+import { useNavigate } from "react-router-dom";
+import { getTaskDetailPath } from "@/shared/utils/task-routes";
+import useAuthStore from "@/config/stores/auth.store";
 
 const TeamTabsSection = ({
   activeTab,
   onTabChange,
   onViewPersonalDashboard,
 }: TeamTabsSectionProps) => {
+  const navigate = useNavigate();
+  const role = useAuthStore((s) => s.user?.user.user_role);
   const [internalTab, setInternalTab] = useState<string>(activeTab);
 
   const currentTab = onTabChange ? activeTab : internalTab;
@@ -64,7 +70,7 @@ const TeamTabsSection = ({
   const assignedTasks = assignedTasksResponse?.data || [];
 
   const transformMeetingData = (meeting: MeetingResponse): MeetingData => {
-    const date = new Date(meeting.scheduled_at);
+    const date = parseWallClockIso(meeting.scheduled_at);
     let badge = format(date, "MMM dd");
     if (isToday(date)) badge = "Today";
     if (isTomorrow(date)) badge = "Tomorrow";
@@ -77,6 +83,7 @@ const TeamTabsSection = ({
       time: timeStr,
       badge: badge,
       meeting_link: meeting.meeting_link,
+      scheduled_at: meeting.scheduled_at,
     };
   };
 
@@ -85,8 +92,8 @@ const TeamTabsSection = ({
       ?.slice()
       .sort(
         (a, b) =>
-          new Date(b.scheduled_at).getTime() -
-          new Date(a.scheduled_at).getTime(),
+          parseWallClockIso(b.scheduled_at).getTime() -
+          parseWallClockIso(a.scheduled_at).getTime(),
       )
       .map(transformMeetingData) || [];
 
@@ -106,6 +113,9 @@ const TeamTabsSection = ({
               columns={columns}
               title="Team's Tasks"
               description="Stay focused and organized with your daily task list."
+              onRowClick={(row) =>
+                navigate(getTaskDetailPath(role, row.task.id))
+              }
             />
           ),
         },

@@ -5,12 +5,56 @@ import { useState, useEffect, useCallback } from 'react';
 import { IoPlayOutline, IoStopOutline, IoPauseOutline, IoCheckmarkOutline } from 'react-icons/io5';
 import { LuClock3 } from 'react-icons/lu';
 import ClockOutSummary from '../clock-out-summary.component';
-import { clockAction } from '@/config/services/time-tracking.service';
+import { clockAction, getActiveSession } from '@/config/services/time-tracking.service';
+import { getWeeklyStreak } from '@/config/services/tasks.service';
 import useTimeTrackingStore from '@/config/stores/time-tracking.store';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 const TimeClockTab = () => {
-	const { sessionData, setSession } = useTimeTrackingStore();
+	const { sessionData, setSession, clearSession } = useTimeTrackingStore();
+
+	// Rehydrate any in-progress session from the server on mount so a refresh
+	// or a fresh device keeps the timer in sync. Stays silent on 404 in case
+	// the backend hasn't shipped this route yet.
+	useQuery({
+		queryKey: ['active-time-session'],
+		queryFn: async () => {
+			try {
+				const res = await getActiveSession();
+				const serverSession = res?.data;
+				if (serverSession && serverSession.status !== 'ended') {
+					setSession(serverSession);
+				} else if (sessionData) {
+					clearSession();
+				}
+				return serverSession ?? null;
+			} catch {
+				return null;
+			}
+		},
+		staleTime: 30_000,
+		retry: false,
+		refetchOnWindowFocus: false,
+	});
+
+	// Real pending tasks for the user — replaces the placeholder picker
+	// ("Design System Update" / "Frontend Integration" / "Bug Fixes").
+	const { data: pendingTasksData } = useQuery({
+		queryKey: ['streaks', { duration: 'week', status: 'pending' }],
+		queryFn: () => getWeeklyStreak({ duration: 'week', status: 'pending' }),
+	});
+	const pendingTaskTitles = (() => {
+		const buckets = pendingTasksData?.data;
+		if (!buckets) return [] as string[];
+		const titles = new Set<string>();
+		Object.values(buckets).forEach((day) =>
+			(day as UserTaskAssignment[]).forEach((t) => {
+				if (t?.task?.title) titles.add(t.task.title);
+			}),
+		);
+		return Array.from(titles);
+	})();
 
 	// Derive state from session data
 	const isClockedIn = sessionData !== null && sessionData.status !== 'ended';
@@ -162,7 +206,7 @@ const TimeClockTab = () => {
 	return (
 		<div className="flex flex-col gap-6">
 			{/* Timer Card */}
-			<div className="bg-white p-6 rounded-3xl w-full">
+			<div className="bg-white p-6 rounded-3xl w-full border border-gray-200">
 				<div className="flex items-center gap-2 mb-2">
 					<LuClock3 className="w-6 h-6 text-primary" />
 					<h2 className="text-xl font-semibold text-[#1F1F1F]">Time-Clock</h2>
@@ -221,7 +265,7 @@ const TimeClockTab = () => {
 
 			{/* Current Task Card - Only visible when clocked in */}
 			{isClockedIn && (
-				<div className="bg-white p-6 rounded-3xl w-full">
+				<div className="bg-white p-6 rounded-3xl w-full border border-gray-200">
 					<div className="mb-6">
 						<h3 className="text-lg font-medium text-[#1F1F1F] mb-1">Current Task (Optional)</h3>
 						<p className="text-sm text-gray-500">Track what you are working on right now</p>
@@ -235,9 +279,17 @@ const TimeClockTab = () => {
 										<SelectValue placeholder="Select from task list..." />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="Design System Update">Design System Update</SelectItem>
-										<SelectItem value="Frontend Integration">Frontend Integration</SelectItem>
-										<SelectItem value="Bug Fixes">Bug Fixes</SelectItem>
+										{pendingTaskTitles.length === 0 ? (
+											<div className="px-3 py-2 text-sm text-muted-foreground">
+												No pending tasks
+											</div>
+										) : (
+											pendingTaskTitles.map((title) => (
+												<SelectItem key={title} value={title}>
+													{title}
+												</SelectItem>
+											))
+										)}
 									</SelectContent>
 								</Select>
 

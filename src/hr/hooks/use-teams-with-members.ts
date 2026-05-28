@@ -29,7 +29,12 @@ export function useTeamsWithMembers() {
 
   const teamEntriesList = teamEntriesResponse?.data ?? [];
   const teamsWithMembers: TeamEntry[] = teamEntriesList.map((t, teamIndex) => {
-    const people = (t.members ?? []).map((m) => ({
+    // HR appears on every team in the backend join — strip them out so the
+    // count and member list reflect actual team members only.
+    const membersWithoutHr = (t.members ?? []).filter(
+      (m) => (m.role ?? "").toLowerCase() !== "hr",
+    );
+    const people = membersWithoutHr.map((m) => ({
       id: m.user_id,
       name: m.full_name || "Unknown",
       role: formatUserRole(m.role ?? "team_member"),
@@ -38,11 +43,13 @@ export function useTeamsWithMembers() {
       payout: 0,
     }));
     const total_payout = people.reduce((sum, p) => sum + (p.payout ?? 0), 0);
+    const rawCount = t.member_count ?? (t.members?.length ?? people.length);
+    const hrCountInTeam = (t.members?.length ?? 0) - membersWithoutHr.length;
     return {
       id: t.team_id,
       team: t.team_name ?? "Team",
       icon_color: TEAM_ICON_COLORS[teamIndex % TEAM_ICON_COLORS.length],
-      members_count: t.member_count ?? people.length,
+      members_count: Math.max(0, rawCount - hrCountInTeam),
       total_payout,
       total_hours: t.total_hours ?? 0,
       total_entries: t.total_entries ?? 0,

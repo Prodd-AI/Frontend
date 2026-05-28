@@ -16,8 +16,8 @@ import {
   Row,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { rankItem } from "@tanstack/match-sorter-utils";
 import { Search, Inbox, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 
 import {
   Table,
@@ -40,12 +40,39 @@ interface DataTableProps<TData, TValue> {
   placeholder?: string;
   tableName?: string;
   tableDescription?: string;
+  /** Optional row click handler. When set, rows show a pointer cursor and
+   *  fire this with the row's original data. Useful for "open detail page". */
+  onRowClick?: (row: TData) => void;
 }
 
-const fuzzyFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
-  const itemRank = rankItem(row.getValue(columnId), value);
-  addMeta({ itemRank });
-  return itemRank.passed;
+// Walk row.original recursively and concatenate every string/number value.
+// This lets the global filter match nested fields like `task.title` and
+// `task.description` (the prior fuzzy filter only looked at row.getValue(columnId),
+// which returns the whole nested object for accessorKey: "task" — making search
+// silently no-op for the tasks tables).
+const collectSearchableText = (input: unknown, sink: string[]): void => {
+  if (input === null || input === undefined) return;
+  if (typeof input === "string" || typeof input === "number") {
+    sink.push(String(input));
+    return;
+  }
+  if (Array.isArray(input)) {
+    input.forEach((item) => collectSearchableText(item, sink));
+    return;
+  }
+  if (typeof input === "object") {
+    Object.values(input as Record<string, unknown>).forEach((v) =>
+      collectSearchableText(v, sink),
+    );
+  }
+};
+
+const globalSearchFilter: FilterFn<unknown> = (row, _columnId, value) => {
+  const needle = String(value ?? "").trim().toLowerCase();
+  if (!needle) return true;
+  const parts: string[] = [];
+  collectSearchableText(row.original, parts);
+  return parts.join(" ").toLowerCase().includes(needle);
 };
 
 const ROW_HEIGHT = 64;
@@ -57,6 +84,7 @@ export function DataTable<TData, TValue>({
   placeholder = "Search......",
   tableName,
   tableDescription,
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -65,7 +93,10 @@ export function DataTable<TData, TValue>({
     [],
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = React.useState("");
+  // The raw input value updates on every keystroke for responsiveness; the
+  // debounced value is what actually drives table filtering.
+  const [searchInput, setSearchInput] = React.useState("");
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
 
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -73,22 +104,23 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     filterFns: {
-      fuzzy: fuzzyFilter as FilterFn<TData>,
+      fuzzy: globalSearchFilter as FilterFn<TData>,
     },
     state: {
       sorting,
       columnVisibility,
       rowSelection,
       columnFilters,
-      globalFilter,
+      globalFilter: debouncedSearch,
     },
     enableRowSelection: true,
-    globalFilterFn: fuzzyFilter as FilterFn<TData>,
+    globalFilterFn: globalSearchFilter as FilterFn<TData>,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onGlobalFilterChange: setGlobalFilter,
+    onGlobalFilterChange: (value) =>
+      setSearchInput(typeof value === "string" ? value : ""),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -117,10 +149,33 @@ export function DataTable<TData, TValue>({
 
   const MemoizedTableRow = React.useMemo(() => {
     return React.memo(function TableRowMemo({ row }: { row: Row<TData> }) {
+      const clickable = Boolean(onRowClick);
       return (
         <TableRow
           data-state={row.getIsSelected() && "selected"}
-          className="hover:bg-muted/30 transition-colors data-[state=selected]:bg-muted/50 border-border/60"
+          className={clsx(
+            "transition-colors data-[state=selected]:bg-muted/50 border-border/60",
+            clickable
+              ? "cursor-pointer hover:bg-muted/40"
+              : "hover:bg-muted/30",
+          )}
+          onClick={
+            clickable
+              ? (e) => {
+                  // Don't fire row click when interacting with controls inside
+                  // the row (dropdowns, buttons, links, inputs, etc.).
+                  const target = e.target as HTMLElement;
+                  if (
+                    target.closest(
+                      'button, a, input, textarea, select, [role="menuitem"], [role="button"]',
+                    )
+                  ) {
+                    return;
+                  }
+                  onRowClick?.(row.original);
+                }
+              : undefined
+          }
         >
           {row.getVisibleCells().map((cell) => (
             <TableCell key={cell.id} className="py-4 px-6">
@@ -130,7 +185,7 @@ export function DataTable<TData, TValue>({
         </TableRow>
       );
     });
-  }, []);
+  }, [onRowClick]);
 
   return (
     <Card
@@ -158,8 +213,8 @@ export function DataTable<TData, TValue>({
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={placeholder}
-            value={globalFilter ?? ""}
-            onChange={(event) => setGlobalFilter(event.target.value)}
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
             className="pl-9 bg-background/50 focus:bg-background h-9 border-border/60"
           />
         </div>

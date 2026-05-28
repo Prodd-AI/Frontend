@@ -57,6 +57,10 @@ const ProfileOverviewComponent = ({ user }: ProfileOverviewProps) => {
       setValue("avatar_url", response.data.url);
       toast.success("Avatar uploaded successfully");
     },
+    onError: (error: Error) => {
+      // Service translates HTTP status (e.g. 413) into a friendly message.
+      toast.error(error.message);
+    },
   });
 
   const handle_avatar_change = (e: React.ChangeEvent<HTMLInputElement>) => {

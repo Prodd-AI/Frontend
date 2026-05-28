@@ -74,6 +74,49 @@ const getAnalysisMetricForSingleTeam = (
   );
 };
 
+/**
+ * Org-wide HR analytics overview.
+ * GET /api/v1/teams/analytics-dashboard
+ */
+const getAnalyticsDashboard = () =>
+  teams_service.get<GeneralReturnInt<Record<string, unknown>>>(
+    "analytics-dashboard",
+    undefined,
+    true,
+  );
+
+/**
+ * Per-team performance metrics for all teams.
+ * GET /api/v1/teams/teams-performance
+ */
+const getTeamsPerformance = () =>
+  teams_service.get<GeneralReturnInt<Record<string, unknown>[]>>(
+    "teams-performance",
+    undefined,
+    true,
+  );
+
+/**
+ * Per-team participation + morale analysis for all teams.
+ * GET /api/v1/teams/teams-analysis
+ */
+const getTeamsAnalysis = () =>
+  teams_service.get<GeneralReturnInt<Record<string, unknown>[]>>(
+    "teams-analysis",
+    undefined,
+    true,
+  );
+
+/**
+ * Performance metrics for a single team.
+ * GET /api/v1/teams/{team_id}/performance
+ */
+const getTeamPerformance = (team_id: string) =>
+  teams_service.get<GeneralReturnInt<Record<string, unknown>>>(
+    `${team_id}/performance`,
+    undefined,
+    true,
+  );
 
 export {
   addTeamMembers,
@@ -83,5 +126,8 @@ export {
   getAnalysisMetricForSingleTeam,
   getMyTeams,
   getTeamData,
-
+  getAnalyticsDashboard,
+  getTeamsPerformance,
+  getTeamsAnalysis,
+  getTeamPerformance,
 };

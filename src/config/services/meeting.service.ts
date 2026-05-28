@@ -71,7 +71,9 @@ const schedule_meeting = (data: {
   title: string;
   type: string;
   description: string;
+  /** Local date the user picked (yyyy-MM-dd) — sent as-is. */
   date: string;
+  /** Local time the user picked (HH:mm 24h) — sent as-is. */
   time: string;
   attendee_emails: string[];
   meeting_link: string;

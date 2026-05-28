@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import GoBackBtn from "@/shared/components/go-back-btn";
+import BackBreadcrumb from "@/shared/components/back-breadcrumb.component";
 import WelcomeBackHeader from "@/shared/components/welcome-back-header.component";
 import TeamOverviewCard from "@/hr/components/team-overview-card.component";
 import AddTeamForm from "@/hr/components/add-team-form.component";
@@ -57,7 +57,10 @@ function Teams() {
 
   return (
     <div>
-      <GoBackBtn title="Back to home" path="/dash/hr" />
+      <BackBreadcrumb
+        trail={[{ label: "Overview", to: "/dash/hr" }, { label: "Teams" }]}
+        backTo="/dash/hr"
+      />
       <WelcomeBackHeader
         heading="Teams Overview"
         subHeading="Manage and monitor all teams across your organization."
