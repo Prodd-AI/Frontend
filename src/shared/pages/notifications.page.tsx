@@ -1,77 +1,23 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Bell, Check, CheckCheck, Trash2 } from "lucide-react";
-import {
-  getAllUserNotifications,
-  markAUserNoficationAsRead,
-  markAllUserNoficationAsRead,
-  deleteASeletedUserNofication,
-} from "@/config/services/notifications.service";
 import Loader from "@/shared/components/loader.component";
 import useAppNotifications from "@/shared/hooks/use-socket-notifications";
 import { formatTimeAgo } from "@/shared/utils/date.utils";
 import { NotificationIcon } from "@/shared/components/notification-icon.component";
-import { toast } from "sonner";
 
 function NotificationsPage() {
-  const queryClient = useQueryClient();
-  const { notifications: realtimeNotifications, markAllAsRead } =
-    useAppNotifications();
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["notifications"],
-    queryFn: () => getAllUserNotifications({ page: "1", limit: "50" }),
-  });
-
-  const persistedNotifications: AppNotification[] = data?.data ?? [];
-
-  const allNotifications = [
-    ...realtimeNotifications,
-    ...persistedNotifications.filter(
-      (pn) => !realtimeNotifications.some((rn) => rn.id === pn.id),
-    ),
-  ].sort(
-    (a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-  );
-
-  const unreadCount = allNotifications.filter((n) => !n.is_read).length;
-
-  const markAsReadMutation = useMutation({
-    mutationFn: (id: string) => markAUserNoficationAsRead(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    },
-  });
-
-  const markAllAsReadMutation = useMutation({
-    mutationFn: () => markAllUserNoficationAsRead(),
-    onSuccess: () => {
-      markAllAsRead();
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      toast.success("All notifications marked as read");
-    },
-  });
-
-  const deleteNotificationMutation = useMutation({
-    mutationFn: (id: string) => deleteASeletedUserNofication(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      toast.success("Notification deleted");
-    },
-  });
-
-  const handleMarkAsRead = (id: string) => {
-    markAsReadMutation.mutate(id);
-  };
-
-  const handleMarkAllAsRead = () => {
-    markAllAsReadMutation.mutate();
-  };
-
-  const handleDeleteNotification = (id: string) => {
-    deleteNotificationMutation.mutate(id);
-  };
+  const {
+    notifications: allNotifications,
+    unreadCount,
+    isLoading,
+    isError,
+    markAsRead: handleMarkAsRead,
+    markAllAsRead: handleMarkAllAsRead,
+    deleteNotification: handleDeleteNotification,
+    isMarkingAsRead,
+    isMarkingAllAsRead,
+    isDeleting,
+  } = useAppNotifications();
 
   if (isLoading) {
     return (
@@ -120,13 +66,11 @@ function NotificationsPage() {
           <button
             type="button"
             onClick={handleMarkAllAsRead}
-            disabled={markAllAsReadMutation.isPending}
+            disabled={isMarkingAllAsRead}
             className="flex items-center gap-2 px-4 py-2 text-sm text-[#6619DE] hover:bg-[#6619DE]/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <CheckCheck className="size-4" />
-            {markAllAsReadMutation.isPending
-              ? "Marking..."
-              : "Mark all as read"}
+            {isMarkingAllAsRead ? "Marking..." : "Mark all as read"}
           </button>
         )}
       </div>
@@ -184,7 +128,7 @@ function NotificationsPage() {
                           className="p-1.5 rounded-lg hover:bg-[#6619DE]/10 transition-colors"
                           aria-label="Mark as read"
                           onClick={() => handleMarkAsRead(notification.id)}
-                          disabled={markAsReadMutation.isPending}
+                          disabled={isMarkingAsRead}
                         >
                           <Check className="size-4 text-[#6619DE]" />
                         </button>
@@ -196,7 +140,7 @@ function NotificationsPage() {
                         onClick={() =>
                           handleDeleteNotification(notification.id)
                         }
-                        disabled={deleteNotificationMutation.isPending}
+                        disabled={isDeleting}
                       >
                         <Trash2 className="size-4 text-red-500" />
                       </button>

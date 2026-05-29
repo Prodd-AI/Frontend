@@ -1,5 +1,15 @@
 import { useState } from "react";
-import { MoreHorizontal, Loader2, FileEdit } from "lucide-react";
+import {
+  MoreHorizontal,
+  Loader2,
+  FileEdit,
+  Pencil,
+  Trash2,
+  Eye,
+  CheckCircle2,
+  Circle,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,16 +19,61 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Task } from "@/team-leader/typings/team-leader";
-import { updateTask } from "@/config/services/tasks.service";
-import { RequestChangesDialog } from "@/shared/components/request-changes-dialog.component";
+import { updateTask, deleteTask } from "@/config/services/tasks.service";
 
-export const TaskActionsCell = ({ task }: { task: Task }) => {
+// Minimal shape this cell needs — both UserTaskAssignment.task (the ambient
+// `Task`) and AssignedTask.task (the team-leader typing) satisfy it without
+// dragging in fields like `deleted_at` that aren't always present. Status is
+// kept loose because the team-leader typing also allows "cancelled"; we only
+// ever toggle between pending/completed.
+type CellTask = {
+  id: string;
+  title: string;
+  description: string;
+  external_link?: string | null;
+  due_date: string;
+  priority: "high" | "medium" | "low";
+  status: string;
+};
+import { RequestChangesDialog } from "@/shared/components/request-changes-dialog.component";
+import EditTaskDialog from "@/team-leader/components/edit-task-dialog.component";
+import { getTaskDetailPath } from "@/shared/utils/task-routes";
+import useAuthStore from "@/config/stores/auth.store";
+
+export const TaskActionsCell = ({
+  task,
+  canRequestChanges = true,
+}: {
+  task: CellTask;
+  /** When false, hides the "Request Changes" item. Team-member personal lists pass false. */
+  canRequestChanges?: boolean;
+}) => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const role = useAuthStore((s) => s.user?.user.user_role);
   const [isOpen, setIsOpen] = useState(false);
   const [isRequestChangesOpen, setIsRequestChangesOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const invalidateTaskLists = () => {
+    queryClient.invalidateQueries({ queryKey: ["team-assigned-tasks"] });
+    queryClient.invalidateQueries({ queryKey: ["team-assigned-tasks-by-team"] });
+    queryClient.invalidateQueries({ queryKey: ["member-assigned-tasks"] });
+    queryClient.invalidateQueries({ queryKey: ["streaks"] });
+  };
 
   const { mutate: updateStatus, isPending } = useMutation({
     mutationFn: async (newStatus: "pending" | "completed") => {
@@ -26,7 +81,7 @@ export const TaskActionsCell = ({ task }: { task: Task }) => {
     },
     onSuccess: () => {
       toast.success("Task status updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["team-assigned-tasks"] });
+      invalidateTaskLists();
       setIsOpen(false);
     },
   });
@@ -36,12 +91,12 @@ export const TaskActionsCell = ({ task }: { task: Task }) => {
       mutationFn: async (newDescription: string) => {
         await updateTask(task.id, {
           description: newDescription,
-          status: task.status,
+          status: task.status as "pending" | "completed" | "cancelled",
         });
       },
       onSuccess: () => {
         toast.success("Changes requested successfully");
-        queryClient.invalidateQueries({ queryKey: ["team-assigned-tasks"] });
+        invalidateTaskLists();
         setIsRequestChangesOpen(false);
       },
     });
@@ -49,6 +104,15 @@ export const TaskActionsCell = ({ task }: { task: Task }) => {
   const handleRequestChanges = (description: string) => {
     requestChanges(description);
   };
+
+  const { mutate: removeTask, isPending: isDeleting } = useMutation({
+    mutationFn: () => deleteTask(task.id),
+    onSuccess: () => {
+      toast.success("Task deleted");
+      invalidateTaskLists();
+      setIsDeleteOpen(false);
+    },
+  });
 
   return (
     <>
@@ -62,11 +126,14 @@ export const TaskActionsCell = ({ task }: { task: Task }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => navigator.clipboard.writeText(task.id)}
+            onClick={() => {
+              setIsOpen(false);
+              navigate(getTaskDetailPath(role, task.id));
+            }}
           >
-            Copy Task ID
+            <Eye className="h-4 w-4 mr-2" />
+            View Task
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             disabled={isPending}
             onClick={() =>
@@ -76,34 +143,95 @@ export const TaskActionsCell = ({ task }: { task: Task }) => {
             }
           >
             {isPending ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 <span>Updating...</span>
-              </div>
+              </>
+            ) : task.status === "completed" ? (
+              <>
+                <Circle className="h-4 w-4 mr-2" />
+                <span>Mark as Pending</span>
+              </>
             ) : (
-              <span>
-                Mark as {task.status === "completed" ? "Pending" : "Completed"}
-              </span>
+              <>
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <span>Mark as Completed</span>
+              </>
             )}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {
               setIsOpen(false);
-              setIsRequestChangesOpen(true);
+              setIsEditOpen(true);
             }}
           >
-            <FileEdit className="h-4 w-4 mr-2" />
-            Request Changes
+            <Pencil className="h-4 w-4 mr-2" />
+            Edit Task
+          </DropdownMenuItem>
+          {canRequestChanges && (
+            <DropdownMenuItem
+              onClick={() => {
+                setIsOpen(false);
+                setIsRequestChangesOpen(true);
+              }}
+            >
+              <FileEdit className="h-4 w-4 mr-2" />
+              Request Changes
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="text-red-600 focus:text-red-700 focus:bg-red-50"
+            onClick={() => {
+              setIsOpen(false);
+              setIsDeleteOpen(true);
+            }}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Task
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <RequestChangesDialog
-        isOpen={isRequestChangesOpen}
-        onClose={() => setIsRequestChangesOpen(false)}
-        onSendRequest={handleRequestChanges}
-        isLoading={isRequestingChanges}
+      <EditTaskDialog
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        task={task}
       />
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this task?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove "{task.title}". This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                removeTask();
+              }}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {canRequestChanges && (
+        <RequestChangesDialog
+          isOpen={isRequestChangesOpen}
+          onClose={() => setIsRequestChangesOpen(false)}
+          onSendRequest={handleRequestChanges}
+          isLoading={isRequestingChanges}
+        />
+      )}
     </>
   );
 };

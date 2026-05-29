@@ -39,4 +39,21 @@ const get_current_user_profile = () => {
   );
 };
 
-export { update_user, update_account_settings, get_current_user_profile };
+/**
+ * Per-member performance trends + workload status (team-lead / HR view).
+ * GET /api/v1/users/{user_id}/member-overview
+ */
+const get_member_overview = (user_id: string) => {
+  return user_api_client.get<GeneralReturnInt<Record<string, unknown>>>(
+    `${user_id}/member-overview`,
+    undefined,
+    true,
+  );
+};
+
+export {
+  update_user,
+  update_account_settings,
+  get_current_user_profile,
+  get_member_overview,
+};

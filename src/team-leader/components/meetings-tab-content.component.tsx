@@ -12,6 +12,7 @@ import {
 import UpcomingMeeting from "@/shared/components/upcoming-meeting-card.component";
 import ScheduleMeeting from "@/shared/components/schedule-meeting.component";
 import { MeetingsTabContentProps } from "@/team-leader/typings/team-leader";
+import { parseWallClockIso } from "@/shared/utils/date.utils";
 
 const MeetingsTabContent = ({
   meetings,
@@ -28,6 +29,23 @@ const MeetingsTabContent = ({
   };
 
   const statuses = ["scheduled", "cancelled", "completed"] as const;
+
+  // Split scheduled meetings into upcoming vs. already-passed so the user can
+  // see what's coming next without losing the history.
+  const now = Date.now();
+  const isPast = (iso?: string): boolean => {
+    if (!iso) return false;
+    const t = parseWallClockIso(iso).getTime();
+    return Number.isFinite(t) && t < now;
+  };
+  const upcomingMeetings = meetings.filter((m) => !isPast(m.scheduled_at));
+  const previousMeetings = meetings
+    .filter((m) => isPast(m.scheduled_at))
+    .sort(
+      (a, b) =>
+        (b.scheduled_at ? parseWallClockIso(b.scheduled_at).getTime() : 0) -
+        (a.scheduled_at ? parseWallClockIso(a.scheduled_at).getTime() : 0),
+    );
 
   return (
     <div className="bg-[#FBFBFB] rounded-[1.5rem] p-[1.625rem]">
@@ -82,14 +100,40 @@ const MeetingsTabContent = ({
           <div className="py-8 text-center text-gray-500">
             Loading meetings...
           </div>
-        ) : meetings.length > 0 ? (
-          meetings.map((meeting, index) => (
-            <UpcomingMeeting key={index} meeting={meeting} />
-          ))
-        ) : (
+        ) : meetings.length === 0 ? (
           <div className="py-8 text-center text-gray-500">
             No {filter?.status} meetings found
           </div>
+        ) : (
+          <>
+            {upcomingMeetings.length > 0 && (
+              <div className="flex flex-col gap-4">
+                {upcomingMeetings.map((meeting, index) => (
+                  <UpcomingMeeting key={`upcoming-${index}`} meeting={meeting} />
+                ))}
+              </div>
+            )}
+            {previousMeetings.length > 0 && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <h5 className="text-sm font-semibold text-[#5A5D61] uppercase tracking-wider mb-3">
+                  Previous Meetings
+                </h5>
+                <div className="flex flex-col gap-4 opacity-80">
+                  {previousMeetings.map((meeting, index) => (
+                    <UpcomingMeeting
+                      key={`previous-${index}`}
+                      meeting={meeting}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            {upcomingMeetings.length === 0 && previousMeetings.length === 0 && (
+              <div className="py-8 text-center text-gray-500">
+                No meetings to show
+              </div>
+            )}
+          </>
         )}
       </div>
 

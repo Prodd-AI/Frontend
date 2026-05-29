@@ -1,4 +1,4 @@
-import GoBackBtn from "@/shared/components/go-back-btn";
+import BackBreadcrumb from "@/shared/components/back-breadcrumb.component";
 import { useTeams } from "@/team-leader/hooks/use-teams";
 import { useTeamAnalysis } from "@/team-leader/hooks/use-team-analysis";
 import { useDateRange } from "@/team-leader/hooks/use-date-range";
@@ -26,30 +26,48 @@ function ViewTeamMembers() {
 
   const [viewMode, setViewMode] = useState<"card" | "table">("table");
 
-  const teamMembers: TeamMemberData[] =
+  const leadNameLower = (metrics?.lead_name ?? "").trim().toLowerCase();
+  const teamMembers: TeamMemberData[] = (
     metrics?.team_members_details.map((member) => ({
       id: member.member_id,
       name: member.member_name,
       role: member.job_title || "Team Member",
-      status:
-        member.flight_risk_indicator === "at risk" ? "At risk" : "On track",
+      status: (member.flight_risk_indicator === "at risk"
+        ? "At risk"
+        : "On track") as "At risk" | "On track",
       taskCompletion: member.task_completion,
       tasksCompleted: member.completed_task,
       totalTasks: member.total_task,
       weekStreak: `${member.week_streak} weeks`,
       lastActive: member.last_active,
       email: member.email,
-    })) || [];
+    })) || []
+  )
+    .slice()
+    .sort((a, b) => {
+      const aLead = leadNameLower && a.name.trim().toLowerCase() === leadNameLower ? 0 : 1;
+      const bLead = leadNameLower && b.name.trim().toLowerCase() === leadNameLower ? 0 : 1;
+      if (aLead !== bLead) return aLead - bLead;
+      return a.name.localeCompare(b.name);
+    });
 
   return (
     <div className="pb-12">
-      <GoBackBtn title="Back home" />
-      <WelcomeBackHeader
-        heading={"Team Dashboard and Insight"}
-        subHeading={"Manage your team's tasks and wellbeing"}
-        badge
-        className="sm:mt-6"
+      <BackBreadcrumb
+        trail={[
+          { label: "Dashboard", to: "/dash/team-lead" },
+          { label: "My Team" },
+        ]}
+        backTo="/dash/team-lead"
       />
+      <div data-tour="page-header">
+        <WelcomeBackHeader
+          heading={"Team Dashboard and Insight"}
+          subHeading={"Manage your team's tasks and wellbeing"}
+          badge
+          className="sm:mt-6"
+        />
+      </div>
       <TeamPerformanceOverview
         teams={teams}
         activeTeamId={activeTeamId}
@@ -104,6 +122,10 @@ function ViewTeamMembers() {
                 name={member.name}
                 role={member.role}
                 status={member.status}
+                isLead={
+                  !!leadNameLower &&
+                  member.name.trim().toLowerCase() === leadNameLower
+                }
                 taskCompletion={member.taskCompletion}
                 tasksCompleted={member.tasksCompleted}
                 totalTasks={member.totalTasks}

@@ -1,9 +1,8 @@
 import DailyMoodCheckIn from "@/shared/components/daily-mood-check-in.component";
-
 import TodaysProgress from "@/shared/components/todays-progress.component";
 import { PersonalDashboardSectionProps } from "@/team-leader/typings/team-leader";
 import { Moods } from "@/shared/typings/daily-mood-check-in";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { DailyMoodCheckInRef } from "@/shared/typings/daily-mood-check-in";
@@ -18,6 +17,7 @@ const PersonalDashboardSection = ({
   averageMoodQuery,
 }: PersonalDashboardSectionProps) => {
   const formRef = useRef<DailyMoodCheckInRef>(null);
+  const queryClient = useQueryClient();
 
   const weekTasks = weekTasksQuery.data?.data;
   const averageMoodData = averageMoodQuery.data?.data?.average_mood ?? 0;
@@ -29,13 +29,12 @@ const PersonalDashboardSection = ({
         .flat()
         .filter((task) => task.task?.status === "completed").length
     : 0;
-   
+
   const todaysTasks = weekTasks?.[todayDayName as keyof typeof weekTasks] ?? [];
   const totalNumberOfTaskForTheDay = todaysTasks.length;
   const numberOfTaskCompletedForTheDay = todaysTasks.filter(
     (task) => task.task.status === "completed",
   ).length;
-
 
   const MoodEmojisMapper = {
     Rough: 1,
@@ -56,6 +55,13 @@ const PersonalDashboardSection = ({
     mutationKey: ["submit-daily-mood-check-in"],
     onSuccess: (res) => {
       toast.success(res.message || "Mood check-in submitted successfully!");
+      // Refresh any mood listings/averages so the new entry shows up
+      // without a page reload.
+      queryClient.invalidateQueries({ queryKey: ["average-mood-week"] });
+      queryClient.invalidateQueries({ queryKey: ["average-mood"] });
+      queryClient.invalidateQueries({ queryKey: ["mood-average"] });
+      queryClient.invalidateQueries({ queryKey: ["user-mood-history"] });
+      queryClient.invalidateQueries({ queryKey: ["get-mood-distribution"] });
       formRef.current?.reset();
     },
   });
@@ -78,30 +84,35 @@ const PersonalDashboardSection = ({
   const remainingCount = meetingData?.remaining_meetings?.length ?? 0;
 
   return (
-    <section className={`grid grid-cols-2 mt-9 gap-4 ${className || ""}`}>
-      <DailyMoodCheckIn
-        ref={formRef}
-        isSubmitting={isPending}
-        onSubmit={handleSubmitDailyMoodCheckIn}
-        className="w-full h-full"
-      />
-      <div className="flex flex-col gap-3.5">
-        <WeeklyStreakComponent
-          className="w-full"
-          numberOfTaskCompleted={numberOfTaskCompleted}
-          totalNumberOfTaskForTheDay={totalNumberOfTaskForTheDay}
-          numberOfTaskCompletedForTheDay={numberOfTaskCompletedForTheDay}
-          weekTasks={weekTasks}
-        />
-        <TodaysProgress
-          title="Today's Progress"
-          numberOfTaskCompleted={numberOfTaskCompletedForTheDay}
-          totalNumberOfTask={totalNumberOfTaskForTheDay}
-          avgMood={averageMoodData}
-          className="w-full"
-        />
+    <section className={`flex flex-col gap-6 ${className || ""}`}>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div data-tour="mood-trends" className="lg:col-span-3">
+          <DailyMoodCheckIn
+            ref={formRef}
+            isSubmitting={isPending}
+            onSubmit={handleSubmitDailyMoodCheckIn}
+          />
+        </div>
+        <div className="flex flex-col gap-4 lg:col-span-2">
+          <div data-tour="weekly-streak">
+            <WeeklyStreakComponent
+              numberOfTaskCompleted={numberOfTaskCompleted}
+              totalNumberOfTaskForTheDay={totalNumberOfTaskForTheDay}
+              numberOfTaskCompletedForTheDay={numberOfTaskCompletedForTheDay}
+              weekTasks={weekTasks}
+            />
+          </div>
+          <div data-tour="weekly-tasks">
+            <TodaysProgress
+              title="Today's Progress"
+              numberOfTaskCompleted={numberOfTaskCompletedForTheDay}
+              totalNumberOfTask={totalNumberOfTaskForTheDay}
+              avgMood={averageMoodData}
+            />
+          </div>
+        </div>
       </div>
-      <div className="col-span-2 mt-4">
+      <div data-tour="upcoming-schedule">
         <UpcomingSchedule
           meeting={meetingData}
           remainingCount={remainingCount}

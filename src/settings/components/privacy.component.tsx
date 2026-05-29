@@ -1,25 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  visibility_schema,
-  type VisibilityForm,
-} from "@/config/forms/privacy.form";
-import { CurrentUserProfile, Visibility } from "@/shared/typings/team-member";
-import { update_account_settings } from "@/config/services/users.service";
-import {
-  get_active_all_sessions,
-  end_a_session,
-  close_account,
-} from "@/config/services/auth.service";
+import { CurrentUserProfile } from "@/shared/typings/team-member";
+import { close_account } from "@/config/services/auth.service";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -43,59 +25,11 @@ const Section = ({ children }: { children: React.ReactNode }) => (
   <div className="rounded-xl border border-[#E5E7EB] p-6">{children}</div>
 );
 
-const RowCard = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex items-center justify-between rounded-lg border border-[#E5E7EB] bg-white p-4">
-    {children}
-  </div>
-);
-
-const PrivacyComponent = ({ user }: PrivacyProps) => {
-  const query_client = useQueryClient();
+// Profile Visibility + Active Sessions hidden per request — keep only Data Management.
+// (Backing services live in users.service / auth.service and can be restored later.)
+const PrivacyComponent = ({ user: _user }: PrivacyProps) => {
   const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
-
-  const { data: sessionsData, isLoading: isLoadingSessions } = useQuery({
-    queryKey: ["active-sessions"],
-    queryFn: get_active_all_sessions,
-  });
-
-  const sessions = sessionsData?.data ?? [];
-
-  const { watch: watchVisibility, setValue: setVisibilityValue } =
-    useForm<VisibilityForm>({
-      resolver: zodResolver(visibility_schema),
-      values: user?.user_profile?.profile_visibility
-        ? {
-            profile_photo: user.user_profile.profile_visibility.profile_photo,
-            contact_info: user.user_profile.profile_visibility.contact_info,
-            working_hours: user.user_profile.profile_visibility.working_hours,
-            activity_status:
-              user.user_profile.profile_visibility.activity_status,
-          }
-        : undefined,
-    });
-
-  const visibility = watchVisibility();
-
-  const { mutate: updateVisibility, isPending: isUpdatingVisibility } =
-    useMutation({
-      mutationFn: (data: VisibilityForm) =>
-        update_account_settings({ profile_visibility: data }),
-      onSuccess: () => {
-        query_client.invalidateQueries({ queryKey: ["current-user-profile"] });
-        toast.success("Visibility settings updated");
-      },
- 
-    });
-
-  const { mutate: endSession, isPending: isEndingSession } = useMutation({
-    mutationFn: (id: string) => end_a_session(id),
-    onSuccess: () => {
-      query_client.invalidateQueries({ queryKey: ["active-sessions"] });
-      toast.success("Session ended");
-    },
-
-  });
 
   const { mutate: deleteAccount, isPending: isDeletingAccount } = useMutation({
     mutationFn: close_account,
@@ -104,140 +38,25 @@ const PrivacyComponent = ({ user }: PrivacyProps) => {
       logout();
       navigate("/login");
     },
-
   });
-
-  const handleVisibilityChange = (
-    key: keyof VisibilityForm,
-    value: Visibility,
-  ) => {
-    setVisibilityValue(key, value);
-    const updatedVisibility = { ...visibility, [key]: value };
-    updateVisibility(updatedVisibility);
-  };
-
-  const options: { value: Visibility; label: string }[] = [
-    { value: "everyone", label: "Everyone" },
-    { value: "team", label: "Team" },
-    { value: "only me", label: "Only me" },
-  ];
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   return (
     <div className="flex flex-col gap-6">
-      <Section>
+      {/* <Section>
         <p className="text-base font-semibold">Profile Visibility</p>
         <p className="text-xs text-gray-500 mb-4">
           Control who can see your profile information
         </p>
+        ...visibility controls hidden per request...
+      </Section> */}
 
-        <div className="space-y-3">
-          {(
-            [
-              {
-                key: "profile_photo",
-                title: "Profile Photo",
-                desc: "Who can see your profile picture",
-              },
-              {
-                key: "contact_info",
-                title: "Contact Information",
-                desc: "Who can see your email and phone",
-              },
-              {
-                key: "working_hours",
-                title: "Working Hours",
-                desc: "Who can see your availability",
-              },
-              {
-                key: "activity_status",
-                title: "Activity Status",
-                desc: "Show when you're online or offline",
-              },
-            ] as const
-          ).map((row) => (
-            <RowCard key={row.key}>
-              <div>
-                <p className="text-sm font-semibold">{row.title}</p>
-                <p className="text-xs text-gray-500">{row.desc}</p>
-              </div>
-              <Select
-                value={visibility[row.key]}
-                disabled={isUpdatingVisibility}
-                onValueChange={(v: Visibility) =>
-                  handleVisibilityChange(row.key, v)
-                }
-              >
-                <SelectTrigger className="w-40 !h-9">
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  {options.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </RowCard>
-          ))}
-        </div>
-      </Section>
-
-      <Section>
+      {/* <Section>
         <p className="text-base font-semibold">Active Sessions</p>
         <p className="text-xs text-gray-500 mb-4">
           Manage your active login sessions
         </p>
-
-        <div className="space-y-3">
-          {isLoadingSessions ? (
-            <p className="text-sm text-gray-500">Loading sessions...</p>
-          ) : sessions.length === 0 ? (
-            <p className="text-sm text-gray-500">No active sessions</p>
-          ) : (
-            sessions.map((s) => (
-              <div
-                key={s.id}
-                className="flex items-center justify-between border border-[#E5E7EB] rounded-lg p-3"
-              >
-                <div>
-                  <p className="text-sm font-semibold">
-                    {s.device_info || "Unknown Device"}
-                    {s.is_current && (
-                      <span className="ml-2 text-xs text-green-600 font-normal">
-                        (Current)
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Created: {formatDate(s.created_at)}
-                  </p>
-                </div>
-                {!s.is_current && (
-                  <Button
-                    variant="outline"
-                    onClick={() => endSession(s.id)}
-                    disabled={isEndingSession}
-                    className="shadow-none border-none bg-[#F3F4F6] text-[#6B7280]"
-                  >
-                    End Session
-                  </Button>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-      </Section>
+        ...sessions list hidden per request...
+      </Section> */}
 
       <Section>
         <p className="text-base font-semibold">Data Management</p>

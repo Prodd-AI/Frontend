@@ -22,6 +22,9 @@ declare module "@/team-leader/typings/team-leader" {
     time: string;
     badge: string;
     meeting_link: string;
+    /** Raw scheduled timestamp (wall-clock-as-UTC from the API) used to
+     *  classify upcoming vs previous. */
+    scheduled_at?: string;
   }
 
   // Review data interface
@@ -102,6 +105,7 @@ declare module "@/team-leader/typings/team-leader" {
     AssignButton?: ComponentType;
     showHeader?: boolean;
     showAssignButton?: boolean;
+    onRowClick?: (row: T) => void;
   }
 
   export interface MeetingsTabContentProps {
