@@ -1,6 +1,6 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import GoBackBtn from "@/shared/components/go-back-btn";
+import BackBreadcrumb from "@/shared/components/back-breadcrumb.component";
 import TeamMemberProfileRow from "../components/team-member-profile-row.component";
 import ProductivityTracker from "@/shared/components/productivity-tracker.component";
 import TeamMemberOverviewCard from "../components/team-member-overview.component";
@@ -9,6 +9,8 @@ import { get_team_member_overview } from "@/config/services/team-member.service"
 import { getAssignedTasksForTeamMember } from "@/config/services/tasks.service";
 import { DataTable } from "@/shared/components/data-table/data-table";
 import { memberAssignedTasksColumns } from "../components/columns/member-assigned-tasks-columns";
+import { getTaskDetailPath } from "@/shared/utils/task-routes";
+import useAuthStore from "@/config/stores/auth.store";
 
 type MoodLevel = "rough" | "notGreat" | "okay" | "good" | "great" | null;
 
@@ -19,6 +21,8 @@ interface DayMood {
 
 function ViewTeamMember() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const role = useAuthStore((s) => s.user?.user.user_role);
 
   const { data: moodData = [], isLoading: isMoodLoading } = useQuery({
     queryKey: ["user-mood-history", id],
@@ -56,7 +60,14 @@ function ViewTeamMember() {
 
   return (
     <div className="pb-12">
-      <GoBackBtn title="Back to team" />
+      <BackBreadcrumb
+        trail={[
+          { label: "Dashboard", to: "/dash/team-lead" },
+          { label: "My Team", to: "/dash/team-lead/view-team" },
+          { label: memberOverview?.name ?? "Team Member" },
+        ]}
+        backTo="/dash/team-lead/view-team"
+      />
       <TeamMemberProfileRow
         name={memberOverview?.name}
         role={memberOverview?.job_title}
@@ -79,6 +90,7 @@ function ViewTeamMember() {
         tableName="Assigned Tasks"
         tableDescription="Tasks assigned to this team member"
         className="mt-[2.875rem]"
+        onRowClick={(row) => navigate(getTaskDetailPath(role, row.task.id))}
       />
     </div>
   );

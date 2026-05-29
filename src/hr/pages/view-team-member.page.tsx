@@ -1,6 +1,6 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import GoBackBtn from "@/shared/components/go-back-btn";
+import BackBreadcrumb from "@/shared/components/back-breadcrumb.component";
 import TeamMemberProfileRow from "@/team-leader/components/team-member-profile-row.component";
 import ProductivityTracker from "@/shared/components/productivity-tracker.component";
 import TeamMemberOverviewCard from "@/team-leader/components/team-member-overview.component";
@@ -9,6 +9,8 @@ import { get_team_member_overview } from "@/config/services/team-member.service"
 import { getAssignedTasksForTeamMember } from "@/config/services/tasks.service";
 import { DataTable } from "@/shared/components/data-table/data-table";
 import { memberAssignedTasksColumns } from "@/team-leader/components/columns/member-assigned-tasks-columns";
+import { getTaskDetailPath } from "@/shared/utils/task-routes";
+import useAuthStore from "@/config/stores/auth.store";
 
 type MoodLevel = "rough" | "notGreat" | "okay" | "good" | "great" | null;
 
@@ -19,6 +21,8 @@ interface DayMood {
 
 export default function HrViewTeamMember() {
   const { id, memberId } = useParams<{ id: string; memberId: string }>();
+  const navigate = useNavigate();
+  const role = useAuthStore((s) => s.user?.user.user_role);
 
   const { data: moodData = [], isLoading: isMoodLoading } = useQuery({
     queryKey: ["user-mood-history", memberId],
@@ -56,7 +60,15 @@ export default function HrViewTeamMember() {
 
   return (
     <div className="pb-12">
-      <GoBackBtn title="Back to team" path={`/dash/hr/teams/${id}`} />
+      <BackBreadcrumb
+        trail={[
+          { label: "Overview", to: "/dash/hr" },
+          { label: "Teams", to: "/dash/hr/teams" },
+          { label: "Team", to: `/dash/hr/teams/${id}` },
+          { label: memberOverview?.name ?? "Member" },
+        ]}
+        backTo={`/dash/hr/teams/${id}`}
+      />
       <TeamMemberProfileRow
         name={memberOverview?.name}
         role={memberOverview?.job_title}
@@ -79,6 +91,7 @@ export default function HrViewTeamMember() {
         tableName="Assigned Tasks"
         tableDescription="Tasks assigned to this team member"
         className="mt-[2.875rem]"
+        onRowClick={(row) => navigate(getTaskDetailPath(role, row.task.id))}
       />
     </div>
   );

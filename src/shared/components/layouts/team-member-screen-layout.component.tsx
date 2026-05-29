@@ -1,37 +1,26 @@
 import { useState, useEffect, useRef, useCallback, Suspense } from "react";
-import { Outlet, Navigate, useMatches, Link } from "react-router-dom";
+import { Outlet, Navigate, useMatches } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import Logo from "../Logo.component";
-import { Bell, X, Settings, LogOut } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { X } from "lucide-react";
+import { RxHamburgerMenu } from "react-icons/rx";
 import useAuthStore from "@/config/stores/auth.store";
 import { refresh_auth_with_team_member_profile } from "@/config/services/auth.service";
 import Loader from "../loader.component";
-import AviPlaceholder from "../avi-placeholder.component";
-import HRBadgeIcon from "@/components/ui/hr-badge-icon";
-import { RxHamburgerMenu } from "react-icons/rx";
-import NotificationDropdown from "@/layout/components/notification-dropdown.component";
-import useAppNotifications from "@/shared/hooks/use-socket-notifications";
+import AppSidebar from "./app-sidebar.component";
+import AppTopbar from "./app-topbar.component";
+import {
+  getSidebarNavForRole,
+  getSidebarFooterForRole,
+} from "./role-sidebar-nav";
+import { GuidedTour } from "@/shared/components/guided-tour";
 
 /**
- * Layout component that provides the team member screen scaffold
- * Provides authentication check, header with logo, notifications, and user profile
- * Automatically shows HR badge for users with HR role
+ * Authenticated app shell: persistent left sidebar + top bar + routed outlet.
  *
- * Uses TanStack Query with side effects handled directly in queryFn for clean,
- * effect-free implementation.
- *
- * WCAG 2.1 AA Compliant:
- * - Semantic HTML landmarks (header, main, nav)
- * - Skip link for keyboard navigation
- * - Focus management for mobile menu
- * - Proper ARIA attributes for interactive elements
- * - Keyboard navigation support (Escape to close menu)
- * - Screen reader announcements for loading states
+ * Route handles supply `sidebarNav` (nav items) and `headerActions` (top-bar
+ * buttons). On mobile the sidebar collapses into a slide-in drawer triggered
+ * by the hamburger; a11y plumbing (skip link, ESC close, focus trap, inert)
+ * is preserved.
  */
 function TeamMemberScreenLayout() {
   const { user, isAuthenticated } = useAuthStore();
@@ -41,9 +30,20 @@ function TeamMemberScreenLayout() {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   const matches = useMatches();
-  const currentMatch = matches[matches.length - 2];
-  const headerChild = (currentMatch?.handle as RouteHandle)?.headerChild;
-  const pathname = currentMatch.pathname;
+  // Merge handles from all matches (leaf overrides ancestor) so intermediate
+  // route layouts (e.g. dialog providers) don't shadow the layout's handle.
+  const mergedHandle = matches.reduce<RouteHandle>((acc, m) => {
+    const h = (m.handle as RouteHandle) ?? null;
+    if (!h) return acc;
+    return { ...acc, ...h };
+  }, {});
+  const userRole = user?.user.user_role ?? "";
+  const sidebarNav =
+    mergedHandle.sidebarNav ?? getSidebarNavForRole(userRole);
+  const headerActions = mergedHandle.headerActions;
+  const sidebarFooter =
+    mergedHandle.sidebarFooter ?? getSidebarFooterForRole(userRole);
+
   const { isLoading, isError } = useQuery({
     queryKey: ["auth", "session"],
     queryFn: async () => {
@@ -147,7 +147,7 @@ function TeamMemberScreenLayout() {
       document.body.style.overflow = "";
     };
   }, [isMenuOpen]);
-  const { notifications, markAllAsRead } = useAppNotifications();
+
   if (isError && !isAuthenticated) {
     return <Navigate to="/auth/login" />;
   }
@@ -170,15 +170,8 @@ function TeamMemberScreenLayout() {
     return <Navigate to="/auth/login" />;
   }
 
-  const isHR = user?.user.user_role === "hr";
-  const userFullName = `${user?.user.first_name} ${user?.user.last_name}`;
-
-  const unreadNotifications = notifications.filter((n) => !n.is_read);
-  const notificationCount = unreadNotifications.length;
-  const isNotification = notificationCount > 0;
-
   return (
-    <div className="bg-gradient-to-b from-[#E4D6FA]/60 to-[#F8F8F9] min-h-screen">
+    <div className="min-h-screen bg-white">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-white focus:text-[#6619DE] focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:font-semibold focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
@@ -186,165 +179,80 @@ function TeamMemberScreenLayout() {
         Skip to main content
       </a>
 
-      <header
-        className="bg-[#F8F8F98A] backdrop-blur-[16.8px] sticky top-0 z-50"
-        role="banner"
-      >
-        <div className="max-w-[1920px] mx-auto p-[22px] sm:px-[2.75rem] flex justify-between items-center min-h-[96px]">
-          <div className="flex items-center gap-[1.75rem]">
-            <Link to={pathname}>
-              <Logo />
-            </Link>
+      <GuidedTour />
+      <div className="flex min-h-screen">
+        {/* Desktop sidebar */}
+        <aside
+          data-tour="sidebar-nav"
+          className="hidden md:flex md:w-[240px] lg:w-[260px] shrink-0 sticky top-0 h-screen bg-white border-r border-gray-100"
+          role="navigation"
+          aria-label="Primary"
+        >
+          <AppSidebar items={sidebarNav} footer={sidebarFooter} />
+        </aside>
 
-            {isHR && (
-              <div
-                className="bg-linear-0 from-[#6619DE] to-[#934DFF] w-[116px] h-[26px] rounded-[5px] flex justify-center items-center gap-[5.4px] text-[0.7rem] text-[#F3F4F6]"
-                role="status"
-                aria-label="HR Manager role badge"
-              >
-                <HRBadgeIcon aria-hidden="true" />
-                <span>HR Manager</span>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-[1.75rem]">
-            {/* Desktop Navigation */}
-            <nav
-              className="hidden sm:flex items-center gap-[1.75rem]"
-              aria-label="Main navigation"
-            >
-              {headerChild}
-            </nav>
-
-            <div className="flex items-center gap-[30px] sm:gap-[4rem]">
-              {/* Notification Bell Button */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="relative p-2 rounded-lg hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
-                    aria-label={`Notifications${
-                      notificationCount > 0
-                        ? `, ${notificationCount} unread`
-                        : ""
-                    }`}
-                  >
-                    <Bell size={32} aria-hidden="true" />
-                    {isNotification && (
-                      <span
-                        className="size-[14px] bg-[#EF4444] rounded-full absolute top-1 right-1"
-                        aria-hidden="true"
-                      />
-                    )}
-                  </button>
-                </PopoverTrigger>
-                <NotificationDropdown
-                  notifications={notifications}
-                  onMarkAllAsRead={markAllAsRead}
-                />
-              </Popover>
-
-              {/* User Profile Section with Popover */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex items-center cursor-pointer rounded-lg p-1 hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
-                    aria-label="Open user menu"
-                    aria-haspopup="menu"
-                  >
-                    {user.user.avatar_url ? (
-                      <img
-                        src={user.user.avatar_url}
-                        alt={`${userFullName}'s profile picture`}
-                        className="size-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <AviPlaceholder
-                        aria-label={`${userFullName}'s avatar placeholder`}
-                      />
-                    )}
-
-                    <div className="hidden sm:flex flex-col ml-[11px] text-left">
-                      <h1 className="text-[#251F2D] font-bold text-base">
-                        {userFullName}
-                      </h1>
-                      <p className="text-[#5A5D61] text-sm font-normal">
-                        {user?.user.email}
-                      </p>
-                    </div>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent
-                  align="end"
-                  sideOffset={8}
-                  className="w-56 p-3 bg-white rounded-xl shadow-xl border border-gray-100"
-                >
-                  <div className="flex flex-col gap-1">
-                    <Link
-                      to="/settings"
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#251F2D] hover:bg-[#F3EBFF] transition-colors group"
-                    >
-                      <Settings
-                        size={18}
-                        className="text-[#6619DE] group-hover:rotate-90 transition-transform duration-300"
-                      />
-                      <span className="text-sm font-medium">Settings</span>
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => useAuthStore.getState().logout()}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#EF4444] hover:bg-red-50 transition-colors w-full"
-                    >
-                      <LogOut size={18} />
-                      <span className="text-sm font-medium">Logout</span>
-                    </button>
-                  </div>
-                </PopoverContent>
-              </Popover>
-
-              {/* Mobile Hamburger Menu Button */}
+        {/* Right column: topbar + content */}
+        <div className="flex-1 min-w-0 flex flex-col">
+          <header
+            className="sticky top-0 z-30 bg-white"
+            role="banner"
+          >
+            <div className="flex items-center gap-2 md:hidden px-4 pt-3">
               <button
                 ref={menuToggleRef}
                 type="button"
-                className="sm:hidden p-2 rounded-lg hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
+                className="p-2 rounded-lg hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6619DE] focus:ring-offset-2"
                 onClick={() => setIsMenuOpen(true)}
                 aria-label="Open navigation menu"
                 aria-expanded={isMenuOpen}
                 aria-controls="mobile-menu-panel"
                 aria-haspopup="dialog"
               >
-                <RxHamburgerMenu size={28} aria-hidden="true" />
+                <RxHamburgerMenu size={24} aria-hidden="true" />
               </button>
             </div>
-          </div>
-        </div>
-      </header>
+            <AppTopbar actions={headerActions} />
+          </header>
 
-      {/* Mobile Menu Overlay */}
+          <main
+            id="main-content"
+            className="flex-1 px-4 sm:px-8 py-6 max-w-[1600px] w-full mx-auto"
+            tabIndex={-1}
+          >
+            <Suspense
+              fallback={
+                <div className="h-[50vh] flex justify-center items-center">
+                  <Loader />
+                </div>
+              }
+            >
+              <Outlet />
+            </Suspense>
+          </main>
+        </div>
+      </div>
+
+      {/* Mobile drawer overlay */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 sm:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300"
           onClick={closeMenu}
           aria-hidden="true"
         />
       )}
 
-      {/* Mobile Menu Panel - Accessible Dialog */}
       <div
         ref={menuPanelRef}
         id="mobile-menu-panel"
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
-        className={`fixed top-0 right-0 h-full w-[300px] bg-white z-50 sm:hidden transform transition-transform duration-300 ease-out shadow-2xl ${
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed top-0 left-0 h-full w-[280px] bg-white z-50 md:hidden transform transition-transform duration-300 ease-out shadow-2xl ${
+          isMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         inert={!isMenuOpen ? true : undefined}
       >
-        {/* Close button */}
-        <div className="flex justify-end p-4">
+        <div className="flex justify-end p-3">
           <button
             ref={closeButtonRef}
             type="button"
@@ -355,55 +263,10 @@ function TeamMemberScreenLayout() {
             <X size={24} className="text-gray-600" aria-hidden="true" />
           </button>
         </div>
-
-        {/* User info in mobile menu */}
-        <div className="px-6 pb-6 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            {user.user.avatar_url ? (
-              <img
-                src={user.user.avatar_url}
-                alt={`${userFullName}'s profile picture`}
-                className="size-12 rounded-full object-cover"
-              />
-            ) : (
-              <AviPlaceholder
-                aria-label={`${userFullName}'s avatar placeholder`}
-              />
-            )}
-            <div className="flex flex-col">
-              <h2 className="text-[#251F2D] font-bold text-base">
-                {userFullName}
-              </h2>
-              <p className="text-[#5A5D61] text-sm">{user?.user.email}</p>
-            </div>
-          </div>
+        <div className="h-[calc(100%-3.5rem)]">
+          <AppSidebar items={sidebarNav} footer={sidebarFooter} />
         </div>
-
-        {/* Menu Navigation */}
-        <nav
-          className="flex flex-col px-6 py-6 gap-4"
-          aria-label="Mobile navigation"
-        >
-          {headerChild}
-        </nav>
       </div>
-
-      {/* Main Content Area */}
-      <main
-        id="main-content"
-        className="max-w-[1920px] mx-auto px-2 sm:px-[2.75rem]"
-        tabIndex={-1}
-      >
-        <Suspense
-          fallback={
-            <div className="h-[50vh] flex justify-center items-center">
-              <Loader />
-            </div>
-          }
-        >
-          <Outlet />
-        </Suspense>
-      </main>
     </div>
   );
 }

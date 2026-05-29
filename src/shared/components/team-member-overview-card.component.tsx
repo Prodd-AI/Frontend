@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import clsx from "clsx";
-import { User } from "lucide-react";
+import { Crown, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface TeamMemberOverviewCardPropsInt {
@@ -15,6 +15,8 @@ interface TeamMemberOverviewCardPropsInt {
   totalTasks?: number;
   weekStreak?: string;
   lastActive?: string;
+  /** Highlight this card as the team lead (badge + ring + warmer background). */
+  isLead?: boolean;
 }
 const statusColor = {
   "At risk": "text-red-500",
@@ -31,6 +33,7 @@ const TeamMemberOverviewCard = ({
   weekStreak,
   lastActive,
   id,
+  isLead = false,
 }: TeamMemberOverviewCardPropsInt) => {
   const navigate = useNavigate();
   const handleViewTeamMemberDetails = (id: string | number) => () => {
@@ -40,20 +43,43 @@ const TeamMemberOverviewCard = ({
   return (
     <div
       className={clsx(
-        `bg-card rounded-2xl p-6 flex-1 min-w-[280px] max-w-sm border`,
+        "rounded-2xl p-6 flex-1 min-w-[280px] max-w-sm border",
+        isLead
+          ? "bg-gradient-to-br from-[#F3EBFF] via-white to-white border-[#6619DE]/40 ring-2 ring-[#6619DE]/15"
+          : "bg-card",
         "shadow-[0px_4px_4px_-4px_rgba(12,12,13,0.05),0px_16px_16px_-8px_rgba(12,12,13,0.10)]",
       )}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Avatar className="h-12 w-12 bg-muted">
-            <AvatarFallback className="bg-muted">
-              <User className="h-6 w-6 text-muted-foreground" />
+          <Avatar
+            className={clsx(
+              "h-12 w-12",
+              isLead
+                ? "bg-[#6619DE]/15 ring-2 ring-[#6619DE]/30"
+                : "bg-muted",
+            )}
+          >
+            <AvatarFallback
+              className={isLead ? "bg-transparent" : "bg-muted"}
+            >
+              {isLead ? (
+                <Crown className="h-6 w-6 text-[#6619DE]" />
+              ) : (
+                <User className="h-6 w-6 text-muted-foreground" />
+              )}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="font-semibold text-foreground">{name || "—"}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-foreground">{name || "—"}</h3>
+              {isLead && (
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-[#6619DE] text-white px-1.5 py-0.5 rounded-md">
+                  Lead
+                </span>
+              )}
+            </div>
             {role && <p className="text-sm text-muted-foreground">{role}</p>}
           </div>
         </div>

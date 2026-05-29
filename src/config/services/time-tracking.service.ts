@@ -4,6 +4,13 @@ import { ApiService } from './root.service';
 // Types
 export type ClockAction = 'clock_in' | 'pause' | 'resume' | 'clock_out';
 
+export type TimeSessionStatus = 'active' | 'paused' | 'ended' | 'completed';
+
+// Backend uses `ended` and `completed` interchangeably for terminal sessions.
+// Centralize the check so we never accidentally treat one as in-progress.
+export const isSessionEnded = (status: TimeSessionStatus): boolean =>
+	status === 'ended' || status === 'completed';
+
 export interface TimeTrackingSession {
 	id: string;
 	created_at: string;
@@ -13,7 +20,7 @@ export interface TimeTrackingSession {
 	started_at: string;
 	ended_at: string | null;
 	accumulated_seconds: string;
-	status: 'active' | 'paused' | 'ended';
+	status: TimeSessionStatus;
 	last_action_at: string;
 }
 
@@ -109,6 +116,86 @@ const allocateTime = (sessionId: string, allocations: TaskAllocation[]) => {
 	);
 };
 
+// Time entries returned by /time-tracking/my-entries. Backend response shape
+// isn't documented but we observed { task_id, title, description,
+// duration_hours, start_time, end_time, date/created_at } in practice. The
+// fields below cover both old and new shapes so the UI is tolerant.
+export interface TimeEntry {
+	id: string;
+	task_id?: string | null;
+	time_session_id?: string | null;
+	title?: string;
+	description?: string;
+	// API has returned duration_hours as both number and stringified number —
+	// callers must coerce before doing math or .toFixed().
+	duration_hours?: number | string;
+	start_time?: string;
+	end_time?: string;
+	date?: string;
+	created_at?: string;
+}
+
+export interface MyTimeEntriesResponse {
+	message?: string;
+	data: TimeEntry[];
+	timestamp?: string;
+	success?: boolean;
+}
+
+const getMyEntries = (params: { duration: 'day' | 'week' | 'month' }) => {
+	return timeTrackingService.get<MyTimeEntriesResponse>('my-entries', params, true);
+};
+
+/**
+ * Get the current user's active (in-progress) time tracking session so the
+ * timer can be rehydrated after a refresh / on a new device. The docs don't
+ * explicitly list this route — we probe `/time-tracking/active` and the
+ * useActiveTimeSession hook silently ignores 404s so this stays safe whether
+ * or not the backend has shipped it.
+ */
+const getActiveSession = () => {
+	return timeTrackingService.get<{
+		message?: string;
+		data: TimeTrackingSession | null;
+	}>('active', undefined, true);
+};
+
+// /time-tracking/my-sessions — paginated list of every session belonging to
+// the current user. Includes active, paused, and ended sessions; backend
+// returns `meta` with page/limit/total/total_pages.
+export interface PaginationMeta {
+	page: number;
+	limit: number;
+	total: number;
+	total_pages: number;
+}
+
+export interface MySessionsResponse {
+	message?: string;
+	data: TimeTrackingSession[];
+	meta?: PaginationMeta;
+	timestamp?: string;
+	success?: boolean;
+}
+
+export interface MySessionsParams {
+	page?: number;
+	limit?: number;
+	status?: TimeSessionStatus;
+}
+
+const getMySessions = (params?: MySessionsParams) => {
+	const query: Record<string, string> = {};
+	if (params?.page !== undefined) query.page = String(params.page);
+	if (params?.limit !== undefined) query.limit = String(params.limit);
+	if (params?.status) query.status = params.status;
+	return timeTrackingService.get<MySessionsResponse>(
+		'my-sessions',
+		Object.keys(query).length ? query : undefined,
+		true,
+	);
+};
+
 /**
  * Get weekly time tracking summary
  */
@@ -123,4 +210,12 @@ const getTeamEntries = () => {
 	return timeTrackingService.get<TeamEntriesResponse>('team-entries', undefined, true);
 };
 
-export { clockAction, allocateTime, getWeeklySummary, getTeamEntries };
+export {
+	clockAction,
+	allocateTime,
+	getActiveSession,
+	getMySessions,
+	getMyEntries,
+	getWeeklySummary,
+	getTeamEntries,
+};

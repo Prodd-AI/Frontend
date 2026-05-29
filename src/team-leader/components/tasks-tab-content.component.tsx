@@ -11,6 +11,7 @@ function TasksTabContent<T>({
   showAssignButton,
   showHeader = true,
   columns,
+  onRowClick,
 }: TasksTabContentProps<T>) {
   return (
     <div className="flex flex-col gap-6">
@@ -32,6 +33,7 @@ function TasksTabContent<T>({
           className="border-none shadow-none"
           tableName={title}
           tableDescription={description}
+          onRowClick={onRowClick}
         />
       )}
     </div>

@@ -54,7 +54,7 @@ const variantClasses = {
 
 const TeamMemberStatus = () => {
   return (
-    <div className="bg-card rounded-2xl p-6 animate-fade-in shadow-[0px_4px_4px_-4px_rgba(12,12,13,0.05),0px_16px_16px_-8px_rgba(12,12,13,0.10)]">
+    <div className="bg-card rounded-2xl p-6 animate-fade-in border border-gray-200 shadow-[0px_4px_4px_-4px_rgba(12,12,13,0.05),0px_16px_16px_-8px_rgba(12,12,13,0.10)]">
       <h2 className="text-[1.75rem] font-semibold text-foreground mb-6">
         Team Member Status
       </h2>

@@ -1,6 +1,7 @@
 import { Video, Clock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { parseWallClockIso } from "@/shared/utils/date.utils";
 
 interface Meeting {
   id: string;
@@ -8,6 +9,7 @@ interface Meeting {
   meeting_link: string;
   participant_count: number;
   start_in_minutes: number;
+  scheduled_at?: string;
 }
 
 interface UpcomingScheduleProps {
@@ -23,9 +25,9 @@ export const UpcomingSchedule = ({
 }: UpcomingScheduleProps) => {
   if (isLoading) {
     return (
-      <div className="bg-[#F8F8F9] rounded-3xl px-[2.25rem] py-[2.75rem] shadow-sm animate-pulse min-h-[16.25rem]">
+      <div className="bg-white rounded-3xl p-6 border border-gray-200 animate-pulse min-h-[280px]">
         <div className="space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-1/4" />
+          <div className="h-4 bg-gray-200 rounded w-1/2" />
           <div className="h-8 bg-gray-200 rounded w-3/4" />
           <div className="h-4 bg-gray-200 rounded w-1/2" />
         </div>
@@ -33,16 +35,26 @@ export const UpcomingSchedule = ({
     );
   }
 
+  // Backend stores the user-picked wall-clock with a Z suffix even though it
+  // isn't actually UTC, so its `start_in_minutes` is computed against real
+  // UTC and ends up shifted. Recompute locally from `scheduled_at` when we
+  // have it, treating the stored value as local wall-clock.
+  const startInMinutes = (() => {
+    if (meeting?.scheduled_at) {
+      const diffMs =
+        parseWallClockIso(meeting.scheduled_at).getTime() - Date.now();
+      return Math.max(0, Math.round(diffMs / 60000));
+    }
+    return meeting?.start_in_minutes ?? 0;
+  })();
+
   if (!meeting) {
     return (
-      <div
-        className="bg-[#F8F8F9] rounded-3xl px-[2.25rem] py-[2.75rem]  flex flex-col items-center justify-center text-center min-h-[16.25rem] shadow-[0_4px_4px_-4px_rgba(0,0,0,0.55),_0_16px_16px_-8px_rgba(0,0,0,0.1)]
-"
-      >
-        <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center mb-2">
-          <Video className="w-5 h-5 text-gray-400" />
+      <div className="bg-white rounded-3xl p-6 border border-gray-200 flex flex-col items-center justify-center text-center min-h-[280px]">
+        <div className="size-11 rounded-xl bg-[#F3EBFF] flex items-center justify-center mb-3">
+          <Video className="w-5 h-5 text-[#6619DE]" />
         </div>
-        <p className="text-sm font-medium text-gray-600">
+        <p className="text-sm font-medium text-gray-500">
           No upcoming meetings today
         </p>
       </div>
@@ -50,42 +62,45 @@ export const UpcomingSchedule = ({
   }
 
   return (
-    <div
-      className="bg-[#F8F8F9] rounded-3xl px-[2.25rem] py-[2.75rem]  relative overflow-hidden group transition-all duration-300 min-h-[16.25rem] flex flex-col justify-between gap-6 shadow-[0_4px_4px_-4px_rgba(0,0,0,0.55),_0_16px_16px_-8px_rgba(0,0,0,0.1)]
-"
-    >
+    <div className="bg-white rounded-3xl p-6 border border-gray-200 min-h-[280px] flex flex-col gap-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-[1.625rem]">
-          <Video size={28} className="text-[#934DFF]" />
-          <h5 className="text-[#5C5666] text-[1.375rem] font-medium">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="size-11 rounded-xl bg-[#6619DE] flex items-center justify-center">
+            <Video size={20} className="text-white" />
+          </span>
+          <h5 className="text-[#5A5D61] text-base font-medium">
             Upcoming Meeting/Call
           </h5>
         </div>
         <Badge
           variant="secondary"
-          className="bg-[#FEF3C7] text-[#D97706] hover:bg-[#FEF3C7] border-none px-3 py-1 text-[11px] font-bold uppercase tracking-wider"
+          className="bg-[#F3EBFF] text-[#6619DE] hover:bg-[#F3EBFF] border-none px-3 py-1 text-[11px] font-semibold rounded-full"
         >
           Starting Soon
         </Badge>
       </div>
 
       {/* Main Info */}
-      <div className="flex items-center gap-4">
-        <h3 className="text-[1.375rem] font-semibold text-[#5C5666] whitespace-nowrap">
+      <div className="flex flex-col gap-2">
+        <h3 className="text-xl font-semibold text-[#251F2D]">
           {meeting.title}
         </h3>
-        <div className="flex items-center gap-4 text-[#6B7280]">
+        <div className="flex flex-wrap items-center gap-5 text-[#6B7280]">
           <div className="flex items-center gap-1.5">
             <Clock className="w-4 h-4" />
-            <span className="text-sm text-[#6B7280]">
+            <span className="text-sm">
               in{" "}
-              {meeting.start_in_minutes >= 60
-                ? `${Math.floor(meeting.start_in_minutes / 60)}h ${meeting.start_in_minutes % 60 > 0 ? `${meeting.start_in_minutes % 60}m` : ""}`
-                : `${meeting.start_in_minutes} ${meeting.start_in_minutes === 1 ? "min" : "mins"}`}
+              {startInMinutes >= 60
+                ? `${Math.floor(startInMinutes / 60)}h ${
+                    startInMinutes % 60 > 0 ? `${startInMinutes % 60}m` : ""
+                  }`
+                : `${startInMinutes} ${
+                    startInMinutes === 1 ? "min" : "mins"
+                  }`}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-[#6B7280]">
+          <div className="flex items-center gap-1.5">
             <Users className="w-4 h-4" />
             <span className="text-sm">
               {meeting.participant_count} Participants
@@ -95,15 +110,15 @@ export const UpcomingSchedule = ({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 mt-auto">
         <Button
-          className="text-white rounded-xl h-[50px] px-8 font-semibold text-sm transition-all duration-200 shadow-sm"
+          className="text-white rounded-xl h-11 px-7 font-semibold text-sm bg-[#6619DE] hover:bg-[#5710c4] transition-colors"
           onClick={() => window.open(meeting.meeting_link, "_blank")}
         >
           Join Call
         </Button>
         {remainingCount > 0 && (
-          <span className="text-xs font-medium text-slate-400">
+          <span className="text-xs font-medium text-gray-400">
             +{remainingCount} more today
           </span>
         )}

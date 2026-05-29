@@ -1,51 +1,87 @@
 import { LuCalendar } from 'react-icons/lu';
 import { Badge } from '@/components/ui/badge';
-import { useEffect, useState } from 'react';
-import { getWeeklySummary, WeeklySummaryData, ChartDataPoint } from '@/config/services/time-tracking.service';
-import { toast } from 'sonner';
+import {
+	getMyEntries,
+	getWeeklySummary,
+	TimeEntry,
+	ChartDataPoint,
+} from '@/config/services/time-tracking.service';
+import { useQuery } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { parseWallClockIso } from '@/shared/utils/date.utils';
 
-interface Entry {
-	id: string;
-	date: string;
-	title: string;
-	range: string;
-	duration: string;
-}
+const toNumber = (n: number | string | null | undefined): number => {
+	if (typeof n === 'number') return Number.isFinite(n) ? n : 0;
+	if (typeof n === 'string') {
+		const parsed = parseFloat(n);
+		return Number.isFinite(parsed) ? parsed : 0;
+	}
+	return 0;
+};
 
-// Mock entries (will be replaced with API later)
-const ALL_ENTRIES: Entry[] = [
-	{ id: '1', date: 'Sun, Dec 1', title: 'Product Development', range: '(09:00 - 13:00)', duration: '4.00h' },
-	{ id: '2', date: 'Sun, Dec 1', title: 'Team Meetings', range: '(14:00 - 16:00)', duration: '2.00h' },
-	{ id: '3', date: 'Mon, Dec 2', title: 'Code Review', range: '(09:00 - 12:00)', duration: '3.00h' },
-];
+const formatHours = (h: number | string | null | undefined) => `${toNumber(h).toFixed(2)}h`;
+const stripSeconds = (t?: string): string => (t ? t.slice(0, 5) : '');
+const formatRange = (entry: TimeEntry): string => {
+	if (entry.start_time && entry.end_time) {
+		return `(${stripSeconds(entry.start_time)} - ${stripSeconds(entry.end_time)})`;
+	}
+	return '';
+};
+const formatEntryDate = (entry: TimeEntry): string => {
+	const iso = entry.date ?? entry.created_at;
+	if (!iso) return '';
+	const d = parseWallClockIso(iso);
+	if (Number.isNaN(d.getTime())) return '';
+	return format(d, 'EEE, MMM d');
+};
+
+// /time-tracking/my-entries returns inconsistent shapes — sometimes an array,
+// sometimes a day-bucketed object like { Mon: [...], Tue: [...] }, sometimes
+// { entries: [...] }. Normalize to a flat array so the rest of the UI doesn't
+// have to care.
+const normalizeEntries = (raw: unknown): TimeEntry[] => {
+	if (!raw) return [];
+	if (Array.isArray(raw)) return raw as TimeEntry[];
+	if (typeof raw === 'object') {
+		const obj = raw as Record<string, unknown>;
+		if (Array.isArray(obj.entries)) return obj.entries as TimeEntry[];
+		if (Array.isArray(obj.data)) return obj.data as TimeEntry[];
+		// Day-bucketed (e.g. Mon/Tue/Wed) — flatten any array values into one list.
+		const flattened: TimeEntry[] = [];
+		Object.values(obj).forEach((value) => {
+			if (Array.isArray(value)) flattened.push(...(value as TimeEntry[]));
+		});
+		return flattened;
+	}
+	return [];
+};
 
 const StatCard = ({ value, label }: { value: string | number; label: string }) => (
-	<div className="bg-gray-50 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+	<div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
 		<div className="text-2xl font-bold text-[#1F1F1F] mb-1">{value}</div>
 		<div className="text-sm text-gray-500">{label}</div>
 	</div>
 );
 
 const WeeklyOverviewTab = () => {
-	const [summaryData, setSummaryData] = useState<WeeklySummaryData | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	// Move the weekly summary onto useQuery so it gets cached/deduped — the
+	// previous manual useEffect re-fired every time the tab mounted, causing
+	// duplicate /weekly-summary calls when switching tabs.
+	const { data: summaryResponse, isLoading } = useQuery({
+		queryKey: ['weekly-time-summary'],
+		queryFn: () => getWeeklySummary(),
+		staleTime: 60_000,
+		refetchOnWindowFocus: false,
+	});
+	const summaryData = summaryResponse?.success ? summaryResponse.data : null;
 
-	useEffect(() => {
-		const fetchSummary = async () => {
-			try {
-				const response = await getWeeklySummary();
-				if (response.success) {
-					setSummaryData(response.data);
-				}
-			} catch (error) {
-				toast.error(error instanceof Error ? error.message : 'Failed to load weekly summary');
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchSummary();
-	}, []);
+	const { data: entriesData, isLoading: isLoadingEntries } = useQuery({
+		queryKey: ['my-time-entries', { duration: 'week' }],
+		queryFn: () => getMyEntries({ duration: 'week' }),
+		staleTime: 60_000,
+		refetchOnWindowFocus: false,
+	});
+	const allEntries: TimeEntry[] = normalizeEntries(entriesData?.data);
 
 	// Derive values from API data or use defaults
 	const chartData: ChartDataPoint[] = summaryData?.chart_data || [];
@@ -57,7 +93,7 @@ const WeeklyOverviewTab = () => {
 	if (isLoading) {
 		return (
 			<div className="flex flex-col gap-[30px]">
-				<div className="bg-white p-6 rounded-3xl w-full flex items-center justify-center h-96">
+				<div className="bg-white p-6 rounded-3xl w-full border border-gray-200 flex items-center justify-center h-96">
 					<p className="text-gray-400">Loading weekly summary...</p>
 				</div>
 			</div>
@@ -67,7 +103,7 @@ const WeeklyOverviewTab = () => {
 	return (
 		<div className="flex flex-col gap-[30px]">
 			{/* Weekly Summary Card */}
-			<div className="bg-white p-6 rounded-3xl w-full">
+			<div className="bg-white p-6 rounded-3xl w-full border border-gray-200">
 				{/* Header */}
 				<div className="flex justify-between items-start mb-8">
 					<div className="flex gap-4">
@@ -121,24 +157,32 @@ const WeeklyOverviewTab = () => {
 			</div>
 
 			{/* All Entries Card */}
-			<div className="bg-white p-6 rounded-3xl w-full">
+			<div className="bg-white p-6 rounded-3xl w-full border border-gray-200">
 				<h2 className="text-xl font-semibold text-[#1F1F1F] mb-8">All Entries</h2>
-				<div className="flex flex-col gap-6">
-					{ALL_ENTRIES.map((entry) => (
-						<div
-							key={entry.id}
-							className="flex items-center justify-between pb-4 border-b border-gray-50 last:border-0 last:pb-0">
-							<div className="flex items-center gap-12">
-								<span className="text-gray-400 text-sm w-24">{entry.date}</span>
-								<span className="font-semibold text-[#1F1F1F] text-base min-w-[200px]">{entry.title}</span>
-								<span className="text-gray-400 text-sm">{entry.range}</span>
+				{isLoadingEntries ? (
+					<p className="text-gray-400 text-sm">Loading entries…</p>
+				) : allEntries.length === 0 ? (
+					<p className="text-gray-400 text-sm">No entries this week.</p>
+				) : (
+					<div className="flex flex-col gap-6">
+						{allEntries.map((entry) => (
+							<div
+								key={entry.id}
+								className="flex items-center justify-between pb-4 border-b border-gray-50 last:border-0 last:pb-0">
+								<div className="flex items-center gap-12">
+									<span className="text-gray-400 text-sm w-24">{formatEntryDate(entry)}</span>
+									<span className="font-semibold text-[#1F1F1F] text-base min-w-[200px]">
+										{entry.description || entry.title || 'Untitled entry'}
+									</span>
+									<span className="text-gray-400 text-sm">{formatRange(entry)}</span>
+								</div>
+								<Badge variant="outline" className="text-gray-500 border-gray-200 rounded-full px-3 font-normal">
+									{formatHours(entry.duration_hours ?? 0)}
+								</Badge>
 							</div>
-							<Badge variant="outline" className="text-gray-500 border-gray-200 rounded-full px-3 font-normal">
-								{entry.duration}
-							</Badge>
-						</div>
-					))}
-				</div>
+						))}
+					</div>
+				)}
 			</div>
 		</div>
 	);

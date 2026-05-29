@@ -1,8 +1,36 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { AssignedTask } from "@/team-leader/typings/team-leader";
-import { format } from "date-fns";
+import { formatDistanceToNowStrict } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { TaskActionsCell } from "./task-actions-cell.component";
+import {
+  classifyDueDate,
+  DUE_DATE_CLASSES,
+  parseWallClockIso,
+} from "@/shared/utils/date.utils";
+
+const PRIORITY_BADGE_CLASSES: Record<string, string> = {
+  high: "bg-red-50 text-red-700 border-red-200 hover:bg-red-100",
+  medium: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100",
+  low: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100",
+};
+
+const relativeDate = (value: string | Date) => {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  const diffMs = date.getTime() - Date.now();
+  const distance = formatDistanceToNowStrict(date);
+  return diffMs >= 0 ? `in ${distance}` : `${distance} ago`;
+};
+
+const relativeDueDate = (value: string | Date | null | undefined) => {
+  if (!value) return "—";
+  const date = value instanceof Date ? value : parseWallClockIso(String(value));
+  if (Number.isNaN(date.getTime())) return "—";
+  const diffMs = date.getTime() - Date.now();
+  const distance = formatDistanceToNowStrict(date);
+  return diffMs >= 0 ? `in ${distance}` : `${distance} ago`;
+};
 
 // Column definitions for assigned tasks without user (for individual member view)
 export const memberAssignedTasksColumns: ColumnDef<
@@ -27,7 +55,7 @@ export const memberAssignedTasksColumns: ColumnDef<
     enableSorting: false,
     cell: ({ row }) => (
       <div
-        className="text-sm text-muted-foreground truncate max-w-[300px]"
+        className="text-sm text-muted-foreground truncate max-w-[220px]"
         title={row.original.task.description}
       >
         {row.original.task.description}
@@ -42,8 +70,8 @@ export const memberAssignedTasksColumns: ColumnDef<
       const priority = row.original.task.priority;
       return (
         <Badge
-          variant={priority === "high" ? "destructive" : "secondary"}
-          className="capitalize shadow-none"
+          variant="outline"
+          className={`capitalize shadow-none ${PRIORITY_BADGE_CLASSES[priority] ?? ""}`}
         >
           {priority}
         </Badge>
@@ -74,25 +102,26 @@ export const memberAssignedTasksColumns: ColumnDef<
   },
   {
     accessorKey: "assigned_at",
-    header: "Assigned At",
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("assigned_at"));
-      return (
-        <div className="text-sm text-muted-foreground whitespace-nowrap">
-          {format(date, "MMM dd, yyyy • h:mm a")}
-        </div>
-      );
-    },
+    header: "Assigned",
+    cell: ({ row }) => (
+      <div className="text-sm text-muted-foreground whitespace-nowrap">
+        {relativeDate(row.getValue("assigned_at") as string)}
+      </div>
+    ),
   },
   {
     accessorKey: "due_date",
-    header: "Due Date",
+    header: "Due",
     accessorFn: (row) => row.task.due_date,
     cell: ({ row }) => {
-      const date = new Date(row.original.task.due_date);
+      const due = row.original.task.due_date;
+      const tier = classifyDueDate(due);
       return (
-        <div className="text-sm text-muted-foreground whitespace-nowrap">
-          {format(date, "MMM dd, yyyy • h:mm a")}
+        <div
+          className={`text-sm whitespace-nowrap ${DUE_DATE_CLASSES[tier]}`}
+          title={tier === "overdue" ? "Overdue" : tier === "soon" ? "Due soon" : undefined}
+        >
+          {relativeDueDate(due)}
         </div>
       );
     },

@@ -5,19 +5,77 @@ import { useState, useEffect, useCallback } from 'react';
 import { IoPlayOutline, IoStopOutline, IoPauseOutline, IoCheckmarkOutline } from 'react-icons/io5';
 import { LuClock3 } from 'react-icons/lu';
 import ClockOutSummary from '../clock-out-summary.component';
-import { clockAction } from '@/config/services/time-tracking.service';
+import MySessionsList from '../my-sessions-list.component';
+import { useFloatingTimer, FloatingTimerIcon } from '../floating-timer.component';
+import { getMySessions, isSessionEnded } from '@/config/services/time-tracking.service';
+import { getWeeklyStreak } from '@/config/services/tasks.service';
 import useTimeTrackingStore from '@/config/stores/time-tracking.store';
-import { toast } from 'sonner';
+import useTimeClockActions from '@/shared/hooks/use-time-clock-actions';
+import { useQuery } from '@tanstack/react-query';
 
 const TimeClockTab = () => {
-	const { sessionData, setSession } = useTimeTrackingStore();
+	const { sessionData, setSession, clearSession } = useTimeTrackingStore();
+	const { clockIn, pause, resume, isLoading } = useTimeClockActions();
+	const {
+		openFloatingTimer,
+		closeFloatingTimer,
+		isFloatingTimerOpen,
+		isFloatingTimerSupported,
+		FloatingTimerPortal,
+	} = useFloatingTimer();
+
+	// Rehydrate any in-progress session from the server on mount. We pull the
+	// latest few rows (covers both `active` and `paused` — a status=active
+	// filter alone would miss a paused session and incorrectly let the UI
+	// show "Clock In" when the user should be resuming). Server is
+	// authoritative: if it disagrees with localStorage we trust the server.
+	useQuery({
+		queryKey: ['active-time-session'],
+		queryFn: async () => {
+			try {
+				const res = await getMySessions({ limit: 5, page: 1 });
+				const serverSession =
+					res?.data?.find((s) => !isSessionEnded(s.status)) ?? null;
+				if (serverSession) {
+					setSession(serverSession);
+				} else if (sessionData) {
+					// Server has no in-progress session — wipe any stale local state
+					// (e.g. after a clock-out that left the store populated).
+					clearSession();
+				}
+				return serverSession;
+			} catch {
+				return null;
+			}
+		},
+		staleTime: 30_000,
+		retry: false,
+		refetchOnWindowFocus: false,
+	});
+
+	// Real pending tasks for the user — replaces the placeholder picker
+	// ("Design System Update" / "Frontend Integration" / "Bug Fixes").
+	const { data: pendingTasksData } = useQuery({
+		queryKey: ['streaks', { duration: 'week', status: 'pending' }],
+		queryFn: () => getWeeklyStreak({ duration: 'week', status: 'pending' }),
+	});
+	const pendingTaskTitles = (() => {
+		const buckets = pendingTasksData?.data;
+		if (!buckets) return [] as string[];
+		const titles = new Set<string>();
+		Object.values(buckets).forEach((day) =>
+			(day as UserTaskAssignment[]).forEach((t) => {
+				if (t?.task?.title) titles.add(t.task.title);
+			}),
+		);
+		return Array.from(titles);
+	})();
 
 	// Derive state from session data
-	const isClockedIn = sessionData !== null && sessionData.status !== 'ended';
+	const isClockedIn = sessionData !== null && !isSessionEnded(sessionData.status);
 	const isActive = sessionData?.status === 'active';
 
 	const [seconds, setSeconds] = useState(0);
-	const [isLoading, setIsLoading] = useState(false);
 
 	// Calculate actual elapsed time including time since last_action_at when active
 	const calculateElapsedSeconds = useCallback((session: typeof sessionData) => {
@@ -73,18 +131,13 @@ const TimeClockTab = () => {
 	};
 
 	const handleClockIn = async () => {
-		setIsLoading(true);
 		try {
-			const response = await clockAction('clock_in');
+			const response = await clockIn();
 			if (response.success) {
-				setSession(response.data);
 				setSessionStartTime(new Date(response.data.started_at));
-				toast.success('Clocked in successfully');
 			}
-		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to clock in');
-		} finally {
-			setIsLoading(false);
+		} catch {
+			// hook already toasts on failure
 		}
 	};
 
@@ -93,19 +146,11 @@ const TimeClockTab = () => {
 		setShowSummary(true);
 	};
 
-	const handlePause = async () => {
-		setIsLoading(true);
+	const handlePauseResume = async () => {
 		try {
-			const action = isActive ? 'pause' : 'resume';
-			const response = await clockAction(action);
-			if (response.success) {
-				setSession(response.data);
-				toast.success(isActive ? 'Timer paused' : 'Timer resumed');
-			}
-		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to update timer');
-		} finally {
-			setIsLoading(false);
+			await (isActive ? pause() : resume());
+		} catch {
+			// hook already toasts on failure
 		}
 	};
 
@@ -162,10 +207,26 @@ const TimeClockTab = () => {
 	return (
 		<div className="flex flex-col gap-6">
 			{/* Timer Card */}
-			<div className="bg-white p-6 rounded-3xl w-full">
-				<div className="flex items-center gap-2 mb-2">
-					<LuClock3 className="w-6 h-6 text-primary" />
-					<h2 className="text-xl font-semibold text-[#1F1F1F]">Time-Clock</h2>
+			<div className="bg-white p-6 rounded-3xl w-full border border-gray-200">
+				<div className="flex items-center justify-between mb-2 gap-3 flex-wrap">
+					<div className="flex items-center gap-2">
+						<LuClock3 className="w-6 h-6 text-primary" />
+						<h2 className="text-xl font-semibold text-[#1F1F1F]">Time-Clock</h2>
+					</div>
+					{isClockedIn && isFloatingTimerSupported && (
+						<button
+							type="button"
+							onClick={isFloatingTimerOpen ? closeFloatingTimer : openFloatingTimer}
+							title="Open the timer in a floating always-on-top window that stays visible across other apps"
+							className={`inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-semibold transition-colors active:scale-95 ${
+								isFloatingTimerOpen
+									? 'border-[#6619DE]/40 bg-[#F3EBFF] text-[#6619DE] hover:bg-[#E8DBFF]'
+									: 'border-[#6619DE]/30 bg-white text-[#6619DE] hover:bg-[#F8F3FF]'
+							}`}>
+							<FloatingTimerIcon className="size-4" />
+							{isFloatingTimerOpen ? 'Close floating timer' : 'Pop out timer'}
+						</button>
+					)}
 				</div>
 				<p className="text-gray-400 text-sm mb-8">
 					{!isClockedIn
@@ -190,7 +251,7 @@ const TimeClockTab = () => {
 						<div className="flex items-center gap-4">
 							<Button
 								variant="outline"
-								onClick={handlePause}
+								onClick={handlePauseResume}
 								disabled={isLoading}
 								className={`
                   ${isActive ? 'bg-[#EF8913] hover:bg-[#EF8913]/90' : 'bg-green-500 hover:bg-green-600'} 
@@ -221,7 +282,7 @@ const TimeClockTab = () => {
 
 			{/* Current Task Card - Only visible when clocked in */}
 			{isClockedIn && (
-				<div className="bg-white p-6 rounded-3xl w-full">
+				<div className="bg-white p-6 rounded-3xl w-full border border-gray-200">
 					<div className="mb-6">
 						<h3 className="text-lg font-medium text-[#1F1F1F] mb-1">Current Task (Optional)</h3>
 						<p className="text-sm text-gray-500">Track what you are working on right now</p>
@@ -235,9 +296,17 @@ const TimeClockTab = () => {
 										<SelectValue placeholder="Select from task list..." />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="Design System Update">Design System Update</SelectItem>
-										<SelectItem value="Frontend Integration">Frontend Integration</SelectItem>
-										<SelectItem value="Bug Fixes">Bug Fixes</SelectItem>
+										{pendingTaskTitles.length === 0 ? (
+											<div className="px-3 py-2 text-sm text-muted-foreground">
+												No pending tasks
+											</div>
+										) : (
+											pendingTaskTitles.map((title) => (
+												<SelectItem key={title} value={title}>
+													{title}
+												</SelectItem>
+											))
+										)}
 									</SelectContent>
 								</Select>
 
@@ -290,6 +359,10 @@ const TimeClockTab = () => {
 					)}
 				</div>
 			)}
+
+			<MySessionsList onRequestClockOut={handleClockOut} />
+
+			{FloatingTimerPortal}
 
 			{showSummary && sessionStartTime && sessionEndTime && sessionData && (
 				<ClockOutSummary

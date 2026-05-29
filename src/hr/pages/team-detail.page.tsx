@@ -2,11 +2,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { get_mood_distribution } from "@/config/services/mood-trends.service";
-import { getTeamData } from "@/config/services/teams.service";
+import { getTeamData, getTeamPerformance } from "@/config/services/teams.service";
 import TeamMemberOverviewCard from "@/shared/components/team-member-overview-card.component";
 import { useTeamAnalysis } from "@/team-leader/hooks/use-team-analysis";
 import { useDateRange } from "@/team-leader/hooks/use-date-range";
-import GoBackBtn from "@/shared/components/go-back-btn";
+import BackBreadcrumb from "@/shared/components/back-breadcrumb.component";
 import InviteTeamMembersDialog from "@/hr/components/invite-team-members-dialog.component";
 import TeamProductivity from "@/hr/components/team-productivity.component";
 import { DataTable } from "@/shared/components/data-table/data-table";
@@ -16,7 +16,7 @@ import {
 } from "@/team-leader/components/columns/team-members-table-columns";
 import { useQuery } from "@tanstack/react-query";
 import { LayoutGrid, List, Plus, Search, User } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function TeamDetailPage() {
@@ -29,6 +29,21 @@ export default function TeamDetailPage() {
     enabled: !!id,
   });
 
+  // Capture: response shape not in OpenAPI spec.
+  const { data: teamPerformanceResponse } = useQuery({
+    queryKey: ["team-performance", id],
+    queryFn: () => getTeamPerformance(id),
+    enabled: !!id,
+  });
+  useEffect(() => {
+    if (teamPerformanceResponse) {
+      console.log(
+        `[capture] GET /teams/${id}/performance`,
+        teamPerformanceResponse,
+      );
+    }
+  }, [teamPerformanceResponse, id]);
+
   const { startDate, endDate } = useDateRange();
 
   const { metrics, analysisLoading } = useTeamAnalysis({
@@ -37,8 +52,8 @@ export default function TeamDetailPage() {
     endDate,
   });
 
-  const teamMembers: TeamMemberData[] = useMemo(
-    () =>
+  const teamMembers: TeamMemberData[] = useMemo(() => {
+    const list =
       metrics?.team_members_details.map((member) => ({
         id: member.member_id,
         name: member.member_name,
@@ -52,9 +67,18 @@ export default function TeamDetailPage() {
         weekStreak: `${member.week_streak} weeks`,
         lastActive: member.last_active,
         email: member.email,
-      })) || [],
-    [metrics],
-  );
+      })) || [];
+    // Lead first — fall back to alphabetical for everyone else.
+    const leadName = metrics?.lead_name?.trim().toLowerCase();
+    return list.slice().sort((a, b) => {
+      const aLead = leadName && a.name.trim().toLowerCase() === leadName ? 0 : 1;
+      const bLead = leadName && b.name.trim().toLowerCase() === leadName ? 0 : 1;
+      if (aLead !== bLead) return aLead - bLead;
+      return a.name.localeCompare(b.name);
+    });
+  }, [metrics]);
+
+  const leadNameLower = (metrics?.lead_name ?? "").trim().toLowerCase();
 
   const [viewMode, setViewMode] = useState<"card" | "table">("card");
   const [search, setSearch] = useState("");
@@ -84,7 +108,14 @@ export default function TeamDetailPage() {
 
   return (
     <div className="pb-12">
-      <GoBackBtn title="Back to teams" path="/dash/hr/teams" />
+      <BackBreadcrumb
+        trail={[
+          { label: "Overview", to: "/dash/hr" },
+          { label: "Teams", to: "/dash/hr/teams" },
+          { label: teamData?.name ?? "Team" },
+        ]}
+        backTo="/dash/hr/teams"
+      />
       <div className="flex items-center justify-between gap-4 bg-inherit rounded-2xl mt-[2.875rem]">
         <div className="flex items-center gap-4">
           {" "}
@@ -99,7 +130,11 @@ export default function TeamDetailPage() {
                 {teamData ? teamData.name + " Team" : "—"}
               </h3>
               <h6 className=" text-[#4B4357] text-[1.375rem]">
-                {teamData ? teamData.size + " team members" : "-"}
+                {(() => {
+                  const count = teamMembers.length;
+                  if (!teamData) return "-";
+                  return `${count} team ${count === 1 ? "member" : "members"}`;
+                })()}
               </h6>
             </div>
           </div>
@@ -174,6 +209,10 @@ export default function TeamDetailPage() {
                 name={member.name}
                 role={member.role}
                 status={member.status}
+                isLead={
+                  !!leadNameLower &&
+                  member.name.trim().toLowerCase() === leadNameLower
+                }
                 taskCompletion={member.taskCompletion}
                 tasksCompleted={member.tasksCompleted}
                 totalTasks={member.totalTasks}

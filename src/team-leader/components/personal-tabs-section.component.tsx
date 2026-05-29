@@ -14,9 +14,13 @@ import { PersonalTabsSectionProps } from "@/team-leader/typings/team-leader";
 import AssignTask from "./assign-task.component";
 import MoodTrends from "@/shared/components/mood-trend.component";
 import { MoodType } from "@/shared/typings/mood-trend";
-import { FocusInfoCard } from "@/shared/typings/todays-focus";
 import TodaysFocusComponent from "@/shared/components/todays-focus.component";
 import { personalTasksColumns } from "./columns/personal-tasks-columns";
+import { formatDistanceToNowStrict } from "date-fns";
+import { buildFocusGoals } from "@/shared/utils/date.utils";
+import { useNavigate } from "react-router-dom";
+import { getTaskDetailPath } from "@/shared/utils/task-routes";
+import useAuthStore from "@/config/stores/auth.store";
 
 const MoodEntryMapper: Record<number, MoodType> = {
   1: "rough",
@@ -25,18 +29,6 @@ const MoodEntryMapper: Record<number, MoodType> = {
   4: "good",
   5: "great",
 };
-const sampleInfoCards: FocusInfoCard[] = [
-  {
-    icon: "break",
-    title: "Recommended Break",
-    description: "Take a 15-minute walk at 2:30 PM",
-  },
-  {
-    icon: "energy",
-    title: "Energy Level",
-    description: "Peak hours: 9-11 AM & 2-4 PM",
-  },
-];
 const PersonalTabsSection = ({
   activeTab,
   onTabChange,
@@ -45,23 +37,23 @@ const PersonalTabsSection = ({
   showAssignButton = true,
   weekTasksQuery,
 }: PersonalTabsSectionProps) => {
+  const navigate = useNavigate();
+  const role = useAuthStore((s) => s.user?.user.user_role);
   const handleTabChange = (tab: string) => {
     onTabChange(tab);
   };
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
   const weekTasks = weekTasksQuery.data?.data;
-  const todaysTasks = weekTasks?.[dayNames[new Date().getDay()]] ?? [];
-  const primaryGoalDescription = (todaysTasks as UserTaskAssignment[]).find(
-    (userTask) =>
-      userTask.task.priority === "high" && userTask.task.status === "pending",
-  )?.task.description;
+  // Flatten the whole week — buildFocusGoals filters to tasks whose due_date
+  // is actually today.
+  const allWeekTasks = weekTasks ? Object.values(weekTasks).flat() : [];
+  const focusGoals = buildFocusGoals(allWeekTasks as UserTaskAssignment[]);
 
   const data = averageMoodQuery?.data;
   const moodEntries = data?.data.mood_scores.map((entry) => {
     return {
       id: entry.user_id,
       title: entry.description,
-      date: new Date(entry.created_at).toLocaleString(),
+      date: `${formatDistanceToNowStrict(new Date(entry.created_at))} ago`,
       mood: MoodEntryMapper[entry.mood_score],
     };
   });
@@ -74,11 +66,7 @@ const PersonalTabsSection = ({
           value: "todays_focus",
           icon: <MdOutlineCenterFocusStrong />,
           content: (
-            <TodaysFocusComponent
-              primaryGoalTitle="Primary Goal"
-              primaryGoalDescription={primaryGoalDescription ?? ""}
-              infoCards={sampleInfoCards}
-            />
+            <TodaysFocusComponent goals={focusGoals} />
           ),
         },
         {
@@ -93,6 +81,9 @@ const PersonalTabsSection = ({
               AssignButton={AssignTask}
               assignedTasks={weekTasks ? Object.values(weekTasks).flat() : []}
               columns={personalTasksColumns}
+              onRowClick={(row) =>
+                navigate(getTaskDetailPath(role, row.task.id))
+              }
             />
           ),
         },

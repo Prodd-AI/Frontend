@@ -51,7 +51,7 @@ export default function HrPayroll() {
   return (
     <div className="space-y-8">
       {/* Configuration Card */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm">
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
         <div className="flex items-center gap-3 mb-2">
           <DollarSign className="text-[#6619DE]" size={24} />
           <h2 className="text-xl font-bold text-[#251F2D]">
@@ -80,7 +80,7 @@ export default function HrPayroll() {
       </div>
 
       {/* Payment Summary Card */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm space-y-8">
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-8">
         <div className="flex items-center gap-3 mb-6">
           <Wallet className="text-[#251F2D]" size={20} />
           <div>

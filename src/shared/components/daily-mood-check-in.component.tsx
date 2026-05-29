@@ -6,9 +6,8 @@ import {
   forwardRef,
 } from "react";
 import clsx from "clsx";
-import { FaRegSmile } from "react-icons/fa";
+import { ArrowUpRight, Smile } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Moods } from "@/shared/typings/daily-mood-check-in";
 import { DailyMoodCheckInPropsInt } from "@/shared/typings/daily-mood-check-in";
 import { DailyMoodCheckInRef } from "@/shared/typings/daily-mood-check-in";
@@ -19,31 +18,11 @@ const mood_emojis_cards: {
   title: string;
   type: Moods;
 }[] = [
-  {
-    emoji: MOOD_EMOJIS.great,
-    title: "Great",
-    type: "Great",
-  },
-  {
-    emoji: MOOD_EMOJIS.good,
-    title: "Good",
-    type: "Good",
-  },
-  {
-    emoji: MOOD_EMOJIS.okay,
-    title: "Okay",
-    type: "Okay",
-  },
-  {
-    emoji: MOOD_EMOJIS.notGreat,
-    title: "Not Great",
-    type: "Not Great",
-  },
-  {
-    emoji: MOOD_EMOJIS.rough,
-    title: "Rough",
-    type: "Rough",
-  },
+  { emoji: MOOD_EMOJIS.great, title: "Great", type: "Great" },
+  { emoji: MOOD_EMOJIS.good, title: "Good", type: "Good" },
+  { emoji: MOOD_EMOJIS.okay, title: "Okay", type: "Okay" },
+  { emoji: MOOD_EMOJIS.notGreat, title: "Not Great", type: "Not Great" },
+  { emoji: MOOD_EMOJIS.rough, title: "Rough", type: "Rough" },
 ];
 
 const DailyMoodCheckIn = forwardRef<
@@ -54,8 +33,7 @@ const DailyMoodCheckIn = forwardRef<
     {
       className,
       title = "Daily Mood Check-in",
-      subTitle = `How are you feeling right now? Your input helps us support your
-          wellness`,
+      subTitle = "How are you feeling right now?",
       onSubmit,
       isSubmitting = false,
     },
@@ -78,90 +56,81 @@ const DailyMoodCheckIn = forwardRef<
       setDescription("");
     }, []);
 
-    const getCurrentData = useCallback(() => {
-      return { mood, description };
-    }, [mood, description]);
+    const getCurrentData = useCallback(
+      () => ({ mood, description }),
+      [mood, description],
+    );
 
     useImperativeHandle(
       ref,
-      () => ({
-        reset,
-        getCurrentData,
-      }),
+      () => ({ reset, getCurrentData }),
       [reset, getCurrentData],
     );
 
     return (
       <div
         className={clsx(
+          "bg-white rounded-3xl p-5 sm:p-6 border border-gray-200 flex flex-col gap-5",
           className,
-          "w-[50.625rem] h-[33.313rem] bg-[#F8F8F9] rounded-[20px] flex flex-col p-[35px]",
-          "transition-all duration-500 ease-in-out",
         )}
-        style={{
-          boxShadow:
-            "0px 4px 4px -4px rgba(12, 12, 13, 0.05), 0px 16px 16px -8px rgba(12, 12, 13, 0.1)",
-        }}
       >
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <FaRegSmile className="text-[#10B948]" size={32} />
-            <h1 className="text-[#393343] font-bold text-4xl">{title}</h1>
-          </div>
-          <h2 className="text-[16px] text-[#6B7280] font-medium">{subTitle}</h2>
+        <div className="flex items-center gap-3">
+          <span className="size-10 rounded-xl bg-[#6619DE] flex items-center justify-center">
+            <Smile size={20} className="text-white" />
+          </span>
+          <h3 className="text-base font-semibold text-[#251F2D]">{title}</h3>
+        </div>
 
-          <div className="flex gap-3 mt-[26px]">
+        <div className="bg-[#F8F8F9] rounded-2xl p-5 sm:p-6">
+          <p className="text-sm font-medium text-[#5A5D61] mb-4">{subTitle}</p>
+
+          <div className="grid grid-cols-5 gap-2 sm:gap-3">
             {mood_emojis_cards.map(({ emoji, title, type }) => (
-              <div
+              <button
                 key={type}
+                type="button"
                 onClick={() => handleSelectEmoji(type)}
                 className={clsx(
-                  "bg-[#EDEDF0] rounded-[17px] w-[8.75rem] h-[6.938rem] flex flex-col cursor-pointer justify-center items-center",
-                  "transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg",
-                  "active:scale-95",
+                  "flex flex-col items-center justify-center gap-1 rounded-2xl py-3 px-1 transition-all",
+                  "bg-white border-2",
                   mood === type
-                    ? "border-2 border-[#6619DE94] bg-[#6619DE]/10 shadow-md scale-105"
-                    : "border-2 border-transparent hover:border-[#6619DE]/30",
+                    ? "border-[#6619DE] shadow-sm"
+                    : "border-transparent hover:border-[#6619DE]/30",
                 )}
               >
-                <p className="text-[35.51px] transition-transform duration-200 ease-in-out">
-                  {emoji}
-                </p>
-                <h5 className="font-medium text-[#393343] transition-colors duration-200">
+                <span className="text-2xl sm:text-3xl">{emoji}</span>
+                <span className="text-[11px] sm:text-xs font-medium text-[#251F2D]">
                   {title}
-                </h5>
-              </div>
+                </span>
+              </button>
             ))}
           </div>
-          <div className="mt-[2.938rem] flex flex-col gap-4">
+
+          <div className="relative mt-5">
             <Textarea
-              className="h-[7.563rem] transition-all duration-200 ease-in-out focus:ring-2 focus:ring-[#6619DE]/20 focus:border-[#6619DE]"
+              className="min-h-[92px] bg-white border-gray-200 rounded-xl pr-14 text-sm focus:ring-2 focus:ring-[#6619DE]/20 focus:border-[#6619DE]"
               placeholder="Anything specific on your mind today? (Optional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
-            <Button
-              className={clsx(
-                "w-full h-[3.313rem] font-bold text-white",
-                "transition-all duration-300 ease-in-out transform",
-                "hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]",
-
-                mood
-                  ? "bg-gradient-to-r from-[#6619DE] to-[#1C75BC] hover:from-[#5A15C7] hover:to-[#1A6BAB] cursor-pointer"
-                  : "bg-gray-400 cursor-not-allowed opacity-60",
-              )}
+            <button
+              type="button"
               onClick={handleSubmit}
               disabled={!mood || isSubmitting}
+              aria-label="Submit mood check-in"
+              className={clsx(
+                "absolute right-3 bottom-3 size-9 rounded-lg flex items-center justify-center transition-all",
+                mood && !isSubmitting
+                  ? "bg-[#6619DE] hover:bg-[#5710c4] text-white"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed",
+              )}
             >
               {isSubmitting ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Submitting...
-                </div>
+                <span className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                "Submit mood check-in"
+                <ArrowUpRight size={18} />
               )}
-            </Button>
+            </button>
           </div>
         </div>
       </div>

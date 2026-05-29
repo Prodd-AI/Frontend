@@ -11,17 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Video, Users, Plus, X, Search } from "lucide-react";
+import { Video, Users, X } from "lucide-react";
 import { TimePicker } from "@/components/ui/time-picker";
-import { format } from "date-fns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getTeamMembers, getTeams } from "@/config/services/teams.service";
+import {
+  getMyTeams,
+  getTeamMembers,
+  getTeams,
+} from "@/config/services/teams.service";
 import { schedule_meeting } from "@/config/services/meeting.service";
 import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
@@ -101,9 +98,9 @@ const ScheduleMeeting = ({
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(
     defaultValuesProp?.defaultTeamId ?? null,
   );
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isAttendeePopoverOpen, setIsAttendeePopoverOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
+  const role = user?.user.user_role;
+  const restrictToOwnTeams = role === "team_lead";
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -125,33 +122,63 @@ const ScheduleMeeting = ({
       title: defaultValuesProp?.title ?? "",
       type: defaultValuesProp?.type ?? undefined,
       description: defaultValuesProp?.description ?? "",
-      attendee_emails: defaultValuesProp?.attendee_emails ?? [],
+      // Auto-include the organizer so they don't have to add themselves
+      // before submitting.
+      attendee_emails: (() => {
+        const seed = defaultValuesProp?.attendee_emails ?? [];
+        const me = user?.user.email;
+        if (!me) return seed;
+        return seed.includes(me) ? seed : [me, ...seed];
+      })(),
     },
   });
 
   useEffect(() => {
     if (!defaultValuesProp) return;
+    const seed = defaultValuesProp.attendee_emails ?? [];
+    const me = user?.user.email;
+    const withOrganizer = me && !seed.includes(me) ? [me, ...seed] : seed;
     reset({
       title: defaultValuesProp.title ?? "",
       type: defaultValuesProp.type,
       description: defaultValuesProp.description ?? "",
-      attendee_emails: defaultValuesProp.attendee_emails ?? [],
+      attendee_emails: withOrganizer,
     } as Partial<ScheduleMeetingFormData>);
-  }, [defaultValuesProp, reset]);
+  }, [defaultValuesProp, reset, user?.user.email]);
 
   const selectedAttendeeEmails = watch("attendee_emails");
 
-  const { data: teamsData, isLoading: teamsLoading } = useQuery({
-    queryKey: ["schedule-meeting-teams"],
-    queryFn: () => getTeams(),
-    enabled: isAttendeePopoverOpen || !!defaultValuesProp?.defaultTeamId,
+  // The two team endpoints return different shapes; normalize to a common
+  // `{ data: TeamRow[] }` so React Query has a single type to infer.
+  type TeamRow = {
+    id?: string;
+    name?: string;
+    team?: { id: string; name: string };
+  };
+  const { data: teamsData, isLoading: teamsLoading } = useQuery<{
+    data: TeamRow[];
+  }>({
+    queryKey: [
+      "schedule-meeting-teams",
+      restrictToOwnTeams ? "mine" : "all",
+    ],
+    queryFn: async () => {
+      const res = restrictToOwnTeams ? await getMyTeams() : await getTeams();
+      return { data: (res?.data ?? []) as TeamRow[] };
+    },
   });
 
-  const teams =
-    teamsData?.data?.map((team) => ({
-      team_id: team.id,
-      team_name: team.name,
-    })) ?? [];
+  // /teams/me returns rows like { team: {...} }; /teams returns the team
+  // directly. Normalize both into a single { team_id, team_name }[] list.
+  const teams = (teamsData?.data ?? [])
+    .map((row) => {
+      const t = row.team ?? row;
+      if (!t?.id || !t?.name) return null;
+      return { team_id: t.id, team_name: t.name };
+    })
+    .filter(
+      (x): x is { team_id: string; team_name: string } => x !== null,
+    );
 
   const activeTeamId = selectedTeamId ?? teams[0]?.team_id;
 
@@ -161,13 +188,10 @@ const ScheduleMeeting = ({
     enabled: !!activeTeamId,
   });
 
-  const teamMembers: TeamMember[] = teamMembersData?.data ?? [];
-
-  const filteredMembers = teamMembers.filter(
-    (member) =>
-      member.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.email.toLowerCase().includes(searchQuery.toLowerCase()),
+  // Drop the HR-role member — HR shows on every team and shouldn't appear in
+  // attendee pickers (matches the Team Analysis member-count rule).
+  const teamMembers: TeamMember[] = (teamMembersData?.data ?? []).filter(
+    (m: TeamMember & { user_role?: string }) => m.user_role !== "hr",
   );
 
   const { mutate, isPending } = useMutation({
@@ -175,7 +199,10 @@ const ScheduleMeeting = ({
     onSuccess: () => {
       reset();
       toast.success("Meeting scheduled successfully!");
+      // Refresh any meeting lists/cards so the new meeting shows up
+      // without a page reload.
       queryClient.invalidateQueries({ queryKey: ["upcoming-meetings-today"] });
+      queryClient.invalidateQueries({ queryKey: ["meetings"] });
       onSchedule?.();
     },
   });
@@ -196,11 +223,17 @@ const ScheduleMeeting = ({
   };
 
   const onSubmit = (values: ScheduleMeetingFormData) => {
+    // Send the picker's local wall-clock date/time exactly as selected — no
+    // timezone conversion. Backend stores what's sent, and the user expects
+    // "10:00" picked locally to be "10:00" in the payload.
+    const y = values.date.getFullYear();
+    const m = String(values.date.getMonth() + 1).padStart(2, "0");
+    const d = String(values.date.getDate()).padStart(2, "0");
     mutate({
       title: values.title,
       type: values.type,
       description: values.description ?? "",
-      date: format(values.date, "yyyy-MM-dd"),
+      date: `${y}-${m}-${d}`,
       time: convertTo24Hour(values.time),
       attendee_emails: values.attendee_emails,
       meeting_link: values.meeting_link,
@@ -219,26 +252,29 @@ const ScheduleMeeting = ({
     }
   };
 
-  const removeAttendee = (email: string) => {
-    setValue(
-      "attendee_emails",
-      selectedAttendeeEmails.filter((e) => e !== email),
-    );
+  // "Select entire team" — add/remove every member of the active team.
+  const teamEmails = teamMembers.map((m) => m.email);
+  const isWholeTeamSelected =
+    teamEmails.length > 0 &&
+    teamEmails.every((email) => selectedAttendeeEmails.includes(email));
+  const toggleWholeTeam = () => {
+    if (isWholeTeamSelected) {
+      setValue(
+        "attendee_emails",
+        selectedAttendeeEmails.filter((e) => !teamEmails.includes(e)),
+      );
+    } else {
+      const merged = Array.from(
+        new Set([...selectedAttendeeEmails, ...teamEmails]),
+      );
+      setValue("attendee_emails", merged);
+    }
   };
-
-  const getSelectedMemberDetails = () => {
-    return teamMembers.filter((m) => selectedAttendeeEmails.includes(m.email));
-  };
-
-  /** Emails that are selected but not in current team list (e.g. prefilled from another team before it loaded) */
-  const selectedEmailsNotInList = selectedAttendeeEmails.filter(
-    (email) => !teamMembers.some((m) => m.email === email),
-  );
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="w-full max-w-[680px] max-h-[80vh] overflow-y-auto"
+      className="w-full max-h-[80vh] overflow-y-auto"
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
@@ -404,162 +440,44 @@ const ScheduleMeeting = ({
           </div>
         </div>
 
-        {/* Attendees */}
-        <div className="space-y-3">
+        {/* Attendees — same inline TeamTabs + TeamMemberSelector pattern as
+            the Assign Task modal. */}
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium text-foreground">
               Attendees <span className="text-destructive">*</span>
             </Label>
-            <Popover
-              open={isAttendeePopoverOpen}
-              onOpenChange={setIsAttendeePopoverOpen}
-            >
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Add attendee
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-80 p-0 bg-white border-gray-200/80 rounded-xl shadow-xl"
-                align="end"
+            {teamEmails.length > 0 && (
+              <button
+                type="button"
+                onClick={toggleWholeTeam}
+                className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
               >
-                {/* Team Tabs */}
-                <TeamTabs
-                  teams={teams}
-                  activeTeamId={activeTeamId}
-                  onSelectTeam={setSelectedTeamId}
-                  isLoading={teamsLoading}
-                  className="p-3 border-b border-gray-100"
-                />
-
-                {/* Search */}
-                <div className="p-3 border-b border-gray-100">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                    <Input
-                      placeholder="Search team members..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-10 pl-9 bg-gray-50/80 border-gray-200/60 rounded-lg text-sm placeholder:text-muted-foreground/50"
-                    />
-                  </div>
-                </div>
-
-                {/* Team members list */}
-                <div className="max-h-64 overflow-y-auto p-2">
-                  <TeamMemberSelector
-                    members={filteredMembers}
-                    selectedValues={selectedAttendeeEmails}
-                    onToggle={toggleAttendee}
-                    isLoading={membersLoading}
-                    emptyMessage="No members found"
-                    valueKey="email"
-                  />
-                </div>
-
-                {/* Footer */}
-                <div className="p-3 border-t border-gray-100 bg-gray-50/50">
-                  <p className="text-xs text-muted-foreground text-center">
-                    {selectedAttendeeEmails.length} attendee
-                    {selectedAttendeeEmails.length !== 1 ? "s" : ""} selected
-                  </p>
-                </div>
-              </PopoverContent>
-            </Popover>
+                {isWholeTeamSelected ? "Clear team" : "Select entire team"}
+              </button>
+            )}
           </div>
 
-          <div className="p-4 bg-gray-50/60 rounded-xl border border-gray-100/80">
-            <div className="flex items-center gap-4">
-              {/* You (Organizer) */}
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Avatar className="w-10 h-10 ring-2 ring-white">
-                    <AvatarImage src={user?.user?.avatar_url ?? ""} alt="You" />
-                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary text-sm font-medium">
-                      {user?.user?.first_name?.[0]}
-                      {user?.user?.last_name?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-foreground">
-                    {user?.user?.first_name ?? "You"}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    Organizer
-                  </span>
-                </div>
-              </div>
+          <TeamTabs
+            teams={teams}
+            activeTeamId={activeTeamId}
+            onSelectTeam={setSelectedTeamId}
+            isLoading={teamsLoading}
+            className="mb-3"
+          />
 
-              {(getSelectedMemberDetails().length > 0 ||
-                selectedEmailsNotInList.length > 0) && (
-                  <>
-                    <div className="w-px h-8 bg-gray-200/80" />
-
-                    {/* Selected attendees (from current team list) */}
-                    <div className="flex items-center gap-2 flex-1 flex-wrap">
-                      {getSelectedMemberDetails().map((member) => (
-                        <div
-                          key={member.id}
-                          className="group relative flex items-center gap-2 pl-1 pr-2 py-1 bg-white rounded-full border border-gray-200/80 shadow-sm transition-all duration-150 hover:border-gray-300"
-                        >
-                          <Avatar className="w-6 h-6">
-                            <AvatarImage
-                              src={member.avatar_url ?? ""}
-                              alt={`${member.first_name} ${member.last_name}`}
-                            />
-                            <AvatarFallback className="bg-gray-100 text-muted-foreground text-[10px] font-medium">
-                              {member.first_name[0]}
-                              {member.last_name[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs font-medium text-foreground">
-                            {member.first_name}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => removeAttendee(member.email)}
-                            className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200"
-                          >
-                            <X className="w-2.5 h-2.5 text-muted-foreground" />
-                          </button>
-                        </div>
-                      ))}
-                      {/* Prefilled attendees not yet in current team list (e.g. still loading) */}
-                      {selectedEmailsNotInList.map((email) => (
-                        <div
-                          key={email}
-                          className="group relative flex items-center gap-2 pl-1 pr-2 py-1 bg-white rounded-full border border-gray-200/80 shadow-sm transition-all duration-150 hover:border-gray-300"
-                        >
-                          <Avatar className="w-6 h-6">
-                            <AvatarFallback className="bg-gray-100 text-muted-foreground text-[10px] font-medium">
-                              {email[0]?.toUpperCase() ?? "?"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs font-medium text-foreground truncate max-w-[120px]">
-                            {email}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => removeAttendee(email)}
-                            className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200"
-                          >
-                            <X className="w-2.5 h-2.5 text-muted-foreground" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-            </div>
+          <div className="border border-gray-200/60 rounded-xl max-h-48 overflow-y-auto">
+            <TeamMemberSelector
+              members={teamMembers}
+              selectedValues={selectedAttendeeEmails}
+              onToggle={toggleAttendee}
+              isLoading={membersLoading}
+              emptyMessage="No team members found"
+              valueKey="email"
+            />
           </div>
           {errors.attendee_emails && (
-            <p className="text-red-500 text-sm">
+            <p className="text-red-500 text-sm mt-1">
               {errors.attendee_emails.message}
             </p>
           )}
