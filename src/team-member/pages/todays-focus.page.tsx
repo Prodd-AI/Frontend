@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import PageHeader from "@/shared/components/page-header.component";
 import TodaysFocusComponent from "@/shared/components/todays-focus.component";
+import TodaysMeetingsList from "@/shared/components/todays-meetings-list.component";
 import { getWeeklyStreak } from "@/config/services/tasks.service";
 import { buildFocusGoals } from "@/shared/utils/date.utils";
 
@@ -19,10 +20,12 @@ function TodaysFocusPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        dataTour="page-header"
         title="Today's Focus"
-        subtitle="Pending tasks for today, ordered by priority"
+        subtitle="Meetings and pending tasks for today, ordered by priority"
       />
-      <TodaysFocusComponent goals={goals} />
+      <TodaysMeetingsList />
+      <TodaysFocusComponent title="Tasks" goals={goals} />
     </div>
   );
 }

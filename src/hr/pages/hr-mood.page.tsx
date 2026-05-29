@@ -5,6 +5,7 @@ function HrMoodPage() {
   return (
     <div className="space-y-8">
       <PageHeader
+        dataTour="page-header"
         title="Mood Heatmap"
         subtitle="Visualize team mood distribution over time"
       />

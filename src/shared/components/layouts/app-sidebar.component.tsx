@@ -4,6 +4,7 @@ import { Settings, LogOut } from "lucide-react";
 import Logo from "../Logo.component";
 import useAuthStore from "@/config/stores/auth.store";
 import { cn } from "@/lib/utils";
+import { useOverviewAlerts } from "@/shared/hooks/use-overview-alerts";
 
 interface AppSidebarProps {
   items: SidebarNavItem[];
@@ -21,6 +22,7 @@ function navItemClass(isActive: boolean) {
 
 function NavItem({ item }: { item: SidebarNavItem }) {
   const location = useLocation();
+  const { totalPendingCount, nextMeeting } = useOverviewAlerts();
 
   if (item.render) {
     // Render-prop items handle their own active state and click semantics.
@@ -37,6 +39,16 @@ function NavItem({ item }: { item: SidebarNavItem }) {
 
   if (!item.to) return null;
 
+  const showBadge =
+    (item.badgeKey === "tasks" && totalPendingCount > 0) ||
+    (item.badgeKey === "meetings" && nextMeeting !== null);
+  const badgeAria =
+    item.badgeKey === "tasks"
+      ? `${totalPendingCount} pending`
+      : item.badgeKey === "meetings" && nextMeeting
+        ? `Meeting in ${nextMeeting.minutesUntil} minutes`
+        : undefined;
+
   return (
     <NavLink
       to={item.to}
@@ -46,7 +58,13 @@ function NavItem({ item }: { item: SidebarNavItem }) {
       <span className="text-base shrink-0" aria-hidden="true">
         {item.icon}
       </span>
-      <span>{item.label}</span>
+      <span className="flex-1">{item.label}</span>
+      {showBadge && (
+        <span
+          className="size-2 rounded-full bg-amber-500"
+          aria-label={badgeAria}
+        />
+      )}
     </NavLink>
   );
 }

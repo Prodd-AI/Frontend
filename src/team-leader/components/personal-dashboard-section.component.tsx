@@ -86,32 +86,39 @@ const PersonalDashboardSection = ({
   return (
     <section className={`flex flex-col gap-6 ${className || ""}`}>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <DailyMoodCheckIn
-          ref={formRef}
-          isSubmitting={isPending}
-          onSubmit={handleSubmitDailyMoodCheckIn}
-          className="lg:col-span-3"
-        />
-        <div className="flex flex-col gap-4 lg:col-span-2">
-          <WeeklyStreakComponent
-            numberOfTaskCompleted={numberOfTaskCompleted}
-            totalNumberOfTaskForTheDay={totalNumberOfTaskForTheDay}
-            numberOfTaskCompletedForTheDay={numberOfTaskCompletedForTheDay}
-            weekTasks={weekTasks}
-          />
-          <TodaysProgress
-            title="Today's Progress"
-            numberOfTaskCompleted={numberOfTaskCompletedForTheDay}
-            totalNumberOfTask={totalNumberOfTaskForTheDay}
-            avgMood={averageMoodData}
+        <div data-tour="mood-trends" className="lg:col-span-3">
+          <DailyMoodCheckIn
+            ref={formRef}
+            isSubmitting={isPending}
+            onSubmit={handleSubmitDailyMoodCheckIn}
           />
         </div>
+        <div className="flex flex-col gap-4 lg:col-span-2">
+          <div data-tour="weekly-streak">
+            <WeeklyStreakComponent
+              numberOfTaskCompleted={numberOfTaskCompleted}
+              totalNumberOfTaskForTheDay={totalNumberOfTaskForTheDay}
+              numberOfTaskCompletedForTheDay={numberOfTaskCompletedForTheDay}
+              weekTasks={weekTasks}
+            />
+          </div>
+          <div data-tour="weekly-tasks">
+            <TodaysProgress
+              title="Today's Progress"
+              numberOfTaskCompleted={numberOfTaskCompletedForTheDay}
+              totalNumberOfTask={totalNumberOfTaskForTheDay}
+              avgMood={averageMoodData}
+            />
+          </div>
+        </div>
       </div>
-      <UpcomingSchedule
-        meeting={meetingData}
-        remainingCount={remainingCount}
-        isLoading={upcomingMeetingsLoading}
-      />
+      <div data-tour="upcoming-schedule">
+        <UpcomingSchedule
+          meeting={meetingData}
+          remainingCount={remainingCount}
+          isLoading={upcomingMeetingsLoading}
+        />
+      </div>
     </section>
   );
 };

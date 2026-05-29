@@ -47,6 +47,7 @@ function RecentMoodsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        dataTour="page-header"
         title="Recent Moods"
         subtitle="Track recent mood check-ins and the average for the period"
         actions={

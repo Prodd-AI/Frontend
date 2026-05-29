@@ -9,6 +9,8 @@ interface SidebarNavItem {
   render?: (ctx: { isActive: boolean }) => ReactNode;
   /** When true, NavLink matches only when path matches exactly (end). Default: true for index items, false otherwise. */
   end?: boolean;
+  /** When set, NavItem shows a dot indicator while the matching alert is active. */
+  badgeKey?: "tasks" | "meetings";
 }
 
 interface RouteHandle {

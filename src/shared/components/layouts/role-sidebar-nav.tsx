@@ -17,6 +17,7 @@ export const hr_sidebar_nav: SidebarNavItem[] = [
     icon: <MdOutlineDashboard size={18} />,
     to: "/dash/hr",
     end: true,
+    badgeKey: "meetings",
   },
   {
     label: "Mood Heatmap",
@@ -46,6 +47,7 @@ export const team_leader_sidebar_nav: SidebarNavItem[] = [
     icon: <MdOutlineDashboard size={18} />,
     to: "/dash/team-lead",
     end: true,
+    badgeKey: "meetings",
   },
   {
     label: "Today's Focus",
@@ -56,6 +58,7 @@ export const team_leader_sidebar_nav: SidebarNavItem[] = [
     label: "Task",
     icon: <IoCheckmarkOutline size={18} />,
     to: "/dash/team-lead/tasks",
+    badgeKey: "tasks",
   },
   {
     label: "Timesheet",
@@ -80,6 +83,7 @@ export const team_member_sidebar_nav: SidebarNavItem[] = [
     icon: <MdOutlineDashboard size={18} />,
     to: "/dash/team-member",
     end: true,
+    badgeKey: "meetings",
   },
   {
     label: "Today's Focus",
@@ -90,6 +94,7 @@ export const team_member_sidebar_nav: SidebarNavItem[] = [
     label: "Task",
     icon: <IoCheckmarkOutline size={18} />,
     to: "/dash/team-member/tasks",
+    badgeKey: "tasks",
   },
   {
     label: "Timesheet",
