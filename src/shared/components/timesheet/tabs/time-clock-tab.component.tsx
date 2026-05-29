@@ -5,30 +5,35 @@ import { useState, useEffect, useCallback } from 'react';
 import { IoPlayOutline, IoStopOutline, IoPauseOutline, IoCheckmarkOutline } from 'react-icons/io5';
 import { LuClock3 } from 'react-icons/lu';
 import ClockOutSummary from '../clock-out-summary.component';
-import { clockAction, getActiveSession } from '@/config/services/time-tracking.service';
+import MySessionsList from '../my-sessions-list.component';
+import { getMySessions } from '@/config/services/time-tracking.service';
 import { getWeeklyStreak } from '@/config/services/tasks.service';
 import useTimeTrackingStore from '@/config/stores/time-tracking.store';
+import useTimeClockActions from '@/shared/hooks/use-time-clock-actions';
 import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
 
 const TimeClockTab = () => {
 	const { sessionData, setSession, clearSession } = useTimeTrackingStore();
+	const { clockIn, pause, resume, isLoading } = useTimeClockActions();
 
-	// Rehydrate any in-progress session from the server on mount so a refresh
-	// or a fresh device keeps the timer in sync. Stays silent on 404 in case
-	// the backend hasn't shipped this route yet.
+	// Rehydrate any in-progress session from the server on mount. We pull the
+	// latest few rows (covers both `active` and `paused` — a status=active
+	// filter alone would miss a paused session and incorrectly let the UI
+	// show "Clock In" when the user should be resuming). Server is
+	// authoritative: if it disagrees with localStorage we trust the server.
 	useQuery({
 		queryKey: ['active-time-session'],
 		queryFn: async () => {
 			try {
-				const res = await getActiveSession();
-				const serverSession = res?.data;
-				if (serverSession && serverSession.status !== 'ended') {
+				const res = await getMySessions({ limit: 5, page: 1 });
+				const serverSession =
+					res?.data?.find((s) => s.status !== 'ended') ?? null;
+				if (serverSession) {
 					setSession(serverSession);
 				} else if (sessionData) {
 					clearSession();
 				}
-				return serverSession ?? null;
+				return serverSession;
 			} catch {
 				return null;
 			}
@@ -61,7 +66,6 @@ const TimeClockTab = () => {
 	const isActive = sessionData?.status === 'active';
 
 	const [seconds, setSeconds] = useState(0);
-	const [isLoading, setIsLoading] = useState(false);
 
 	// Calculate actual elapsed time including time since last_action_at when active
 	const calculateElapsedSeconds = useCallback((session: typeof sessionData) => {
@@ -117,18 +121,13 @@ const TimeClockTab = () => {
 	};
 
 	const handleClockIn = async () => {
-		setIsLoading(true);
 		try {
-			const response = await clockAction('clock_in');
+			const response = await clockIn();
 			if (response.success) {
-				setSession(response.data);
 				setSessionStartTime(new Date(response.data.started_at));
-				toast.success('Clocked in successfully');
 			}
-		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to clock in');
-		} finally {
-			setIsLoading(false);
+		} catch {
+			// hook already toasts on failure
 		}
 	};
 
@@ -137,19 +136,11 @@ const TimeClockTab = () => {
 		setShowSummary(true);
 	};
 
-	const handlePause = async () => {
-		setIsLoading(true);
+	const handlePauseResume = async () => {
 		try {
-			const action = isActive ? 'pause' : 'resume';
-			const response = await clockAction(action);
-			if (response.success) {
-				setSession(response.data);
-				toast.success(isActive ? 'Timer paused' : 'Timer resumed');
-			}
-		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to update timer');
-		} finally {
-			setIsLoading(false);
+			await (isActive ? pause() : resume());
+		} catch {
+			// hook already toasts on failure
 		}
 	};
 
@@ -234,7 +225,7 @@ const TimeClockTab = () => {
 						<div className="flex items-center gap-4">
 							<Button
 								variant="outline"
-								onClick={handlePause}
+								onClick={handlePauseResume}
 								disabled={isLoading}
 								className={`
                   ${isActive ? 'bg-[#EF8913] hover:bg-[#EF8913]/90' : 'bg-green-500 hover:bg-green-600'} 
@@ -342,6 +333,8 @@ const TimeClockTab = () => {
 					)}
 				</div>
 			)}
+
+			<MySessionsList onRequestClockOut={handleClockOut} />
 
 			{showSummary && sessionStartTime && sessionEndTime && sessionData && (
 				<ClockOutSummary

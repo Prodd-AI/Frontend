@@ -150,6 +150,42 @@ const getActiveSession = () => {
 	}>('active', undefined, true);
 };
 
+// /time-tracking/my-sessions — paginated list of every session belonging to
+// the current user. Includes active, paused, and ended sessions; backend
+// returns `meta` with page/limit/total/total_pages.
+export interface PaginationMeta {
+	page: number;
+	limit: number;
+	total: number;
+	total_pages: number;
+}
+
+export interface MySessionsResponse {
+	message?: string;
+	data: TimeTrackingSession[];
+	meta?: PaginationMeta;
+	timestamp?: string;
+	success?: boolean;
+}
+
+export interface MySessionsParams {
+	page?: number;
+	limit?: number;
+	status?: 'active' | 'paused' | 'ended';
+}
+
+const getMySessions = (params?: MySessionsParams) => {
+	const query: Record<string, string> = {};
+	if (params?.page !== undefined) query.page = String(params.page);
+	if (params?.limit !== undefined) query.limit = String(params.limit);
+	if (params?.status) query.status = params.status;
+	return timeTrackingService.get<MySessionsResponse>(
+		'my-sessions',
+		Object.keys(query).length ? query : undefined,
+		true,
+	);
+};
+
 /**
  * Get weekly time tracking summary
  */
@@ -168,6 +204,7 @@ export {
 	clockAction,
 	allocateTime,
 	getActiveSession,
+	getMySessions,
 	getMyEntries,
 	getWeeklySummary,
 	getTeamEntries,

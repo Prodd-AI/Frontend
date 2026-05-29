@@ -7,6 +7,7 @@ import { useState, useMemo } from 'react';
 import { IoTrashOutline } from 'react-icons/io5';
 import { clockAction, allocateTime, TaskAllocation } from '@/config/services/time-tracking.service';
 import useTimeTrackingStore from '@/config/stores/time-tracking.store';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 interface Task {
@@ -66,6 +67,7 @@ const ClockOutSummary = ({
 	onConfirm,
 }: ClockOutSummaryProps) => {
 	const { clearSession } = useTimeTrackingStore();
+	const queryClient = useQueryClient();
 	const [tasks, setTasks] = useState<Task[]>(initialTasks);
 	const [newTaskName, setNewTaskName] = useState('');
 	const [newTaskStart, setNewTaskStart] = useState('');
@@ -190,6 +192,9 @@ const ClockOutSummary = ({
 			}
 
 			clearSession();
+			queryClient.invalidateQueries({ queryKey: ['my-sessions'] });
+			queryClient.invalidateQueries({ queryKey: ['my-time-entries'] });
+			queryClient.invalidateQueries({ queryKey: ['weekly-time-summary'] });
 			toast.success('Clocked out and time allocated successfully');
 			onConfirm();
 		} catch (error) {
