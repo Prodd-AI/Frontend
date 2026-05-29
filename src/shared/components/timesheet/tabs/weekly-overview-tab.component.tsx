@@ -20,9 +20,10 @@ const toNumber = (n: number | string | null | undefined): number => {
 };
 
 const formatHours = (h: number | string | null | undefined) => `${toNumber(h).toFixed(2)}h`;
+const stripSeconds = (t?: string): string => (t ? t.slice(0, 5) : '');
 const formatRange = (entry: TimeEntry): string => {
 	if (entry.start_time && entry.end_time) {
-		return `(${entry.start_time} - ${entry.end_time})`;
+		return `(${stripSeconds(entry.start_time)} - ${stripSeconds(entry.end_time)})`;
 	}
 	return '';
 };
@@ -171,7 +172,7 @@ const WeeklyOverviewTab = () => {
 								<div className="flex items-center gap-12">
 									<span className="text-gray-400 text-sm w-24">{formatEntryDate(entry)}</span>
 									<span className="font-semibold text-[#1F1F1F] text-base min-w-[200px]">
-										{entry.title ?? 'Untitled entry'}
+										{entry.description || entry.title || 'Untitled entry'}
 									</span>
 									<span className="text-gray-400 text-sm">{formatRange(entry)}</span>
 								</div>

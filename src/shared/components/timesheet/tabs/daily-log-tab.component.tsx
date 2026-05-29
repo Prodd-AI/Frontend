@@ -17,9 +17,21 @@ const toNumber = (n: number | string | null | undefined): number => {
 
 const formatHours = (h?: number | string | null) => `${toNumber(h).toFixed(2)}h`;
 
+// Show both hours and minutes for the daily total — short sessions like
+// 0.05h are easier to read as "3 mins".
+const formatHoursAndMinutes = (h?: number | string | null): string => {
+	const hours = toNumber(h);
+	const totalMinutes = Math.round(hours * 60);
+	return `${hours.toFixed(2)}h · ${totalMinutes} ${totalMinutes === 1 ? 'min' : 'mins'}`;
+};
+
+// API returns start_time / end_time as 24-hour "HH:MM:SS" strings — drop
+// the seconds for display.
+const stripSeconds = (t?: string): string => (t ? t.slice(0, 5) : '');
+
 const formatRange = (entry: TimeEntry): string | null => {
 	if (entry.start_time && entry.end_time) {
-		return `${entry.start_time} - ${entry.end_time}`;
+		return `${stripSeconds(entry.start_time)} - ${stripSeconds(entry.end_time)}`;
 	}
 	return null;
 };
@@ -84,7 +96,10 @@ export const DailyLogTab = () => {
 				) : (
 					<div className="flex flex-col gap-2">
 						{entries.map((entry) => {
-							const title = entry.title ?? 'Untitled entry';
+							// Entries from /allocate carry the description but no separate
+							// title field — surface that as the row's heading so the row
+							// isn't just "Untitled entry".
+							const heading = entry.description || entry.title || 'Untitled entry';
 							const range = formatRange(entry);
 							return (
 								<div
@@ -92,7 +107,7 @@ export const DailyLogTab = () => {
 									className="group relative flex justify-between items-start py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors rounded-xl px-4 -mx-4">
 									<div className="flex-1 pr-12">
 										<div className="flex items-center gap-3 mb-2">
-											<h3 className="font-semibold text-[#1F1F1F] text-base">{title}</h3>
+											<h3 className="font-semibold text-[#1F1F1F] text-base">{heading}</h3>
 											<div className="flex items-center gap-2">
 												<span className="px-2 py-0.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
 													{formatHours(entry.duration_hours)}
@@ -104,16 +119,13 @@ export const DailyLogTab = () => {
 												)}
 											</div>
 										</div>
-										<p className="text-gray-400 text-sm">
-											{entry.description || 'No description provided'}
-										</p>
 									</div>
 								</div>
 							);
 						})}
 						<div className="flex justify-end pt-4">
 							<span className="text-sm font-semibold text-[#251F2D]">
-								Total: {formatHours(totalHours)}
+								Total: {formatHoursAndMinutes(totalHours)}
 							</span>
 						</div>
 					</div>
