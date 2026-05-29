@@ -4,6 +4,13 @@ import { ApiService } from './root.service';
 // Types
 export type ClockAction = 'clock_in' | 'pause' | 'resume' | 'clock_out';
 
+export type TimeSessionStatus = 'active' | 'paused' | 'ended' | 'completed';
+
+// Backend uses `ended` and `completed` interchangeably for terminal sessions.
+// Centralize the check so we never accidentally treat one as in-progress.
+export const isSessionEnded = (status: TimeSessionStatus): boolean =>
+	status === 'ended' || status === 'completed';
+
 export interface TimeTrackingSession {
 	id: string;
 	created_at: string;
@@ -13,7 +20,7 @@ export interface TimeTrackingSession {
 	started_at: string;
 	ended_at: string | null;
 	accumulated_seconds: string;
-	status: 'active' | 'paused' | 'ended';
+	status: TimeSessionStatus;
 	last_action_at: string;
 }
 
@@ -171,7 +178,7 @@ export interface MySessionsResponse {
 export interface MySessionsParams {
 	page?: number;
 	limit?: number;
-	status?: 'active' | 'paused' | 'ended';
+	status?: TimeSessionStatus;
 }
 
 const getMySessions = (params?: MySessionsParams) => {

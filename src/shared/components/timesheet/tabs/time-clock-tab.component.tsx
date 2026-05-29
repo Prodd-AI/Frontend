@@ -6,7 +6,7 @@ import { IoPlayOutline, IoStopOutline, IoPauseOutline, IoCheckmarkOutline } from
 import { LuClock3 } from 'react-icons/lu';
 import ClockOutSummary from '../clock-out-summary.component';
 import MySessionsList from '../my-sessions-list.component';
-import { getMySessions } from '@/config/services/time-tracking.service';
+import { getMySessions, isSessionEnded } from '@/config/services/time-tracking.service';
 import { getWeeklyStreak } from '@/config/services/tasks.service';
 import useTimeTrackingStore from '@/config/stores/time-tracking.store';
 import useTimeClockActions from '@/shared/hooks/use-time-clock-actions';
@@ -27,10 +27,12 @@ const TimeClockTab = () => {
 			try {
 				const res = await getMySessions({ limit: 5, page: 1 });
 				const serverSession =
-					res?.data?.find((s) => s.status !== 'ended') ?? null;
+					res?.data?.find((s) => !isSessionEnded(s.status)) ?? null;
 				if (serverSession) {
 					setSession(serverSession);
 				} else if (sessionData) {
+					// Server has no in-progress session — wipe any stale local state
+					// (e.g. after a clock-out that left the store populated).
 					clearSession();
 				}
 				return serverSession;
@@ -62,7 +64,7 @@ const TimeClockTab = () => {
 	})();
 
 	// Derive state from session data
-	const isClockedIn = sessionData !== null && sessionData.status !== 'ended';
+	const isClockedIn = sessionData !== null && !isSessionEnded(sessionData.status);
 	const isActive = sessionData?.status === 'active';
 
 	const [seconds, setSeconds] = useState(0);

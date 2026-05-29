@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
 	getMySessions,
+	isSessionEnded,
 	TimeTrackingSession,
 } from '@/config/services/time-tracking.service';
 import useTimeTrackingStore from '@/config/stores/time-tracking.store';
@@ -57,6 +58,14 @@ const statusStyles: Record<TimeTrackingSession['status'], string> = {
 	active: 'bg-emerald-100 text-emerald-700 border-emerald-200',
 	paused: 'bg-amber-100 text-amber-700 border-amber-200',
 	ended: 'bg-gray-100 text-gray-500 border-gray-200',
+	completed: 'bg-gray-100 text-gray-500 border-gray-200',
+};
+
+const statusLabels: Record<TimeTrackingSession['status'], string> = {
+	active: 'Active',
+	paused: 'Paused',
+	ended: 'Completed',
+	completed: 'Completed',
 };
 
 const SessionRow = ({
@@ -71,7 +80,7 @@ const SessionRow = ({
 	const { pause, resume, isLoading } = useTimeClockActions();
 	const elapsed = computeElapsed(session);
 	const isActive = session.status === 'active';
-	const isEnded = session.status === 'ended';
+	const isEnded = isSessionEnded(session.status);
 
 	return (
 		<div
@@ -87,10 +96,10 @@ const SessionRow = ({
 					<Badge
 						variant="outline"
 						className={cn(
-							'rounded-full border px-2 py-0.5 text-[11px] font-medium capitalize',
+							'rounded-full border px-2 py-0.5 text-[11px] font-medium',
 							statusStyles[session.status],
 						)}>
-						{session.status}
+						{statusLabels[session.status]}
 					</Badge>
 					{isCurrent && (
 						<Badge

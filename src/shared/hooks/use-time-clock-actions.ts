@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { clockAction, ClockAction } from '@/config/services/time-tracking.service';
+import { clockAction, ClockAction, isSessionEnded } from '@/config/services/time-tracking.service';
 import useTimeTrackingStore from '@/config/stores/time-tracking.store';
 
 // Shared pause/resume/clock-in/clock-out wiring. Both the timer card and the
@@ -18,13 +18,17 @@ export function useTimeClockActions() {
 			try {
 				const res = await clockAction(action);
 				if (res.success) {
-					if (action === 'clock_out') {
+					// Treat any terminal status (ended/completed) as a clear, regardless
+					// of which action returned it — keeps the store from latching onto
+					// a finished session.
+					if (action === 'clock_out' || isSessionEnded(res.data.status)) {
 						clearSession();
 					} else {
 						setSession(res.data);
 					}
 					toast.success(labels.success);
 					queryClient.invalidateQueries({ queryKey: ['my-sessions'] });
+					queryClient.invalidateQueries({ queryKey: ['active-time-session'] });
 				}
 				return res;
 			} catch (error) {
