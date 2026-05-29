@@ -123,9 +123,12 @@ const allocateTime = (sessionId: string, allocations: TaskAllocation[]) => {
 export interface TimeEntry {
 	id: string;
 	task_id?: string | null;
+	time_session_id?: string | null;
 	title?: string;
 	description?: string;
-	duration_hours?: number;
+	// API has returned duration_hours as both number and stringified number —
+	// callers must coerce before doing math or .toFixed().
+	duration_hours?: number | string;
 	start_time?: string;
 	end_time?: string;
 	date?: string;

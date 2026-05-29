@@ -4,7 +4,18 @@ import { useQuery } from '@tanstack/react-query';
 import { getMyEntries, TimeEntry } from '@/config/services/time-tracking.service';
 import { Loader2 } from 'lucide-react';
 
-const formatHours = (h?: number) => `${(h ?? 0).toFixed(2)}h`;
+// Backend sometimes returns duration_hours as a number, sometimes as a
+// stringified number — coerce defensively so .toFixed never blows up.
+const toNumber = (n: number | string | null | undefined): number => {
+	if (typeof n === 'number') return Number.isFinite(n) ? n : 0;
+	if (typeof n === 'string') {
+		const parsed = parseFloat(n);
+		return Number.isFinite(parsed) ? parsed : 0;
+	}
+	return 0;
+};
+
+const formatHours = (h?: number | string | null) => `${toNumber(h).toFixed(2)}h`;
 
 const formatRange = (entry: TimeEntry): string | null => {
 	if (entry.start_time && entry.end_time) {
@@ -39,7 +50,7 @@ export const DailyLogTab = () => {
 	});
 
 	const entries: TimeEntry[] = normalizeEntries(data?.data);
-	const totalHours = entries.reduce((acc, e) => acc + (e.duration_hours ?? 0), 0);
+	const totalHours = entries.reduce((acc, e) => acc + toNumber(e.duration_hours), 0);
 
 	return (
 		<div className="flex flex-col gap-6">

@@ -10,7 +10,16 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { parseWallClockIso } from '@/shared/utils/date.utils';
 
-const formatHours = (h: number) => `${h.toFixed(2)}h`;
+const toNumber = (n: number | string | null | undefined): number => {
+	if (typeof n === 'number') return Number.isFinite(n) ? n : 0;
+	if (typeof n === 'string') {
+		const parsed = parseFloat(n);
+		return Number.isFinite(parsed) ? parsed : 0;
+	}
+	return 0;
+};
+
+const formatHours = (h: number | string | null | undefined) => `${toNumber(h).toFixed(2)}h`;
 const formatRange = (entry: TimeEntry): string => {
 	if (entry.start_time && entry.end_time) {
 		return `(${entry.start_time} - ${entry.end_time})`;
