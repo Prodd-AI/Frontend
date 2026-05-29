@@ -172,9 +172,17 @@ const MySessionsList = ({ onRequestClockOut }: MySessionsListProps) => {
 		refetchOnWindowFocus: false,
 	});
 
-	const sessions = data?.data ?? [];
+	const rawSessions = data?.data ?? [];
 	const meta = data?.meta;
 	const totalPages = meta?.total_pages ?? 1;
+
+	// Pin the current session to the top across every page so users always
+	// have quick access to pause/resume/clock-out without paginating to find
+	// it. Dedupe by id so we don't render it twice on page 1.
+	const sessions =
+		sessionData && !isSessionEnded(sessionData.status)
+			? [sessionData, ...rawSessions.filter((s) => s.id !== sessionData.id)]
+			: rawSessions;
 
 	return (
 		<div className="w-full rounded-3xl border border-gray-200 bg-white p-6">
