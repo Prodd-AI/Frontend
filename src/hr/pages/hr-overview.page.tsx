@@ -27,6 +27,7 @@ import {
   TakeTourButton,
   useGuidedTour,
 } from "@/shared/components/guided-tour";
+import OverviewAlertsBanner from "@/shared/components/overview-alerts-banner.component";
 import { hrOverviewTourSteps } from "../hr-overview.tour-steps";
 
 type AnalysisTeam = TeamOverviewCardResponse;
@@ -164,6 +165,7 @@ function HrOverviewPage() {
 
   return (
     <div className="space-y-8">
+      <OverviewAlertsBanner />
       <PageHeader
         dataTour="page-header"
         title="HR Analytics Dashboard (Overview)"

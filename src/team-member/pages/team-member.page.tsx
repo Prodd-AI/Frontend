@@ -8,6 +8,7 @@ import {
   TakeTourButton,
   useGuidedTour,
 } from "@/shared/components/guided-tour";
+import OverviewAlertsBanner from "@/shared/components/overview-alerts-banner.component";
 import { teamMemberTourSteps } from "../team-member.tour-steps";
 
 function Page() {
@@ -31,6 +32,7 @@ function Page() {
 
   return (
     <div className="space-y-6 pb-12">
+      <OverviewAlertsBanner tasksRoute="/dash/team-member/tasks" />
       <PageHeader
         dataTour="page-header"
         title={`Welcome back, ${user?.user.first_name ?? ""}`}
