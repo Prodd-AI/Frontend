@@ -12,6 +12,7 @@ import {
   getSidebarNavForRole,
   getSidebarFooterForRole,
 } from "./role-sidebar-nav";
+import { GuidedTour } from "@/shared/components/guided-tour";
 
 /**
  * Authenticated app shell: persistent left sidebar + top bar + routed outlet.
@@ -178,9 +179,11 @@ function TeamMemberScreenLayout() {
         Skip to main content
       </a>
 
+      <GuidedTour />
       <div className="flex min-h-screen">
         {/* Desktop sidebar */}
         <aside
+          data-tour="sidebar-nav"
           className="hidden md:flex md:w-[240px] lg:w-[260px] shrink-0 sticky top-0 h-screen bg-white border-r border-gray-100"
           role="navigation"
           aria-label="Primary"

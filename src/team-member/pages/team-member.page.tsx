@@ -4,9 +4,15 @@ import { useQueries } from "@tanstack/react-query";
 import { getWeeklyStreak } from "@/config/services/tasks.service";
 import { get_average_mood_for_the_week } from "@/config/services/mood-trends.service";
 import useAuthStore from "@/config/stores/auth.store";
+import {
+  TakeTourButton,
+  useGuidedTour,
+} from "@/shared/components/guided-tour";
+import { teamMemberTourSteps } from "../team-member.tour-steps";
 
 function Page() {
   const user = useAuthStore((state) => state.user);
+  const { startTour } = useGuidedTour("team-member", teamMemberTourSteps);
 
   const [weekTasksQuery, averageMoodQuery] = useQueries({
     queries: [
@@ -26,8 +32,10 @@ function Page() {
   return (
     <div className="space-y-6 pb-12">
       <PageHeader
+        dataTour="page-header"
         title={`Welcome back, ${user?.user.first_name ?? ""}`}
         subtitle="How are you feeling today? Let's make it productive and positive."
+        actions={<TakeTourButton onStart={startTour} />}
       />
 
       {/* NudgeBanner removed — content was a hardcoded wellness tip with no

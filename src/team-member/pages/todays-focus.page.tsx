@@ -19,6 +19,7 @@ function TodaysFocusPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        dataTour="page-header"
         title="Today's Focus"
         subtitle="Pending tasks for today, ordered by priority"
       />

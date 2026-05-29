@@ -60,12 +60,14 @@ function ViewTeamMembers() {
         ]}
         backTo="/dash/team-lead"
       />
-      <WelcomeBackHeader
-        heading={"Team Dashboard and Insight"}
-        subHeading={"Manage your team's tasks and wellbeing"}
-        badge
-        className="sm:mt-6"
-      />
+      <div data-tour="page-header">
+        <WelcomeBackHeader
+          heading={"Team Dashboard and Insight"}
+          subHeading={"Manage your team's tasks and wellbeing"}
+          badge
+          className="sm:mt-6"
+        />
+      </div>
       <TeamPerformanceOverview
         teams={teams}
         activeTeamId={activeTeamId}

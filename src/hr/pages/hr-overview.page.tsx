@@ -23,6 +23,11 @@ import useTeamStore from "@/config/stores/team.store";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import type { TeamOverviewCardResponse } from "@/shared/typings/hr-service";
+import {
+  TakeTourButton,
+  useGuidedTour,
+} from "@/shared/components/guided-tour";
+import { hrOverviewTourSteps } from "../hr-overview.tour-steps";
 
 type AnalysisTeam = TeamOverviewCardResponse;
 
@@ -30,6 +35,7 @@ function HrOverviewPage() {
   const navigate = useNavigate();
   const { open: openScheduleMeeting } = useHrScheduleMeeting();
   const { search_term } = useTeamStore();
+  const { startTour } = useGuidedTour("hr", hrOverviewTourSteps);
 
   const { teams: analysis_teams_raw, is_loading: is_analysis_loading } =
     useTeamsOverview();
@@ -159,32 +165,42 @@ function HrOverviewPage() {
   return (
     <div className="space-y-8">
       <PageHeader
+        dataTour="page-header"
         title="HR Analytics Dashboard (Overview)"
         subtitle="Strategic insights into team wellbeing and productivity"
         actions={
-          <Button
-            onClick={() => openScheduleMeeting(null)}
-            className="bg-[#6619DE] hover:bg-[#5710c4] h-11 px-6 rounded-xl gap-2 font-semibold"
-          >
-            <RiCalendarScheduleLine className="h-4 w-4" />
-            Schedule Meeting
-          </Button>
+          <>
+            <TakeTourButton onStart={startTour} />
+            <Button
+              onClick={() => openScheduleMeeting(null)}
+              className="bg-[#6619DE] hover:bg-[#5710c4] h-11 px-6 rounded-xl gap-2 font-semibold"
+            >
+              <RiCalendarScheduleLine className="h-4 w-4" />
+              Schedule Meeting
+            </Button>
+          </>
         }
       />
 
-      <StatusCards items={status_items} />
+      <div data-tour="status-cards">
+        <StatusCards items={status_items} />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <BurnoutAlertsChart
-          total_at_risk={total_at_risk}
-          // delta_vs_last_week omitted — no API for weekly delta in the docs yet.
-          series={burnoutSeries}
-        />
-        <UpcomingSchedule
-          meeting={upcomingMeetingData}
-          remainingCount={upcomingRemainingCount}
-          isLoading={upcomingMeetingsLoading}
-        />
+        <div data-tour="burnout-alerts">
+          <BurnoutAlertsChart
+            total_at_risk={total_at_risk}
+            // delta_vs_last_week omitted — no API for weekly delta in the docs yet.
+            series={burnoutSeries}
+          />
+        </div>
+        <div data-tour="upcoming-schedule">
+          <UpcomingSchedule
+            meeting={upcomingMeetingData}
+            remainingCount={upcomingRemainingCount}
+            isLoading={upcomingMeetingsLoading}
+          />
+        </div>
       </div>
 
       <section className="space-y-6">
@@ -199,7 +215,10 @@ function HrOverviewPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6">
-          <div className="rounded-3xl bg-white p-5 border border-gray-200">
+          <div
+            data-tour="team-performance"
+            className="rounded-3xl bg-white p-5 border border-gray-200"
+          >
             <div className="flex items-center gap-2 mb-4">
               <span className="size-8 rounded-full bg-[#F3EBFF] flex items-center justify-center">
                 <HiOutlineUserGroup className="text-[#6619DE]" size={16} />

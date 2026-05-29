@@ -30,6 +30,7 @@ function TasksPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        dataTour="page-header"
         title="Tasks"
         subtitle="Stay focused and organized with your task list"
         actions={

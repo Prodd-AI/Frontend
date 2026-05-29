@@ -72,6 +72,7 @@ function HrTeamAnalysisPage() {
   return (
     <div className="space-y-8">
       <PageHeader
+        dataTour="page-header"
         title="Team Analysis"
         subtitle="Breakdown of every team's activities, morale and participation by department"
       />
