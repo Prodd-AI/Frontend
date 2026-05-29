@@ -6,6 +6,7 @@ import { IoPlayOutline, IoStopOutline, IoPauseOutline, IoCheckmarkOutline } from
 import { LuClock3 } from 'react-icons/lu';
 import ClockOutSummary from '../clock-out-summary.component';
 import MySessionsList from '../my-sessions-list.component';
+import { useFloatingTimer, FloatingTimerIcon } from '../floating-timer.component';
 import { getMySessions, isSessionEnded } from '@/config/services/time-tracking.service';
 import { getWeeklyStreak } from '@/config/services/tasks.service';
 import useTimeTrackingStore from '@/config/stores/time-tracking.store';
@@ -15,6 +16,13 @@ import { useQuery } from '@tanstack/react-query';
 const TimeClockTab = () => {
 	const { sessionData, setSession, clearSession } = useTimeTrackingStore();
 	const { clockIn, pause, resume, isLoading } = useTimeClockActions();
+	const {
+		openFloatingTimer,
+		closeFloatingTimer,
+		isFloatingTimerOpen,
+		isFloatingTimerSupported,
+		FloatingTimerPortal,
+	} = useFloatingTimer();
 
 	// Rehydrate any in-progress session from the server on mount. We pull the
 	// latest few rows (covers both `active` and `paused` — a status=active
@@ -200,9 +208,25 @@ const TimeClockTab = () => {
 		<div className="flex flex-col gap-6">
 			{/* Timer Card */}
 			<div className="bg-white p-6 rounded-3xl w-full border border-gray-200">
-				<div className="flex items-center gap-2 mb-2">
-					<LuClock3 className="w-6 h-6 text-primary" />
-					<h2 className="text-xl font-semibold text-[#1F1F1F]">Time-Clock</h2>
+				<div className="flex items-center justify-between mb-2 gap-3 flex-wrap">
+					<div className="flex items-center gap-2">
+						<LuClock3 className="w-6 h-6 text-primary" />
+						<h2 className="text-xl font-semibold text-[#1F1F1F]">Time-Clock</h2>
+					</div>
+					{isClockedIn && isFloatingTimerSupported && (
+						<button
+							type="button"
+							onClick={isFloatingTimerOpen ? closeFloatingTimer : openFloatingTimer}
+							title="Open the timer in a floating always-on-top window that stays visible across other apps"
+							className={`inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-semibold transition-colors active:scale-95 ${
+								isFloatingTimerOpen
+									? 'border-[#6619DE]/40 bg-[#F3EBFF] text-[#6619DE] hover:bg-[#E8DBFF]'
+									: 'border-[#6619DE]/30 bg-white text-[#6619DE] hover:bg-[#F8F3FF]'
+							}`}>
+							<FloatingTimerIcon className="size-4" />
+							{isFloatingTimerOpen ? 'Close floating timer' : 'Pop out timer'}
+						</button>
+					)}
 				</div>
 				<p className="text-gray-400 text-sm mb-8">
 					{!isClockedIn
@@ -337,6 +361,8 @@ const TimeClockTab = () => {
 			)}
 
 			<MySessionsList onRequestClockOut={handleClockOut} />
+
+			{FloatingTimerPortal}
 
 			{showSummary && sessionStartTime && sessionEndTime && sessionData && (
 				<ClockOutSummary
