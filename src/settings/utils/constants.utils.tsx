@@ -6,6 +6,7 @@ import { IoShieldOutline } from "react-icons/io5";
 import { TbFocusCentered } from "react-icons/tb";
 import { IoCheckmark } from "react-icons/io5";
 import { FaRegClock } from "react-icons/fa";
+import { IoFlash } from "react-icons/io5";
 
 export const tabs = [
   {
@@ -29,6 +30,11 @@ export const tabs = [
     label: "Privacy Policy",
     value: "privacy",
     icon: <IoShieldOutline size={20} />,
+  },
+  {
+    label: "Integrations",
+    value: "integrations",
+    icon: <IoFlash size={20} />,
   },
   // {
   //   label: "Team Details",

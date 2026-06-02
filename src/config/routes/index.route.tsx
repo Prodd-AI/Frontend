@@ -9,6 +9,7 @@ import { onboarding_routes } from "@/config/routes/onboarding.route";
 import NotFoundPage from "@/shared/pages/not-found.page";
 import { settings_routes } from "./settings.route";
 import { notifications_routes } from "./notifications.route";
+import { meetings_routes } from "./meetings.route";
 import TeamMemberEntryDash from "@/shared/pages/teamMemberDashEntry.page";
 import Loader from "@/shared/components/loader.component";
 import withAuthGuard from "@/shared/components/HOC/with-auth-guard";
@@ -33,6 +34,7 @@ const router = createBrowserRouter([
   { path: "/auth", children: auth_routes },
   { path: "/onboarding", children: onboarding_routes },
   { path: "/settings", children: settings_routes },
+  { path: "/meetings", children: meetings_routes },
   { path: "/notifications", children: notifications_routes },
   { path: "*", element: <NotFoundPage /> },
 ]);

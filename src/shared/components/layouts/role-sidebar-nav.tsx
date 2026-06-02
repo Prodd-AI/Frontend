@@ -7,6 +7,8 @@ import { IoCheckmarkOutline, IoWarningOutline } from "react-icons/io5";
 import { LuClock2, LuFileClock } from "react-icons/lu";
 import { HiOutlineUserGroup } from "react-icons/hi";
 import { RxPerson } from "react-icons/rx";
+import { FiVideo } from "react-icons/fi";
+import { IoFlashOutline } from "react-icons/io5";
 import InviteTeamPromo from "./invite-team-promo.component";
 
 type UserRole = "hr" | "team_lead" | "team_member" | "super_admin" | string;
@@ -75,6 +77,16 @@ export const team_leader_sidebar_nav: SidebarNavItem[] = [
     icon: <RxPerson size={18} />,
     to: "/dash/team-lead/view-team",
   },
+  {
+    label: "Meetings",
+    icon: <FiVideo size={18} />,
+    to: "/meetings",
+  },
+  {
+    label: "AI Tasks",
+    icon: <IoFlashOutline size={18} />,
+    to: "/meetings/ai-tasks",
+  },
 ];
 
 export const team_member_sidebar_nav: SidebarNavItem[] = [
@@ -105,6 +117,16 @@ export const team_member_sidebar_nav: SidebarNavItem[] = [
     label: "Recent Mood",
     icon: <LuClock2 size={18} />,
     to: "/dash/team-member/recent-moods",
+  },
+  {
+    label: "Meetings",
+    icon: <FiVideo size={18} />,
+    to: "/meetings",
+  },
+  {
+    label: "AI Tasks",
+    icon: <IoFlashOutline size={18} />,
+    to: "/meetings/ai-tasks",
   },
 ];
 
