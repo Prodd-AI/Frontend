@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import {
   get_transcripts,
+  normalize_action_items,
   sync_meetings,
   type MeetingTranscript,
 } from "@/config/services/integrations.service";
@@ -114,67 +115,72 @@ function MeetingsPage() {
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
-            {transcripts.map((t: MeetingTranscript) => (
-              <div
-                key={t.id}
-                onClick={() => navigate(`${t.id}`)}
-                className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-gray-900 truncate">
-                    {t.title}
-                  </h4>
-                  <div className="flex items-center gap-4 mt-1.5">
-                    {t.meeting_date && (
-                      <span className="text-xs text-gray-400 flex items-center gap-1">
-                        <FiClock size={12} />
-                        {format(
-                          new Date(t.meeting_date),
-                          "MMM d, yyyy 'at' h:mm a",
-                        )}
-                      </span>
-                    )}
-                    {t.duration && (
-                      <span className="text-xs text-gray-400">
-                        {formatDuration(t.duration)}
-                      </span>
-                    )}
-                    {t.participants?.length > 0 && (
-                      <span className="text-xs text-gray-400 flex items-center gap-1">
-                        <FiUsers size={12} />
-                        {t.participants.length} participants
-                      </span>
+            {transcripts.map((t: MeetingTranscript) => {
+              const actionItems = normalize_action_items(t.action_items);
+
+              return (
+                <div
+                  key={t.id}
+                  onClick={() => navigate(`${t.id}`)}
+                  className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-gray-900 truncate">
+                      {t.title}
+                    </h4>
+                    <div className="flex items-center gap-4 mt-1.5">
+                      {t.meeting_date && (
+                        <span className="text-xs text-gray-400 flex items-center gap-1">
+                          <FiClock size={12} />
+                          {format(
+                            new Date(t.meeting_date),
+                            "MMM d, yyyy 'at' h:mm a",
+                          )}
+                        </span>
+                      )}
+                      {t.duration && (
+                        <span className="text-xs text-gray-400">
+                          {formatDuration(t.duration)}
+                        </span>
+                      )}
+                      {t.participants?.length > 0 && (
+                        <span className="text-xs text-gray-400 flex items-center gap-1">
+                          <FiUsers size={12} />
+                          {t.participants.length} participants
+                        </span>
+                      )}
+                    </div>
+                    {t.ai_summary && (
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                        {t.ai_summary}
+                      </p>
                     )}
                   </div>
-                  {t.ai_summary && (
-                    <p className="text-xs text-gray-500 mt-1 line-clamp-1">
-                      {t.ai_summary}
-                    </p>
-                  )}
-                </div>
 
-                <div className="flex items-center gap-3 ml-4 shrink-0">
-                  {t.action_items?.length > 0 && (
-                    <span className="text-xs font-medium bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full">
-                      {t.action_items.length} action items
+                  <div className="flex items-center gap-3 ml-4 shrink-0">
+                    {actionItems.length > 0 && (
+                      <span className="text-xs font-medium bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full">
+                        {actionItems.length} action items
+                      </span>
+                    )}
+                    <span
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                        t.processing_status === "completed" ||
+                        t.processing_status === "processed"
+                          ? "bg-green-50 text-green-700"
+                          : t.processing_status === "processing"
+                            ? "bg-blue-50 text-blue-700"
+                            : t.processing_status === "failed"
+                              ? "bg-red-50 text-red-700"
+                              : "bg-gray-50 text-gray-500"
+                      }`}
+                    >
+                      {t.processing_status}
                     </span>
-                  )}
-                  <span
-                    className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                      t.processing_status === "completed"
-                        ? "bg-green-50 text-green-700"
-                        : t.processing_status === "processing"
-                          ? "bg-blue-50 text-blue-700"
-                          : t.processing_status === "failed"
-                            ? "bg-red-50 text-red-700"
-                            : "bg-gray-50 text-gray-500"
-                    }`}
-                  >
-                    {t.processing_status}
-                  </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

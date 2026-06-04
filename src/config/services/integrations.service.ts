@@ -12,14 +12,15 @@ export interface IntegrationStatusMap {
 export interface MeetingTranscript {
   id: string;
   title: string;
+  provider: string;
   external_id: string;
   transcript_text: string;
   ai_summary: string;
   ai_overview: { overview?: string; outline?: string[] } | null;
-  action_items: string[];
+  action_items: string[] | string | null;
   keywords: string[];
   topics_discussed: string[];
-  speakers: { id: string; name: string }[];
+  speakers: { id: string | number; name: string }[];
   participants: string[];
   meeting_attendees: {
     displayName?: string;
@@ -32,21 +33,92 @@ export interface MeetingTranscript {
     text: string;
     start_time: number;
     end_time: number;
+    ai_filters?: {
+      task?: string | null;
+      metric?: string | null;
+      pricing?: string | null;
+      question?: string | null;
+      sentiment?: "positive" | "neutral" | "negative" | string | null;
+      text_cleanup?: string | null;
+      date_and_time?: string | null;
+    };
   }[];
-  analytics: Record<string, unknown>;
-  host_email: string;
-  organizer_email: string;
+  analytics: {
+    speakers?: {
+      name: string;
+      duration?: number;
+      questions?: number;
+      speaker_id?: string | number;
+      word_count?: number;
+      duration_pct?: number;
+      words_per_minute?: number;
+      filler_words?: number;
+      longest_monologue?: number;
+      monologues_count?: number;
+    }[];
+    categories?: {
+      tasks?: number | null;
+      metrics?: number | null;
+      questions?: number | null;
+      date_times?: number | null;
+    };
+    sentiments?: {
+      neutral_pct?: number;
+      negative_pct?: number;
+      positive_pct?: number;
+    };
+  } | null;
+  host_email: string | null;
+  organizer_email: string | null;
   transcript_url: string;
-  audio_url: string;
-  video_url: string;
+  audio_url: string | null;
+  video_url: string | null;
   duration: number;
   meeting_date: string;
   processing_status: string;
-  meeting_type: string;
-  meeting_link: string;
+  meeting_type: string | null;
+  meeting_link: string | null;
   created_at: string;
   extracted_tasks?: ExtractedTask[];
 }
+
+export const normalize_action_items = (
+  actionItems: MeetingTranscript["action_items"],
+) => {
+  if (Array.isArray(actionItems)) {
+    return actionItems.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  if (typeof actionItems !== "string") return [];
+
+  const lines = actionItems
+    .split(/\r?\n/)
+    .map((line) =>
+      line.trim().replace(/^[-*]\s+/, "").replace(/^\d+[.)]\s+/, ""),
+    )
+    .filter(Boolean);
+
+  return lines.reduce<string[]>((items, line, index) => {
+    const nextLine = lines[index + 1];
+    const previousLine = lines[index - 1];
+    const isOwnerHeading = /^\*\*.+\*\*$/.test(line);
+    const wasAfterOwnerHeading =
+      previousLine && /^\*\*.+\*\*$/.test(previousLine);
+    const cleanLine = line.replace(/\*\*/g, "");
+
+    if (isOwnerHeading && nextLine) {
+      items.push(`${cleanLine}: ${nextLine.replace(/\*\*/g, "")}`);
+      return items;
+    }
+
+    if (wasAfterOwnerHeading) {
+      return items;
+    }
+
+    items.push(cleanLine);
+    return items;
+  }, []);
+};
 
 export interface ExtractedTask {
   id: string;

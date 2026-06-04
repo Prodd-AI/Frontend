@@ -1,17 +1,45 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { get_transcript_by_id, MeetingTranscript } from "@/config/services/integrations.service";
+import {
+  get_transcript_by_id,
+  MeetingTranscript,
+  normalize_action_items,
+} from "@/config/services/integrations.service";
 import PageHeader from "@/shared/components/page-header.component";
 import { VscLoading } from "react-icons/vsc";
 import {
+  FiActivity,
+  FiBarChart2,
+  FiCalendar,
   FiClock,
   FiUsers,
   FiExternalLink,
   FiArrowLeft,
   FiPlay,
+  FiLink,
+  FiMail,
+  FiMessageCircle,
 } from "react-icons/fi";
-import { IoCheckmarkCircle, IoFlag, IoBookmark } from "react-icons/io5";
+import { IoCheckmarkCircle, IoFlag } from "react-icons/io5";
 import { format } from "date-fns";
+
+const cleanOverviewLines = (overview?: string) => {
+  if (!overview) return [];
+
+  return overview
+    .split(/\r?\n/)
+    .map((line) =>
+      line
+        .trim()
+        .replace(/^[-*]\s+/, "")
+        .replace(/\*\*/g, "")
+        .replace(/\s{2,}/g, " "),
+    )
+    .filter(Boolean);
+};
+
+const formatPercent = (value?: number) =>
+  typeof value === "number" ? `${Math.round(value)}%` : "0%";
 
 function MeetingDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +52,24 @@ function MeetingDetailPage() {
   });
 
   const transcript = response?.data as MeetingTranscript | undefined;
+  const actionItems = normalize_action_items(transcript?.action_items ?? null);
+  const overviewItems = cleanOverviewLines(transcript?.ai_overview?.overview);
+  const attendeeLabels =
+    transcript?.meeting_attendees?.length
+      ? transcript.meeting_attendees.map(
+          (attendee) =>
+            attendee.displayName ||
+            attendee.name ||
+            attendee.email ||
+            "Unknown attendee",
+        )
+      : transcript?.participants || [];
+  const questionCount =
+    transcript?.analytics?.categories?.questions ??
+    transcript?.sentences?.filter((sentence) => sentence.ai_filters?.question)
+      .length ??
+    0;
+  const sentiment = transcript?.analytics?.sentiments;
 
   const formatDuration = (seconds: number) => {
     if (!seconds) return "—";
@@ -83,18 +129,18 @@ function MeetingDetailPage() {
           },
           {
             label: "Participants",
-            value: transcript.participants?.length || 0,
+            value: attendeeLabels.length,
             icon: <FiUsers />,
           },
           {
             label: "Action Items",
-            value: transcript.action_items?.length || 0,
+            value: actionItems.length,
             icon: <IoCheckmarkCircle />,
           },
           {
-            label: "Keywords",
-            value: transcript.keywords?.length || 0,
-            icon: <IoBookmark />,
+            label: "Questions",
+            value: questionCount,
+            icon: <FiMessageCircle />,
           },
         ].map((stat) => (
           <div
@@ -132,6 +178,26 @@ function MeetingDetailPage() {
             <FiPlay size={14} /> Audio
           </a>
         )}
+        {transcript.video_url && (
+          <a
+            href={transcript.video_url}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <FiPlay size={14} /> Video
+          </a>
+        )}
+        {transcript.meeting_link && (
+          <a
+            href={transcript.meeting_link}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <FiLink size={14} /> Meeting Link
+          </a>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -149,15 +215,36 @@ function MeetingDetailPage() {
             </div>
           )}
 
+          {/* AI Overview */}
+          {overviewItems.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h3 className="font-semibold text-gray-900 text-sm mb-3 flex items-center gap-2">
+                <FiBarChart2 className="text-blue-500" />
+                AI Overview
+              </h3>
+              <ul className="space-y-2">
+                {overviewItems.map((item, i) => (
+                  <li
+                    key={i}
+                    className="text-sm text-gray-600 leading-relaxed flex gap-2"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0 mt-2" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Action Items */}
-          {transcript.action_items?.length > 0 && (
+          {actionItems.length > 0 && (
             <div className="bg-white border border-gray-200 rounded-2xl p-5">
               <h3 className="font-semibold text-gray-900 text-sm mb-3 flex items-center gap-2">
                 <IoCheckmarkCircle className="text-green-500" />
                 Action Items
               </h3>
               <ul className="space-y-2">
-                {transcript.action_items.map((item, i) => (
+                {actionItems.map((item, i) => (
                   <li
                     key={i}
                     className="text-sm text-gray-600 flex items-start gap-2"
@@ -169,6 +256,103 @@ function MeetingDetailPage() {
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {/* Meeting Details */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <h3 className="font-semibold text-gray-900 text-sm mb-3">
+              Meeting Details
+            </h3>
+            <div className="space-y-3 text-sm">
+              {transcript.meeting_date && (
+                <div className="flex items-start gap-2 text-gray-600">
+                  <FiCalendar className="mt-0.5 text-gray-400 shrink-0" />
+                  <span>
+                    {format(
+                      new Date(transcript.meeting_date),
+                      "MMM d, yyyy h:mm a",
+                    )}
+                  </span>
+                </div>
+              )}
+              {transcript.organizer_email && (
+                <div className="flex items-start gap-2 text-gray-600">
+                  <FiMail className="mt-0.5 text-gray-400 shrink-0" />
+                  <span className="break-all">{transcript.organizer_email}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 text-gray-600">
+                <FiActivity className="text-gray-400 shrink-0" />
+                <span className="capitalize">
+                  {transcript.provider || "Unknown provider"} ·{" "}
+                  {transcript.processing_status || "Unknown status"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Attendees */}
+          {attendeeLabels.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h3 className="font-semibold text-gray-900 text-sm mb-3 flex items-center gap-2">
+                <FiUsers className="text-primary-color" />
+                Attendees
+              </h3>
+              <div className="space-y-2">
+                {attendeeLabels.map((attendee) => (
+                  <div
+                    key={attendee}
+                    className="text-sm text-gray-700 flex items-center gap-2 min-w-0"
+                  >
+                    <div className="w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs font-semibold shrink-0">
+                      {attendee?.charAt(0)?.toUpperCase() || "?"}
+                    </div>
+                    <span className="truncate">{attendee}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Sentiment */}
+          {sentiment && (
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h3 className="font-semibold text-gray-900 text-sm mb-3">
+                Sentiment
+              </h3>
+              <div className="space-y-3">
+                {[
+                  {
+                    label: "Positive",
+                    value: sentiment.positive_pct,
+                    color: "bg-green-500",
+                  },
+                  {
+                    label: "Neutral",
+                    value: sentiment.neutral_pct,
+                    color: "bg-gray-400",
+                  },
+                  {
+                    label: "Negative",
+                    value: sentiment.negative_pct,
+                    color: "bg-red-500",
+                  },
+                ].map((item) => (
+                  <div key={item.label}>
+                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                      <span>{item.label}</span>
+                      <span>{formatPercent(item.value)}</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                      <div
+                        className={`h-full ${item.color}`}
+                        style={{ width: formatPercent(item.value) }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -278,10 +462,27 @@ function MeetingDetailPage() {
                     <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-500 shrink-0 mt-0.5">
                       {s.speaker_name?.charAt(0)?.toUpperCase() || "?"}
                     </div>
-                    <div>
-                      <span className="text-xs font-medium text-gray-900">
-                        {s.speaker_name}
-                      </span>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-medium text-gray-900">
+                          {s.speaker_name}
+                        </span>
+                        {s.start_time !== undefined && (
+                          <span className="text-[11px] text-gray-400">
+                            {formatDuration(Math.round(s.start_time))}
+                          </span>
+                        )}
+                        {s.ai_filters?.question && (
+                          <span className="text-[10px] font-semibold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
+                            question
+                          </span>
+                        )}
+                        {s.ai_filters?.task && (
+                          <span className="text-[10px] font-semibold bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">
+                            task
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-600 mt-0.5">{s.text}</p>
                     </div>
                   </div>
