@@ -9,9 +9,13 @@ import TasksFilter, {
 import TasksTabContent from "@/team-leader/components/tasks-tab-content.component";
 import AssignTask from "@/team-leader/components/assign-task.component";
 import { personalTasksColumns } from "@/team-leader/components/columns/personal-tasks-columns";
-import { getWeeklyStreak } from "@/config/services/tasks.service";
+import {
+  getAllTasksAssignedToTeamMembersByTeamLead,
+  getWeeklyStreak,
+} from "@/config/services/tasks.service";
 import { getTaskDetailPath } from "@/shared/utils/task-routes";
 import useAuthStore from "@/config/stores/auth.store";
+import TeamWeeklyTaskSummary from "@/team-leader/components/team-weekly-task-summary.component";
 
 function TasksPage() {
   const [duration, setDuration] = useState<TasksDuration>("week");
@@ -24,8 +28,14 @@ function TasksPage() {
     queryFn: () => getWeeklyStreak({ duration, status }),
   });
 
+  const { data: teamAssignedTasksData, isLoading: isSummaryLoading } = useQuery({
+    queryKey: ["team-assigned-tasks"],
+    queryFn: () => getAllTasksAssignedToTeamMembersByTeamLead(),
+  });
+
   const weekTasks = data?.data;
   const assignedTasks = weekTasks ? Object.values(weekTasks).flat() : [];
+  const teamAssignedTasks = teamAssignedTasksData?.data ?? [];
 
   return (
     <div className="space-y-6">
@@ -48,6 +58,10 @@ function TasksPage() {
         isLoading={isLoading}
         columns={personalTasksColumns}
         onRowClick={(row) => navigate(getTaskDetailPath(role, row.task.id))}
+      />
+      <TeamWeeklyTaskSummary
+        tasks={teamAssignedTasks}
+        isLoading={isSummaryLoading}
       />
     </div>
   );

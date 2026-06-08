@@ -161,7 +161,12 @@ export const EditTaskDialog = ({
         priority: values.priority,
         due_date,
         external_link: values.external_link || undefined,
-        status: task.status as "pending" | "completed" | "cancelled",
+        status: task.status as
+          | "pending"
+          | "completed"
+          | "cancelled"
+          | "approved"
+          | "changes_requested",
       });
     },
     onSuccess: (res) => {

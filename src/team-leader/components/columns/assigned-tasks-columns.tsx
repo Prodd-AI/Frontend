@@ -17,6 +17,21 @@ const PRIORITY_BADGE_CLASSES: Record<string, string> = {
   low: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100",
 };
 
+const STATUS_BADGE_CLASSES: Record<string, string> = {
+  completed:
+    "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-emerald-500/20",
+  approved:
+    "bg-green-500/10 text-green-600 hover:bg-green-500/20 border-green-500/20",
+  changes_requested:
+    "bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-orange-500/20",
+  pending:
+    "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border-amber-500/20",
+  cancelled: "bg-slate-100 text-slate-500 hover:bg-slate-200 border-slate-200",
+};
+
+const formatStatusLabel = (status: string) =>
+  status.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+
 const relativeDate = (value: string | Date) => {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
@@ -85,16 +100,10 @@ export const columns: ColumnDef<AssignedTask>[] = [
       const status = row.original.task.status;
       return (
         <Badge
-          className={`capitalize shadow-none ${
-            status === "completed"
-              ? "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-emerald-500/20"
-              : status === "pending"
-                ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border-amber-500/20"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200 border-slate-200"
-          }`}
+          className={`shadow-none ${STATUS_BADGE_CLASSES[status] ?? STATUS_BADGE_CLASSES.cancelled}`}
           variant="outline"
         >
-          {status}
+          {formatStatusLabel(status)}
         </Badge>
       );
     },

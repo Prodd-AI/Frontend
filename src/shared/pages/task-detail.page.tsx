@@ -12,6 +12,7 @@ import {
   Pencil,
   Trash2,
   User as UserIcon,
+  XCircle,
 } from "lucide-react";
 import BackBreadcrumb from "@/shared/components/back-breadcrumb.component";
 import useAuthStore from "@/config/stores/auth.store";
@@ -50,8 +51,13 @@ const PRIORITY_CLASSES: Record<string, string> = {
 
 const STATUS_CLASSES: Record<string, string> = {
   completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  approved: "bg-green-50 text-green-700 border-green-200",
+  changes_requested: "bg-orange-50 text-orange-700 border-orange-200",
   pending: "bg-amber-50 text-amber-700 border-amber-200",
 };
+
+const formatStatusLabel = (status: string) =>
+  status.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
 const formatDueDateLong = (iso: string | undefined): string => {
   if (!iso) return "—";
@@ -104,8 +110,10 @@ function TaskDetailPage() {
     queryClient.invalidateQueries({ queryKey: ["task-detail", id] });
   };
 
-  const { mutate: toggleStatus, isPending: isToggling } = useMutation({
-    mutationFn: async (newStatus: "pending" | "completed") => {
+  const { mutate: updateStatus, isPending: isUpdatingStatus } = useMutation({
+    mutationFn: async (
+      newStatus: "pending" | "completed" | "approved" | "changes_requested",
+    ) => {
       if (!task) return;
       await updateTask(task.id, { status: newStatus });
     },
@@ -153,6 +161,8 @@ function TaskDetailPage() {
   }
 
   const dueTier = classifyDueDate(task.due_date);
+  const canLeadReviewCompletion =
+    role === "team_lead" && task.status === "completed";
 
   return (
     <div className="space-y-6 pb-12">
@@ -171,18 +181,46 @@ function TaskDetailPage() {
             <Button
               variant="outline"
               onClick={() =>
-                toggleStatus(task.status === "completed" ? "pending" : "completed")
+                updateStatus(
+                  task.status === "completed" || task.status === "approved"
+                    ? "pending"
+                    : "completed",
+                )
               }
-              disabled={isToggling}
+              disabled={isUpdatingStatus}
               className="gap-2"
             >
-              {task.status === "completed" ? (
+              {task.status === "completed" || task.status === "approved" ? (
                 <Circle className="size-4" />
               ) : (
                 <CheckCircle2 className="size-4" />
               )}
-              {task.status === "completed" ? "Mark Pending" : "Mark Completed"}
+              {task.status === "completed" || task.status === "approved"
+                ? "Mark Pending"
+                : "Mark Completed"}
             </Button>
+            {canLeadReviewCompletion && (
+              <Button
+                variant="outline"
+                onClick={() => updateStatus("approved")}
+                disabled={isUpdatingStatus}
+                className="gap-2 border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800"
+              >
+                <CheckCircle2 className="size-4" />
+                Approve
+              </Button>
+            )}
+            {canLeadReviewCompletion && (
+              <Button
+                variant="outline"
+                onClick={() => updateStatus("changes_requested")}
+                disabled={isUpdatingStatus}
+                className="gap-2 border-orange-200 text-orange-700 hover:bg-orange-50 hover:text-orange-800"
+              >
+                <XCircle className="size-4" />
+                Reject
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setIsEditOpen(true)} className="gap-2">
               <Pencil className="size-4" />
               Edit
@@ -202,8 +240,8 @@ function TaskDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 rounded-2xl bg-white border border-gray-200 p-6 space-y-5">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className={`capitalize ${STATUS_CLASSES[task.status] ?? ""}`}>
-              {task.status}
+            <Badge variant="outline" className={STATUS_CLASSES[task.status] ?? ""}>
+              {formatStatusLabel(task.status)}
             </Badge>
             <Badge variant="outline" className={`capitalize ${PRIORITY_CLASSES[task.priority] ?? ""}`}>
               <Flag className="size-3 mr-1" />

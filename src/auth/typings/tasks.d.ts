@@ -13,7 +13,12 @@ interface Task {
   title: string;
   description: string;
   external_link: string | null;
-  status: "pending" |  "completed" ;
+  status:
+    | "pending"
+    | "completed"
+    | "approved"
+    | "changes_requested"
+    | "cancelled";
   priority: "low" | "medium" | "high" 
   due_date: string;
   created_by_id: string;
