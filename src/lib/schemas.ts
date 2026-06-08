@@ -90,6 +90,14 @@ const team_schema = z.object({
     .string()
     .min(1, "Team name is required")
     .max(100, "Team name must not exceed 100 characters"),
+  team_type: z
+    .string()
+    .min(1, "Team type is required")
+    .max(100, "Team type must not exceed 100 characters"),
+  custom_team_type: z
+    .string()
+    .max(100, "Custom team type must not exceed 100 characters")
+    .optional(),
   description: z
     .string()
     .min(1, "Description is required")

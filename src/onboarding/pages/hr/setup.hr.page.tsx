@@ -64,7 +64,15 @@ function HrSetup() {
   const teamsSetupForm = useForm<TeamsSetupFormData>({
     resolver: zodResolver(teams_setup_schema),
     defaultValues: {
-      teams: [{ name: "", size: "", description: "" }],
+      teams: [
+        {
+          name: "",
+          team_type: "",
+          custom_team_type: "",
+          size: "",
+          description: "",
+        },
+      ],
     },
   });
 
@@ -237,10 +245,17 @@ function HrSetup() {
         // Create all teams sequentially
         for (const team of formData.teams) {
           await new Promise<void>((resolve, reject) => {
-            createTeamMutation(team, {
-              onSuccess: () => resolve(),
-              onError: (error) => reject(error),
-            });
+            createTeamMutation(
+              {
+                name: team.name,
+                description: team.description,
+                size: team.size,
+              },
+              {
+                onSuccess: () => resolve(),
+                onError: (error) => reject(error),
+              },
+            );
           });
         }
         
