@@ -371,10 +371,10 @@ const RegisterFormComponent = () => {
           <p>
             I agree to the{" "}
             <Link
-              to="/terms"
+              to="/privacy-policy"
               className="text-[#6619DE] underline underline-offset-2"
             >
-              terms of service & privacy policy
+              privacy policy
             </Link>
           </p>
           {errors.accepted && (
