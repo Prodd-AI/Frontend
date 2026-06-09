@@ -15,6 +15,9 @@ import { login_team_member } from "@/config/services/auth.service";
 import useAuthStore from "@/config/stores/auth.store";
 import { TeamMember } from "@/shared/typings/team-member";
 import Banner from "@/shared/components/banner.component";
+
+const getRolePath = (role?: string | null) => role?.replace(/_/g, "-") ?? "";
+
 function LoginFormComponent() {
   const [showPassword, setShowPassword] = useState(false);
   const [banner, setBanner] = useState<{
@@ -56,13 +59,17 @@ function LoginFormComponent() {
 
         reset();
 
+        const rolePath = getRolePath(response.data.user.user_role);
+
         if (response.data.user.organization_id && response.data.user.is_onboarded) {
-          return navigate(`/dash/${response.data.user.user_role.replace("_", "-")}`);
+          return navigate(rolePath ? `/dash/${rolePath}` : "/");
         }
         if (response.data.user.organization_id && !response.data.user.is_onboarded) {
-          return navigate(`/onboarding/${response.data.user.user_role.replace("_", "-")}-setup`);
+          return navigate(
+            rolePath ? `/onboarding/${rolePath}-setup` : "/onboarding/hr-setup",
+          );
         }
-        return navigate("/")
+        return navigate("/onboarding/hr-setup");
       } else {
         setBanner({
           open: true,

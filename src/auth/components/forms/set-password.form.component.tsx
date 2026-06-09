@@ -6,8 +6,6 @@ import { Label } from "@/components/ui/label";
 import { set_password } from "@/config/services/auth.service";
 import { set_password_schema } from "@/lib/schemas";
 import { getErrorMessage } from "@/shared/utils/error-message.utils";
-import useAuthStore from "@/config/stores/auth.store";
-import { TeamMember } from "@/shared/typings/team-member";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
@@ -15,51 +13,6 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-
-const getDefaultRedirectPath = (user: TeamMember | null) => {
-  if (!user) return "/auth/login";
-
-  const { is_onboarded, user_role } = user.user;
-
-  if (!is_onboarded) {
-    switch (user_role) {
-      case "hr":
-        return "/onboarding/hr-setup";
-      case "team_lead":
-        return "/onboarding/team-lead-setup";
-      case "team_member":
-        return "/onboarding/team-member-setup";
-      default:
-        break;
-    }
-  }
-
-  switch (user_role) {
-    case "hr":
-      return "/dash/hr";
-    case "team_lead":
-      return "/dash/team-lead";
-    case "team_member":
-      return "/dash/team-member";
-    case "super_admin":
-      return "/dash/admin";
-    default:
-      return "/auth/login";
-  }
-};
-
-const getSafeRedirectPath = (redirectTo: string | null, fallback: string) => {
-  if (
-    redirectTo &&
-    redirectTo.startsWith("/") &&
-    !redirectTo.startsWith("//") &&
-    !redirectTo.startsWith("/auth/set-password")
-  ) {
-    return redirectTo;
-  }
-
-  return fallback;
-};
 
 function SetPasswordFormComponent() {
   const [showPassword, setShowPassword] = useState(false);
@@ -73,7 +26,6 @@ function SetPasswordFormComponent() {
   });
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
 
   const {
     formState: { errors },
@@ -90,13 +42,11 @@ function SetPasswordFormComponent() {
   >({
     mutationFn: (data) => set_password(data),
     onSuccess: (res) => {
-      const fallbackRedirectPath = getDefaultRedirectPath(user);
-      const redirectPath = getSafeRedirectPath(
-        searchParams.get("redirectTo"),
-        fallbackRedirectPath
-      );
-
       toast.success(res.message || "Password set successfully.");
+      const email = searchParams.get("email");
+      const redirectPath = email
+        ? `/auth/login?email=${encodeURIComponent(email)}`
+        : "/auth/login";
       navigate(redirectPath, { replace: true });
     },
     onError: (error) => {

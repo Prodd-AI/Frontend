@@ -33,8 +33,14 @@ type UserWithPasswordState = TeamMember["user"] & {
   is_invited?: boolean;
 };
 
+const getRolePath = (role?: string | null) => role?.replace(/_/g, "-") ?? "";
+
 const getPostVerificationPath = (user: TeamMember["user"]) => {
-  const rolePath = user.user_role.replace("_", "-");
+  const rolePath = getRolePath(user.user_role);
+
+  if (!rolePath) {
+    return "/auth/login";
+  }
 
   if (user.organization_id && user.is_onboarded) {
     return `/dash/${rolePath}`;

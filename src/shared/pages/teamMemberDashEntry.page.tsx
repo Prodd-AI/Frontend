@@ -8,8 +8,12 @@ interface TeamMemberDashEntryProps {
 function TeamMemberDashEntry({ user }: TeamMemberDashEntryProps) {
   //determine team member role and redirect based on the user role
 
-  if (!user || !user.user.user_role) {
+  if (!user) {
     return <Navigate to="/auth/login" />;
+  }
+
+  if (!user.user.user_role) {
+    return user.user.is_onboarded ? <Navigate to="/auth/login" /> : <Navigate to="/onboarding/hr-setup" />;
   }
 
   const { user: teamMember } = user;
