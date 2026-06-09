@@ -4,7 +4,7 @@ import { SelectRoleCardProps } from "../../typings/select-role-card";
 const SelectRoleCard = ({
   Icon = MdPeopleAlt,
   title = "Role Title",
-  description = "this is description of the specified role, either HR, Team Lead or Team Member",
+  description = "this is description of the specified role, either Admin, Team Lead or Team Member",
   active,
   onChangeFn,
   value,

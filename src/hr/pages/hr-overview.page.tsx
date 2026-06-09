@@ -6,6 +6,7 @@ import { PiUsersThree } from "react-icons/pi";
 import { GoGraph } from "react-icons/go";
 import { IoWarningOutline } from "react-icons/io5";
 import { HiOutlineUserGroup } from "react-icons/hi";
+import { HiOutlineClipboardDocumentCheck } from "react-icons/hi2";
 
 import StatusCards from "@/shared/components/status-cards.component";
 import { UpcomingSchedule } from "@/shared/components/upcoming-schedule.component";
@@ -52,12 +53,6 @@ function HrOverviewPage() {
   const upcomingRemainingCount =
     upcomingMeetingData?.remaining_meetings?.length ?? 0;
 
-  // Org-wide average mood for the week.
-  const { data: avgMoodResponse } = useQuery({
-    queryKey: ["mood-average", "week"],
-    queryFn: () => get_average_mood_for_the_week({ period: "week" }),
-  });
-
   // Capture: response shape not in the OpenAPI spec — log so it can be wired in.
   // Disabled: backend currently registers GET /teams/{id} before the literal
   // /teams/analytics-dashboard route, so requests hit the {id} handler and
@@ -76,10 +71,45 @@ function HrOverviewPage() {
       );
     }
   }, [analyticsDashboardResponse]);
-  const org_avg_mood = avgMoodResponse?.data?.average_mood;
-  const org_avg_mood_text =
-    typeof org_avg_mood === "number" ? org_avg_mood.toFixed(1) : "—";
+  // Org-wide check-in volume for the week.
+  const { data: avgMoodResponse } = useQuery({
+    queryKey: ["mood-average", "week"],
+    queryFn: () => get_average_mood_for_the_week({ period: "week" }),
+  });
   const checkin_sample_size = avgMoodResponse?.data?.mood_scores?.length ?? 0;
+  const teamCount = analysis_teams.length;
+  const totalStaff = analysis_teams.reduce(
+    (acc, team) => acc + (team.member_count || 0),
+    0,
+  );
+  const atRiskStaff = analysis_teams
+    .filter((team) => team.status === "AT_RISK" || team.status === "FLAGGED")
+    .reduce((acc, team) => acc + (team.member_count || 0), 0);
+  const activeStaff = Math.max(0, totalStaff - atRiskStaff);
+  const avgProductivityScore = teamCount
+    ? Math.round(
+        analysis_teams.reduce(
+          (acc, team) => acc + (team.performance_score || 0),
+          0,
+        ) / teamCount,
+      )
+    : 0;
+  const attendancePercentage =
+    totalStaff > 0
+      ? Math.min(
+          100,
+          Math.round((checkin_sample_size / totalStaff) * 100),
+        )
+      : 0;
+  const burnoutAlertsCount = analysis_teams.filter(
+    (team) => team.status === "AT_RISK" || team.status === "FLAGGED",
+  ).length;
+  const highPerformingTeams = analysis_teams.filter(
+    (team) => (team.performance_score || 0) >= 80,
+  ).length;
+  const managerPerformanceReview = teamCount
+    ? Math.round((highPerformingTeams / teamCount) * 100)
+    : 0;
 
   const filtered_analysis_teams = analysis_teams.filter(
     (team) =>
@@ -87,67 +117,88 @@ function HrOverviewPage() {
       team.lead_name?.toLowerCase().includes(search_term.toLowerCase()),
   );
 
-  const total_employees = analysis_teams.reduce(
-    (acc, team) => acc + (team.member_count || 0),
-    0,
-  );
-  const total_at_risk = analysis_teams.filter(
-    (team) => team.status === "AT_RISK" || team.status === "FLAGGED",
-  ).length;
-  const checkin_rate =
-    total_employees > 0
-      ? Math.min(
-          100,
-          Math.round((checkin_sample_size / total_employees) * 100),
-        )
-      : 0;
-
   const status_items = [
     {
-      id: "total_employees",
-      title: "Total Employees",
-      value: String(total_employees),
+      id: "total_staff",
+      title: "Total Staff",
+      value: String(totalStaff),
       icon: <PiUsersThree size={16} />,
       icon_classname: "text-[#6619DE]",
       delta_value: 0,
       value_suffix: "",
-      delta_text: total_employees > 0 ? "Active" : "—",
+      delta_text: totalStaff > 0 ? "Live headcount" : "—",
       delta_color: "success" as const,
       delta_period: "across teams",
     },
     {
-      id: "check_in_rate",
-      title: "Check-in Rate",
-      value: String(checkin_rate),
+      id: "active_staff",
+      title: "Active Staff",
+      value: String(activeStaff),
+      icon: <HiOutlineUserGroup size={16} />,
+      icon_classname: "text-success-color",
+      delta_value: activeStaff,
+      delta_text: totalStaff > 0 ? "engaged" : "—",
+      delta_color: "success" as const,
+      delta_period: "currently active",
+    },
+    {
+      id: "productivity_score",
+      title: "Productivity Score",
+      value: String(avgProductivityScore),
+      value_suffix: "%",
+      icon: <GoGraph size={16} />,
+      icon_classname: "text-primary-color",
+      delta_value: 0,
+      delta_text: "team average",
+      delta_color: "success" as const,
+      delta_period: "across teams",
+    },
+    {
+      id: "attendance_percentage",
+      title: "Attendance Percentage",
+      value: String(attendancePercentage),
       value_suffix: "%",
       icon: <RiHeartPulseLine size={16} />,
       icon_classname: "text-success-color",
       delta_value: 0,
-      delta_text: "weekly",
+      delta_text: "weekly check-ins",
       delta_color: "success" as const,
-      delta_period: "participation",
+      delta_period: "attendance",
     },
     {
-      id: "avg_mood",
-      title: "Average Mood",
-      value: org_avg_mood_text,
-      icon: <GoGraph size={16} />,
-      icon_classname: "text-primary-color",
-      delta_value: 0,
-      delta_text: "score",
-      delta_color: "success" as const,
-      delta_period: "out of 5",
-    },
-    {
-      id: "flight_risks",
-      title: "Flight Risks",
-      value: String(total_at_risk),
+      id: "attrition_risk_indicator",
+      title: "Attrition Risk Indicator",
+      value: String(atRiskStaff),
       icon: <IoWarningOutline size={16} />,
       icon_classname: "text-danger-color",
-      delta_value: total_at_risk,
-      delta_text: total_at_risk > 0 ? "alert" : "safe",
-      delta_color: total_at_risk > 0 ? ("danger" as const) : ("success" as const),
-      delta_period: "team count",
+      delta_value: atRiskStaff,
+      delta_text: atRiskStaff > 0 ? "staff at risk" : "safe",
+      delta_color: atRiskStaff > 0 ? ("danger" as const) : ("success" as const),
+      delta_period: "headcount",
+    },
+    {
+      id: "burnout_alerts_count",
+      title: "Burnout Alerts Count",
+      value: String(burnoutAlertsCount),
+      icon: <IoWarningOutline size={16} />,
+      icon_classname: "text-danger-color",
+      delta_value: burnoutAlertsCount,
+      delta_text: burnoutAlertsCount > 0 ? "teams flagged" : "clear",
+      delta_color:
+        burnoutAlertsCount > 0 ? ("danger" as const) : ("success" as const),
+      delta_period: "this week",
+    },
+    {
+      id: "manager_performance_review",
+      title: "Manager Performance Review",
+      value: String(managerPerformanceReview),
+      value_suffix: "%",
+      icon: <HiOutlineClipboardDocumentCheck size={16} />,
+      icon_classname: "text-[#7C3AED]",
+      delta_value: highPerformingTeams,
+      delta_text: highPerformingTeams > 0 ? "managers on target" : "—",
+      delta_color: "success" as const,
+      delta_period: "team review",
     },
   ];
 
@@ -168,7 +219,7 @@ function HrOverviewPage() {
       <OverviewAlertsBanner />
       <PageHeader
         dataTour="page-header"
-        title="HR Analytics Dashboard (Overview)"
+        title="Admin Analytics Dashboard (Overview)"
         subtitle="Strategic insights into team wellbeing and productivity"
         actions={
           <>
@@ -191,7 +242,7 @@ function HrOverviewPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div data-tour="burnout-alerts">
           <BurnoutAlertsChart
-            total_at_risk={total_at_risk}
+            total_at_risk={burnoutAlertsCount}
             // delta_vs_last_week omitted — no API for weekly delta in the docs yet.
             series={burnoutSeries}
           />

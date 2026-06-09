@@ -55,7 +55,7 @@ export default function HrPayroll() {
         <div className="flex items-center gap-3 mb-2">
           <DollarSign className="text-[#6619DE]" size={24} />
           <h2 className="text-xl font-bold text-[#251F2D]">
-            Hourly Rate Configuration
+            Admin Rate Configuration
           </h2>
         </div>
         <p className="text-gray-500 text-sm mb-6">
@@ -96,7 +96,7 @@ export default function HrPayroll() {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex flex-col items-center justify-center p-4">
-            <span className="text-xs text-gray-400 mb-1">Total Employees</span>
+          <span className="text-xs text-gray-400 mb-1">Total Employees</span>
             <span className="text-xl font-bold text-[#251F2D]">
               {payroll_data?.total_employees ?? 0}
             </span>
