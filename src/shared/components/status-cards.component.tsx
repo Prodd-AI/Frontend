@@ -75,7 +75,11 @@ export default function StatusCards({
               {it.value_suffix ? `${it.value_suffix}` : ""}
             </p>
 
-            {(delta.text || it.delta_period) && (
+            {it.description ? (
+              <p className="mt-3 text-xs leading-5 italic text-[#9CA3AF]">
+                {it.description}
+              </p>
+            ) : (delta.text || it.delta_period) ? (
               <div className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-success-color/10 px-2 py-1">
                 {delta.text && (
                   <span className={cn("text-xs font-semibold", delta.cls)}>
@@ -88,7 +92,7 @@ export default function StatusCards({
                   </span>
                 )}
               </div>
-            )}
+            ) : null}
           </button>
         );
       })}

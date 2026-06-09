@@ -1,6 +1,6 @@
 /**
  * Map a user's role to the dashboard prefix where the task detail page lives,
- * so the same task table works across team-lead / team-member / HR.
+ * so the same task table works across team-lead / team-member / Admin.
  */
 const ROLE_TO_PREFIX: Record<string, string> = {
   hr: "/dash/hr",

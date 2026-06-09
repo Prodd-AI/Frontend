@@ -42,7 +42,7 @@ const EMPTY_MEMBER = (): MemberEntry => ({
 const ROLE_OPTIONS = [
   { value: "team_member", label: "Team Member" },
   { value: "team_lead", label: "Team Lead" },
-  { value: "hr", label: "HR" },
+  { value: "hr", label: "Admin" },
   { value: "executive", label: "Executive" },
 ] as const;
 

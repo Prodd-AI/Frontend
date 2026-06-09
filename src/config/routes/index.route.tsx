@@ -13,6 +13,9 @@ import TeamMemberEntryDash from "@/shared/pages/teamMemberDashEntry.page";
 import Loader from "@/shared/components/loader.component";
 import withAuthGuard from "@/shared/components/HOC/with-auth-guard";
 const WelcomePage = lazy(() => import("@/onboarding/pages/welcome.page"));
+const PrivacyPolicyPage = lazy(
+  () => import("@/shared/pages/privacy-policy.page")
+);
 
 const GuardedTeamMemberEntryDash = withAuthGuard(TeamMemberEntryDash);
 
@@ -24,6 +27,10 @@ const router = createBrowserRouter([
   {
     path: "/welcome",
     element: <WelcomePage />,
+  },
+  {
+    path: "/privacy-policy",
+    element: <PrivacyPolicyPage />,
   },
 
   { path: "/dash/hr", children: hr_routes },

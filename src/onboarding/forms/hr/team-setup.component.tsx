@@ -1,10 +1,22 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, X } from "lucide-react";
+import type { ChangeEvent } from "react";
 import { UseFormReturn, useFieldArray } from "react-hook-form";
+
+const TEAM_TYPE_OPTIONS = ["Engineering", "Design", "Marketing", "Others"];
 
 export interface TeamFormData {
   name: string;
+  team_type: string;
+  custom_team_type?: string;
   size: string;
   description: string;
 }
@@ -36,7 +48,13 @@ function TeamSetup({ form }: TeamSetupProps) {
   });
 
   const addTeam = () => {
-    append({ name: "", size: "", description: "" });
+    append({
+      name: "",
+      team_type: "",
+      custom_team_type: "",
+      size: "",
+      description: "",
+    });
   };
 
   return (
@@ -46,19 +64,68 @@ function TeamSetup({ form }: TeamSetupProps) {
           key={field.id}
           className="flex flex-col md:flex-row gap-4 md:items-end"
         >
-          {/* Team Name */}
+          {/* Team Type */}
           <div className="flex-1 flex flex-col gap-2">
             <Label className="text-[#000000] font-semibold text-sm sm:text-base">
-              Team Name
+              Team Type
             </Label>
-            <Input
-              className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
-              placeholder="e.g design, marketing, engineering"
-              {...form.register(`teams.${index}.name`)}
-            />
+            <Select
+              value={form.watch(`teams.${index}.team_type`)}
+              onValueChange={(value) => {
+                form.setValue(`teams.${index}.team_type`, value, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+                form.setValue(`teams.${index}.name`, value, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+
+                if (value !== "Others") {
+                  form.setValue(`teams.${index}.custom_team_type`, "", {
+                    shouldDirty: true,
+                  });
+                }
+              }}
+            >
+              <SelectTrigger className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14 w-full">
+                <SelectValue placeholder="Select team type" />
+              </SelectTrigger>
+              <SelectContent>
+                {TEAM_TYPE_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {form.watch(`teams.${index}.team_type`) === "Others" && (
+              <Input
+                className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
+                placeholder="Enter custom team type (optional)"
+                {...form.register(`teams.${index}.custom_team_type`, {
+                  onChange: (event: ChangeEvent<HTMLInputElement>) => {
+                    const custom_type = event.target.value.trim();
+                    form.setValue(
+                      `teams.${index}.name`,
+                      custom_type || "Others",
+                      {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      },
+                    );
+                  },
+                })}
+              />
+            )}
             {errors.teams?.[index]?.name && (
               <div className="text-red-500 text-xs sm:text-sm">
                 {errors.teams[index]?.name?.message}
+              </div>
+            )}
+            {errors.teams?.[index]?.team_type && (
+              <div className="text-red-500 text-xs sm:text-sm">
+                {errors.teams[index]?.team_type?.message}
               </div>
             )}
           </div>

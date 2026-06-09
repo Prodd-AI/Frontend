@@ -84,8 +84,8 @@ function TeamLeadSetup() {
       Icon: IoCheckmarkDone,
       Component: () => <CompleteTeamLeadOnBoard />,
       cbFn: () => {
-        toast.success("Onboarding complete. Click on forgot password to reset your password.");
-        navigate("/auth/login");
+        toast.success("Onboarding complete.");
+        navigate("/dash/team-lead");
       },
     },
   ];

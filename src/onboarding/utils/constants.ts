@@ -24,7 +24,7 @@ export const role_cards: Array<{
       Icon: FaUserShield,
     },
     // {
-    //   title: "HR/Admin",
+    //   title: "Admin/Admin",
     //   description:
     //     "Set up teams, manage employee profiles, and track overall performance.",
     //   value: "hr",

@@ -26,7 +26,7 @@ const QuickSetupComponent = ({ form }: QuickSetupComponentProps) => {
     const roleMap: Record<string, string> = {
       team_member: "Team Member",
       team_lead: "Team Lead",
-      hr: "HR",
+      hr: "Admin",
       super_admin: "Super Admin",
       executive: "Executive",
     };

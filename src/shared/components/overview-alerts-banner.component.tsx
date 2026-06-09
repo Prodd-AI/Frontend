@@ -3,7 +3,7 @@ import { AlertTriangle, Calendar, ArrowRight } from "lucide-react";
 import { useOverviewAlerts } from "@/shared/hooks/use-overview-alerts";
 
 interface OverviewAlertsBannerProps {
-  /** Optional route for the "View tasks" link. Omit for HR (no personal tasks). */
+  /** Optional route for the "View tasks" link. Omit for Admin (no personal tasks). */
   tasksRoute?: string;
 }
 

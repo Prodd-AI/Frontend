@@ -64,6 +64,31 @@ const reset_password_schema = z
     path: ["new_password"],
   });
 
+// Set Password Schema
+const set_password_schema = z
+  .object({
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(128, "Password is too long")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+      ),
+    confirm_password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(128, "Password is too long")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+      ),
+  })
+  .refine((data) => data.password === data.confirm_password, {
+    error: "Passwords do not match",
+    path: ["confirm_password"],
+  });
+
 const verify_email_schema = z.object({
   code: z.string().length(6, "Code must be exactly 6 digits"),
 });
@@ -90,6 +115,14 @@ const team_schema = z.object({
     .string()
     .min(1, "Team name is required")
     .max(100, "Team name must not exceed 100 characters"),
+  team_type: z
+    .string()
+    .min(1, "Team type is required")
+    .max(100, "Team type must not exceed 100 characters"),
+  custom_team_type: z
+    .string()
+    .max(100, "Custom team type must not exceed 100 characters")
+    .optional(),
   description: z
     .string()
     .min(1, "Description is required")
@@ -129,6 +162,7 @@ export {
   login_schema,
   forgot_password_schema,
   reset_password_schema,
+  set_password_schema,
   verify_email_schema,
   company_info_schema,
   team_schema,

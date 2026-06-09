@@ -8,6 +8,7 @@ import {
   Eye,
   CheckCircle2,
   Circle,
+  XCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -36,8 +37,7 @@ import { updateTask, deleteTask } from "@/config/services/tasks.service";
 // Minimal shape this cell needs — both UserTaskAssignment.task (the ambient
 // `Task`) and AssignedTask.task (the team-leader typing) satisfy it without
 // dragging in fields like `deleted_at` that aren't always present. Status is
-// kept loose because the team-leader typing also allows "cancelled"; we only
-// ever toggle between pending/completed.
+// kept loose because the API can return workflow states before typings catch up.
 type CellTask = {
   id: string;
   title: string;
@@ -76,7 +76,9 @@ export const TaskActionsCell = ({
   };
 
   const { mutate: updateStatus, isPending } = useMutation({
-    mutationFn: async (newStatus: "pending" | "completed") => {
+    mutationFn: async (
+      newStatus: "pending" | "completed" | "approved" | "changes_requested",
+    ) => {
       await updateTask(task.id, { status: newStatus });
     },
     onSuccess: () => {
@@ -91,7 +93,7 @@ export const TaskActionsCell = ({
       mutationFn: async (newDescription: string) => {
         await updateTask(task.id, {
           description: newDescription,
-          status: task.status as "pending" | "completed" | "cancelled",
+          status: "changes_requested",
         });
       },
       onSuccess: () => {
@@ -138,7 +140,9 @@ export const TaskActionsCell = ({
             disabled={isPending}
             onClick={() =>
               updateStatus(
-                task.status === "completed" ? "pending" : "completed",
+                task.status === "completed" || task.status === "approved"
+                  ? "pending"
+                  : "completed",
               )
             }
           >
@@ -147,7 +151,7 @@ export const TaskActionsCell = ({
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 <span>Updating...</span>
               </>
-            ) : task.status === "completed" ? (
+            ) : task.status === "completed" || task.status === "approved" ? (
               <>
                 <Circle className="h-4 w-4 mr-2" />
                 <span>Mark as Pending</span>
@@ -159,6 +163,30 @@ export const TaskActionsCell = ({
               </>
             )}
           </DropdownMenuItem>
+          {canRequestChanges && task.status === "completed" && (
+            <DropdownMenuItem
+              disabled={isPending}
+              onClick={() => updateStatus("approved")}
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+              )}
+              Approve Completion
+            </DropdownMenuItem>
+          )}
+          {canRequestChanges && task.status === "completed" && (
+            <DropdownMenuItem
+              onClick={() => {
+                setIsOpen(false);
+                setIsRequestChangesOpen(true);
+              }}
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              Reject Completion
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onClick={() => {
               setIsOpen(false);
@@ -168,7 +196,7 @@ export const TaskActionsCell = ({
             <Pencil className="h-4 w-4 mr-2" />
             Edit Task
           </DropdownMenuItem>
-          {canRequestChanges && (
+          {canRequestChanges && task.status !== "completed" && (
             <DropdownMenuItem
               onClick={() => {
                 setIsOpen(false);

@@ -58,7 +58,12 @@ declare module "@/shared/typings/task-card" {
    * Available task status options.
    * Represents the current state of a task in the workflow.
    */
-  export type TaskStatus = "completed" | "pending" | "cancelled";
+  export type TaskStatus =
+    | "completed"
+    | "pending"
+    | "cancelled"
+    | "approved"
+    | "changes_requested";
 
   /**
    * Available task priority levels.

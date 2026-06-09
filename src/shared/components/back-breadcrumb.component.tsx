@@ -21,7 +21,7 @@ interface BackBreadcrumbProps {
 
 /**
  * Unified back + breadcrumb header used at the top of every detail / nested page.
- * Keeps navigation affordances consistent across HR, team-lead, and team-member.
+ * Keeps navigation affordances consistent across Admin, team-lead, and team-member.
  */
 export function BackBreadcrumb({
   trail,

@@ -67,6 +67,16 @@ const reset_password = (data: {
     data,
   );
 };
+const set_password = (data: {
+  password: string;
+  confirm_password: string;
+}) => {
+  return auth_service.post<GeneralReturnInt<unknown>, typeof data>(
+    "set-password",
+    data,
+    true,
+  );
+};
 const change_password = (data: {
   current_password: string;
   new_password: string;
@@ -122,6 +132,7 @@ export {
   refresh_auth_with_team_member_profile,
   forgot_password,
   reset_password,
+  set_password,
   logout,
   get_active_all_sessions,
   end_a_session,
