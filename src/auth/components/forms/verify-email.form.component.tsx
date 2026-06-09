@@ -22,6 +22,58 @@ import { Link } from "react-router-dom";
 import { TeamMember } from "@/shared/typings/team-member";
 import Banner from "@/shared/components/banner.component";
 
+type UserWithPasswordState = TeamMember["user"] & {
+  has_password?: boolean;
+  hasPassword?: boolean;
+  password_set?: boolean;
+  passwordSet?: boolean;
+  is_password_set?: boolean;
+  requires_password_setup?: boolean;
+  needs_password_setup?: boolean;
+  is_invited?: boolean;
+};
+
+const getPostVerificationPath = (user: TeamMember["user"]) => {
+  const rolePath = user.user_role.replace("_", "-");
+
+  if (user.organization_id && user.is_onboarded) {
+    return `/dash/${rolePath}`;
+  }
+
+  if (user.organization_id && !user.is_onboarded) {
+    return `/onboarding/${rolePath}-setup`;
+  }
+
+  return "/onboarding/hr-setup";
+};
+
+const shouldSetPasswordAfterVerification = (user: TeamMember["user"]) => {
+  const userWithPasswordState = user as UserWithPasswordState;
+
+  if (
+    userWithPasswordState.requires_password_setup ||
+    userWithPasswordState.needs_password_setup
+  ) {
+    return true;
+  }
+
+  if (
+    userWithPasswordState.has_password === false ||
+    userWithPasswordState.hasPassword === false ||
+    userWithPasswordState.password_set === false ||
+    userWithPasswordState.passwordSet === false ||
+    userWithPasswordState.is_password_set === false
+  ) {
+    return true;
+  }
+
+  if (userWithPasswordState.is_invited && !user.is_onboarded) {
+    return true;
+  }
+
+  return Boolean(user.organization_id && !user.is_onboarded);
+};
+
 function VerifyEmailFormComponent({
   email,
   code,
@@ -69,23 +121,28 @@ function VerifyEmailFormComponent({
   >({
     mutationFn: (data) => verify_email(data),
     onSuccess: (res) => {
+      const nextPath = getPostVerificationPath(res.data.user);
+      const shouldSetPassword = shouldSetPasswordAfterVerification(
+        res.data.user
+      );
+
       setBanner({
-        message: "Verification Complete. Redirecting you to your Dashboard",
+        message: shouldSetPassword
+          ? "Verification complete. Create your password to continue."
+          : "Verification Complete. Redirecting you to your Dashboard",
         variant: "success",
         isOpen: true,
       });
       login(res.data, res.data?.access_token);
       localStorage.setItem("refresh_token_id", res.data.refresh_token);
 
-      if (res.data.user.organization_id && res.data.user.is_onboarded) {
-        return navigate(`/dash/${res.data.user.user_role.replace("_", "-")}`);
-      }
-      if (res.data.user.organization_id && !res.data.user.is_onboarded) {
+      if (shouldSetPassword) {
         return navigate(
-          `/onboarding/${res.data.user.user_role.replace("_", "-")}-setup`,
+          `/auth/set-password?redirectTo=${encodeURIComponent(nextPath)}`,
         );
       }
-      return navigate("/onboarding/hr-setup");
+
+      return navigate(nextPath);
     },
     onError(error) {
       setBanner({
@@ -166,7 +223,7 @@ function VerifyEmailFormComponent({
                 value={field.value}
                 onChange={(value) => {
                   setValue("code", value);
-                  if (email && code?.length === 6) {
+                  if (email && value.length === 6) {
                     onSubmit({ code: value });
                   }
                 }}
