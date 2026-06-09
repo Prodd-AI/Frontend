@@ -26,6 +26,10 @@ const priorityStyles = {
 const statusStyles = {
   completed:
     "bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border-emerald-200/80 shadow-emerald-100/50",
+  approved:
+    "bg-gradient-to-r from-green-50 to-green-100 text-green-700 border-green-200/80 shadow-green-100/50",
+  changes_requested:
+    "bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 border-orange-200/80 shadow-orange-100/50",
   pending:
     "bg-gradient-to-r from-slate-50 to-slate-100 text-slate-600 border-slate-200/80 shadow-slate-100/50",
   cancelled:
@@ -35,6 +39,8 @@ const statusStyles = {
 const priorityLabels = { high: "High", medium: "Medium", low: "Low" };
 const statusLabels = {
   completed: "Completed",
+  approved: "Approved",
+  changes_requested: "Changes Requested",
   pending: "Pending",
   cancelled: "Cancelled",
 };
@@ -180,6 +186,8 @@ const TaskCard = forwardRef<TaskCardRef, TaskCardPropsInt>(
                 className={clsx(
                   "w-1.5 h-1.5 rounded-full",
                   status === "completed" && "bg-emerald-500",
+                  status === "approved" && "bg-green-500",
+                  status === "changes_requested" && "bg-orange-500",
                   status === "pending" && "bg-slate-400",
                   status === "cancelled" && "bg-rose-500"
                 )}

@@ -8,9 +8,9 @@ export const hrOverviewTourSteps: TourStep[] = [
   {
     target: "body",
     placement: "center",
-    title: "Welcome to HR Analytics",
+    title: "Welcome to Admin Analytics",
     content:
-      "A quick walkthrough of the HR workspace — both this overview page and the deeper analysis views in the sidebar. Roughly 60 seconds. You can replay it any time from the header. Hit Next to begin.",
+      "A quick walkthrough of the Admin workspace — both this overview page and the deeper analysis views in the sidebar. Roughly 60 seconds. You can replay it any time from the header. Hit Next to begin.",
     data: { next: HOME },
   },
   {

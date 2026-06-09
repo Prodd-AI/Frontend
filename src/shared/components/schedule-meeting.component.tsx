@@ -188,7 +188,7 @@ const ScheduleMeeting = ({
     enabled: !!activeTeamId,
   });
 
-  // Drop the HR-role member — HR shows on every team and shouldn't appear in
+  // Drop the Admin-role member — Admin shows on every team and shouldn't appear in
   // attendee pickers (matches the Team Analysis member-count rule).
   const teamMembers: TeamMember[] = (teamMembersData?.data ?? []).filter(
     (m: TeamMember & { user_role?: string }) => m.user_role !== "hr",

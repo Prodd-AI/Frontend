@@ -13,7 +13,7 @@ import {
 } from "@/hr/hooks/use-hr-schedule-meeting";
 
 /**
- * Wraps the HR routes. Hosts the Schedule Meeting dialog state so any HR page
+ * Wraps the Admin routes. Hosts the Schedule Meeting dialog state so any Admin page
  * (overview, flight risk, top-bar action) can trigger it via `useHrScheduleMeeting`.
  */
 export default function HrScheduleMeetingProvider() {

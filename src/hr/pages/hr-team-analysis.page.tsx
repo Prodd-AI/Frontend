@@ -93,7 +93,7 @@ function HrTeamAnalysisPage() {
               ? "Team Analysis"
               : tab === "timesheet"
                 ? "Timesheet Weekly Overview"
-                : "HR Payroll"}
+                : "Admin Payroll"}
           </button>
         ))}
       </div>

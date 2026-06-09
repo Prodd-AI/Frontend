@@ -15,7 +15,7 @@ function formatUserRole(role: string): string {
     super_admin: "Super Admin",
     team_member: "Team Member",
     team_lead: "Team Lead",
-    hr: "HR",
+    hr: "Admin",
     executive: "Executive",
   };
   return map[role] ?? role.replace(/_/g, " ");
@@ -29,7 +29,7 @@ export function useTeamsWithMembers() {
 
   const teamEntriesList = teamEntriesResponse?.data ?? [];
   const teamsWithMembers: TeamEntry[] = teamEntriesList.map((t, teamIndex) => {
-    // HR appears on every team in the backend join — strip them out so the
+    // Admin appears on every team in the backend join — strip them out so the
     // count and member list reflect actual team members only.
     const membersWithoutHr = (t.members ?? []).filter(
       (m) => (m.role ?? "").toLowerCase() !== "hr",
