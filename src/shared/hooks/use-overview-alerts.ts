@@ -1,6 +1,7 @@
 import { useQueries } from "@tanstack/react-query";
 import { getWeeklyStreak } from "@/config/services/tasks.service";
 import { get_upcoming_meetings_today } from "@/config/services/meeting.service";
+import { parseWallClockIso } from "@/shared/utils/date.utils";
 
 const MEETING_SOON_MINUTES = 60;
 
@@ -74,7 +75,15 @@ export function useOverviewAlerts(enabled = true): OverviewAlerts {
   ).length;
 
   const meeting = meetingsQuery.data?.data;
-  const minutesUntil = meeting?.start_in_minutes ?? null;
+  const minutesUntil = (() => {
+    if (!meeting) return null;
+    if (meeting.scheduled_at) {
+      const diffMs =
+        parseWallClockIso(meeting.scheduled_at).getTime() - Date.now();
+      return Math.round(diffMs / 60000);
+    }
+    return meeting.start_in_minutes ?? null;
+  })();
   const nextMeeting =
     meeting?.id &&
     typeof minutesUntil === "number" &&
