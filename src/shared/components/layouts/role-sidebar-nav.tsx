@@ -8,6 +8,7 @@ import { LuClock2, LuFileClock } from "react-icons/lu";
 import { HiOutlineUserGroup } from "react-icons/hi";
 import { RxPerson } from "react-icons/rx";
 import InviteTeamPromo from "./invite-team-promo.component";
+import SupportContactCard from "./support-contact-card.component";
 
 type UserRole = "hr" | "team_lead" | "team_member" | "super_admin" | string;
 
@@ -122,6 +123,14 @@ export function getSidebarNavForRole(role: UserRole): SidebarNavItem[] {
 }
 
 export function getSidebarFooterForRole(role: UserRole): ReactNode {
-  if (role === "hr" || role === "team_lead") return <InviteTeamPromo />;
+  if (role === "hr") {
+    return (
+      <div className="flex flex-col gap-3">
+        <InviteTeamPromo />
+        <SupportContactCard />
+      </div>
+    );
+  }
+  if (role === "team_lead") return <InviteTeamPromo />;
   return null;
 }
