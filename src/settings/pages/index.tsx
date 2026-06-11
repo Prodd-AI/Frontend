@@ -4,15 +4,25 @@ import { useState } from "react";
 import AccountSettingsComponent from "../components/account-settings.component";
 import PreferencesComponent from "../components/preferences.component";
 import PrivacyComponent from "../components/privacy.component";
+import IntegrationsComponent from "../components/integrations.component";
 import { SettingsTab } from "@/settings/typings/tab";
 import useAuthStore from "@/config/stores/auth.store";
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { get_current_user_profile } from "@/config/services/users.service";
 import PageHeader from "@/shared/components/page-header.component";
 
+const isSettingsTab = (tab: string | null): tab is SettingsTab =>
+  !!tab &&
+  ["overview", "account", "preferences", "privacy", "team", "integrations"].includes(
+    tab,
+  );
+
 function SettingsPage() {
-  const [active_tab, set_active_tab] = useState<SettingsTab>("overview");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const initialTab = isSettingsTab(tabParam) ? tabParam : "overview";
+  const [active_tab, set_active_tab] = useState<SettingsTab>(initialTab);
   const user = useAuthStore((state) => state.user);
 
   const { data: userProfileResponse } = useQuery({
@@ -23,7 +33,7 @@ function SettingsPage() {
   const currentUserProfile = userProfileResponse?.data;
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/auth/login" replace />;
   }
 
   return (
@@ -36,7 +46,10 @@ function SettingsPage() {
       <div className="rounded-3xl bg-white border border-gray-200 p-5">
         <SettingsTabComponent
           activeTab={active_tab}
-          onTabChange={(tab) => set_active_tab(tab)}
+          onTabChange={(tab) => {
+            set_active_tab(tab);
+            setSearchParams(tab === "overview" ? {} : { tab });
+          }}
         />
 
         <div className="mt-6">
@@ -52,6 +65,7 @@ function SettingsPage() {
           {active_tab === "privacy" && (
             <PrivacyComponent user={currentUserProfile} />
           )}
+          {active_tab === "integrations" && <IntegrationsComponent />}
         </div>
       </div>
     </div>

@@ -47,7 +47,6 @@ function LoginFormComponent() {
     onSuccess: (response) => {
       if (response?.data) {
         login(response.data, response.data.access_token);
-        console.log(response.data.refresh_token)
         localStorage.setItem("refresh_token_id", response.data.refresh_token);
 
         setBanner({

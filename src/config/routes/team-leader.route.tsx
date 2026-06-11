@@ -8,7 +8,7 @@ import {
   getSidebarFooterForRole,
 } from "@/shared/components/layouts/role-sidebar-nav";
 
-const TeamLeaderPage = lazy(
+const TeamLeaderPage  = lazy(
   () => import("@/team-leader/pages/team-leader.page"),
 );
 const TodaysFocusPage = lazy(

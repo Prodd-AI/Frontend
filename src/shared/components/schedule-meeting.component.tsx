@@ -158,10 +158,7 @@ const ScheduleMeeting = ({
   const { data: teamsData, isLoading: teamsLoading } = useQuery<{
     data: TeamRow[];
   }>({
-    queryKey: [
-      "schedule-meeting-teams",
-      restrictToOwnTeams ? "mine" : "all",
-    ],
+    queryKey: ["schedule-meeting-teams", restrictToOwnTeams ? "mine" : "all"],
     queryFn: async () => {
       const res = restrictToOwnTeams ? await getMyTeams() : await getTeams();
       return { data: (res?.data ?? []) as TeamRow[] };
@@ -176,9 +173,7 @@ const ScheduleMeeting = ({
       if (!t?.id || !t?.name) return null;
       return { team_id: t.id, team_name: t.name };
     })
-    .filter(
-      (x): x is { team_id: string; team_name: string } => x !== null,
-    );
+    .filter((x): x is { team_id: string; team_name: string } => x !== null);
 
   const activeTeamId = selectedTeamId ?? teams[0]?.team_id;
 
