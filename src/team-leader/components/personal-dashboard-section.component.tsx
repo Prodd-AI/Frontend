@@ -2,14 +2,13 @@ import DailyMoodCheckIn from "@/shared/components/daily-mood-check-in.component"
 import TodaysProgress from "@/shared/components/todays-progress.component";
 import { PersonalDashboardSectionProps } from "@/team-leader/typings/team-leader";
 import { Moods } from "@/shared/typings/daily-mood-check-in";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { DailyMoodCheckInRef } from "@/shared/typings/daily-mood-check-in";
 import { submit_check_in_mood } from "@/config/services/mood-trends.service";
 import WeeklyStreakComponent from "@/shared/components/weekly-streak.component";
-import { get_upcoming_meetings_today } from "@/config/services/meeting.service";
-import { UpcomingSchedule } from "@/shared/components/upcoming-schedule.component";
+import UpcomingMeetingsList from "@/shared/components/upcoming-meetings-list.component";
 
 const PersonalDashboardSection = ({
   className,
@@ -74,15 +73,6 @@ const PersonalDashboardSection = ({
     });
   };
 
-  const { data: upcomingMeetingsData, isLoading: upcomingMeetingsLoading } =
-    useQuery({
-      queryKey: ["upcoming-meetings-today"],
-      queryFn: () => get_upcoming_meetings_today(),
-    });
-
-  const meetingData = upcomingMeetingsData?.data;
-  const remainingCount = meetingData?.remaining_meetings?.length ?? 0;
-
   return (
     <section className={`flex flex-col gap-6 ${className || ""}`}>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -113,11 +103,7 @@ const PersonalDashboardSection = ({
         </div>
       </div>
       <div data-tour="upcoming-schedule">
-        <UpcomingSchedule
-          meeting={meetingData}
-          remainingCount={remainingCount}
-          isLoading={upcomingMeetingsLoading}
-        />
+        <UpcomingMeetingsList />
       </div>
     </section>
   );
