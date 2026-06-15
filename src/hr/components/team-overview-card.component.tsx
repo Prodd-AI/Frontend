@@ -98,14 +98,12 @@ export default function TeamOverviewCard({
           </span>
         </div>
 
-        {/* Striped progress bar */}
-        <div className="relative h-3 w-full rounded-full bg-gray-200 overflow-hidden">
+        {/* Performance progress bar — clean solid gradient (no stripes) */}
+        <div className="relative h-2.5 w-full rounded-full bg-gray-100 overflow-hidden">
           <div
-            className="absolute inset-y-0 left-0 rounded-full"
+            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-[width] duration-500 ease-out"
             style={{
-              width: `${Math.min(performance, 100)}%`,
-              background:
-                "repeating-linear-gradient(-55deg, #22c55e, #22c55e 6px, #16a34a 6px, #16a34a 12px)",
+              width: `${Math.min(Math.max(performance, 0), 100)}%`,
             }}
           />
         </div>

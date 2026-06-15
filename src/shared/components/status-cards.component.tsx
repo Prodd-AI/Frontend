@@ -60,8 +60,10 @@ export default function StatusCards({
               {it.icon && (
                 <span
                   className={cn(
-                    "inline-flex items-center justify-center size-8 rounded-full bg-[#F3EBFF]",
-                    it.icon_classname,
+                    "inline-flex items-center justify-center size-8 rounded-full",
+                    // Background tint is supplied per-item via `icon_classname`
+                    // so each icon's circle can match its semantic color.
+                    it.icon_classname ?? "bg-[#F3EBFF]",
                   )}
                 >
                   {it.icon}

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { RiCalendarScheduleLine, RiHeartPulseLine } from "react-icons/ri";
 import { PiUsersThree } from "react-icons/pi";
 import { GoGraph } from "react-icons/go";
-import { IoWarningOutline } from "react-icons/io5";
+import { IoWarningOutline, IoFlameOutline } from "react-icons/io5";
 import { HiOutlineUserGroup } from "react-icons/hi";
 import { HiOutlineClipboardDocumentCheck } from "react-icons/hi2";
 
@@ -124,7 +124,7 @@ function HrOverviewPage() {
       value: String(totalStaff),
       description: "Current headcount across all teams.",
       icon: <PiUsersThree size={16} />,
-      icon_classname: "text-[#6619DE]",
+      icon_classname: "bg-primary-color/10 text-primary-color",
     },
     {
       id: "active_staff",
@@ -132,7 +132,7 @@ function HrOverviewPage() {
       value: String(activeStaff),
       description: "People currently active in the workspace.",
       icon: <HiOutlineUserGroup size={16} />,
-      icon_classname: "text-success-color",
+      icon_classname: "bg-success-color/10 text-success-color",
     },
     {
       id: "productivity_score",
@@ -141,7 +141,7 @@ function HrOverviewPage() {
       value_suffix: "%",
       description: "Average team performance score.",
       icon: <GoGraph size={16} />,
-      icon_classname: "text-primary-color",
+      icon_classname: "bg-primary-color/10 text-primary-color",
     },
     {
       id: "attendance_percentage",
@@ -150,7 +150,7 @@ function HrOverviewPage() {
       value_suffix: "%",
       description: "Weekly check-in rate.",
       icon: <RiHeartPulseLine size={16} />,
-      icon_classname: "text-success-color",
+      icon_classname: "bg-success-color/10 text-success-color",
     },
     {
       id: "attrition_risk_indicator",
@@ -158,15 +158,15 @@ function HrOverviewPage() {
       value: String(atRiskStaff),
       description: "Staff with elevated attrition risk.",
       icon: <IoWarningOutline size={16} />,
-      icon_classname: "text-danger-color",
+      icon_classname: "bg-danger-color/10 text-danger-color",
     },
     {
       id: "burnout_alerts_count",
       title: "Burnout Alerts Count",
       value: String(burnoutAlertsCount),
       description: "Teams currently flagged this week.",
-      icon: <IoWarningOutline size={16} />,
-      icon_classname: "text-danger-color",
+      icon: <IoFlameOutline size={16} />,
+      icon_classname: "bg-danger-color/10 text-danger-color",
     },
     {
       id: "manager_performance_review",
@@ -175,7 +175,7 @@ function HrOverviewPage() {
       value_suffix: "%",
       description: "Share of teams scoring 80% or higher.",
       icon: <HiOutlineClipboardDocumentCheck size={16} />,
-      icon_classname: "text-[#7C3AED]",
+      icon_classname: "bg-primary-color/10 text-primary-color",
     },
   ];
 
@@ -229,6 +229,7 @@ function HrOverviewPage() {
             meeting={upcomingMeetingData}
             remainingCount={upcomingRemainingCount}
             isLoading={upcomingMeetingsLoading}
+            onSchedule={() => openScheduleMeeting(null)}
           />
         </div>
       </div>

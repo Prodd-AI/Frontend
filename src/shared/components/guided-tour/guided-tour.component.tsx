@@ -63,6 +63,17 @@ export default function GuidedTour() {
       onEvent={onEvent}
       continuous
       scrollToFirstStep
+      // Keep tooltips clear of the sticky 72px header (and viewport edges) so
+      // they never flip up and overlap it — the flip/shift middleware treats
+      // that top band as out of bounds when choosing/nudging placement.
+      floatingOptions={{
+        flipOptions: {
+          padding: { top: 88, bottom: 16, left: 16, right: 16 },
+        },
+        shiftOptions: {
+          padding: { top: 88, bottom: 16, left: 16, right: 16 },
+        },
+      }}
       options={{
         ...joyrideOptions,
         showProgress: true,

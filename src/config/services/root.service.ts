@@ -7,6 +7,35 @@ import axios, {
 import useAuthStore from "@/config/stores/auth.store";
 
 /**
+ * Maximum number of automatic retries for transient network failures.
+ * Only applies to requests that received no response (no HTTP status).
+ */
+const MAX_NETWORK_RETRIES = 2;
+
+/**
+ * An axios error enriched with metadata so callers (retry predicates,
+ * toasts, error boundaries) can branch on the real cause instead of a
+ * flattened string.
+ */
+export interface ApiError extends Error {
+  /** The axios error code (e.g. "ERR_NETWORK", "ECONNABORTED"). */
+  code?: string;
+  /** The HTTP status, if a response was received. */
+  status?: number;
+  /** True when the request left the browser but no response came back. */
+  isNetworkError: boolean;
+  /** The original axios error, preserved for debugging. */
+  cause?: unknown;
+}
+
+/**
+ * Internal request config shape used to track per-request retry attempts.
+ */
+interface RetryableRequestConfig extends AxiosRequestConfig {
+  _retryCount?: number;
+}
+
+/**
  * Configuration options for API requests
  */
 export interface ApiRequestConfig {
@@ -44,7 +73,11 @@ export interface ApiServiceConfig {
  * - Custom headers and axios options per request
  * - Request/response interceptors
  *
- * Note: Retry logic is handled by TanStack Query for better integration with React state management.
+ * Note: Transient network failures (no response received — dropped connections,
+ * failed CORS preflights, backend cold starts) are automatically retried with
+ * exponential backoff at the axios layer, up to MAX_NETWORK_RETRIES. Errors with
+ * an HTTP status (4xx/5xx) are never retried. This works for every request
+ * (queries and mutations) regardless of TanStack Query's per-hook retry config.
  *
  * @example
  * ```typescript
@@ -105,9 +138,35 @@ export class ApiService {
         return response;
       },
       async (error: AxiosError) => {
-        // Handle errors
-        const errorMessage = this.extractErrorMessage(error);
-        const customError = new Error(errorMessage);
+        // A "no response" error means the request left the browser but nothing
+        // came back: dropped connection, failed CORS preflight, DNS hiccup, or
+        // a backend cold start. These are transient, so retry them with
+        // exponential backoff before surfacing a failure. We deliberately do
+        // NOT retry responses with a status (4xx/5xx) — those are deterministic.
+        const config = error.config as RetryableRequestConfig | undefined;
+        const isNetworkError = !error.response && !!error.request;
+
+        if (config && isNetworkError) {
+          const attempt = config._retryCount ?? 0;
+          if (attempt < MAX_NETWORK_RETRIES) {
+            config._retryCount = attempt + 1;
+            const delay = Math.min(500 * 2 ** attempt, 4000);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            return this.axiosInstance(config);
+          }
+        }
+
+        // Out of retries (or a deterministic error): build a rich error that
+        // preserves the code/status/cause instead of flattening to a string.
+        const customError: ApiError = Object.assign(
+          new Error(this.extractErrorMessage(error)),
+          {
+            code: error.code,
+            status: error.response?.status,
+            isNetworkError,
+            cause: error,
+          }
+        );
 
         // Call custom error interceptor if provided
         if (this.config.onError) {
@@ -138,10 +197,13 @@ export class ApiService {
       return message || `HTTP ${status}: ${statusText}`;
     } else if (error.request) {
       // Request was made but no response received
-      if (error.code === "ECONNABORTED") {
-        return `Request timeout after ${this.config.timeout}ms`;
+      if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") {
+        return "The server is taking too long to respond. Please check your connection and try again.";
       }
-      return "No response received from server";
+      if (error.code === "ERR_NETWORK") {
+        return "We couldn't reach our servers. Please check your internet connection and try again.";
+      }
+      return "We couldn't reach our servers. Please check your internet connection and try again.";
     } else {
       // Something else happened
       return error.message || "An unexpected error occurred";
