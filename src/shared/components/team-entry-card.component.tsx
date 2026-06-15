@@ -27,6 +27,8 @@ interface TeamEntryCardProps {
   team: TeamEntry;
   /** When true, shows payout for team and members; otherwise shows hours/entries */
   showPayout?: boolean;
+  /** Display currency for payout amounts (ISO code, e.g. "USD", "NGN"). */
+  currency?: string;
 }
 
 const isTeamLeadRole = (role: string | undefined): boolean => {
@@ -35,12 +37,18 @@ const isTeamLeadRole = (role: string | undefined): boolean => {
   return lower === "team_lead" || lower === "team lead" || lower === "lead";
 };
 
-export function TeamEntryCard({ team, showPayout = false }: TeamEntryCardProps) {
+export function TeamEntryCard({
+  team,
+  showPayout = false,
+  currency = "USD",
+}: TeamEntryCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const teamAmount = showPayout ? team.total_payout : team.total_hours;
   const teamLabel = showPayout
-    ? (team.total_payout != null ? formatCurrency(team.total_payout) : "$0.00")
+    ? (team.total_payout != null
+        ? formatCurrency(team.total_payout, currency)
+        : formatCurrency(0, currency))
     : `${team.total_hours ?? 0}h`;
 
   // Lead always renders first so it's obvious who owns the team.
@@ -93,7 +101,7 @@ export function TeamEntryCard({ team, showPayout = false }: TeamEntryCardProps) 
           )}
           <div className="bg-[#EAEBEB] px-3 py-1 rounded-full text-xs font-bold text-[#6B7280]">
             {showPayout && teamAmount != null
-              ? formatCurrency(teamAmount)
+              ? formatCurrency(teamAmount, currency)
               : teamLabel}
           </div>
         </div>
@@ -109,7 +117,9 @@ export function TeamEntryCard({ team, showPayout = false }: TeamEntryCardProps) 
         {orderedPeople.map((person) => {
           const personAmount = showPayout ? person.payout : person.hours;
           const personLabel = showPayout
-            ? (person.payout != null ? formatCurrency(person.payout) : "$0.00")
+            ? (person.payout != null
+                ? formatCurrency(person.payout, currency)
+                : formatCurrency(0, currency))
             : `${person.hours ?? 0}h`;
           const isLead = isTeamLeadRole(person.role);
           return (
@@ -159,7 +169,7 @@ export function TeamEntryCard({ team, showPayout = false }: TeamEntryCardProps) 
                 )}
                 <div className="bg-[#EAEBEB] px-3 py-1 rounded-full text-xs font-bold text-[#6B7280]">
                   {showPayout && personAmount != null
-                    ? formatCurrency(personAmount)
+                    ? formatCurrency(personAmount, currency)
                     : personLabel}
                 </div>
               </div>

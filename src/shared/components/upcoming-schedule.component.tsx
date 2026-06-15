@@ -1,7 +1,10 @@
 import { Video, Clock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { parseWallClockIso } from "@/shared/utils/date.utils";
+import {
+  parseWallClockIso,
+  isMeetingUpcomingOrRecent,
+} from "@/shared/utils/date.utils";
 
 interface Meeting {
   id: string;
@@ -16,12 +19,15 @@ interface UpcomingScheduleProps {
   meeting: Meeting | null | undefined;
   remainingCount: number;
   isLoading?: boolean;
+  /** When provided, the empty state shows a "Schedule Meeting" CTA. */
+  onSchedule?: () => void;
 }
 
 export const UpcomingSchedule = ({
   meeting,
   remainingCount,
   isLoading,
+  onSchedule,
 }: UpcomingScheduleProps) => {
   if (isLoading) {
     return (
@@ -48,7 +54,13 @@ export const UpcomingSchedule = ({
     return meeting?.start_in_minutes ?? 0;
   })();
 
-  if (!meeting) {
+  // Treat a meeting that's more than the grace window past its start time as
+  // not upcoming, so stale/passed meetings drop off this card.
+  const isStale =
+    !!meeting &&
+    !isMeetingUpcomingOrRecent(meeting.scheduled_at, meeting.start_in_minutes);
+
+  if (!meeting || isStale) {
     return (
       <div className="bg-white rounded-3xl p-6 border border-gray-200 flex flex-col items-center justify-center text-center min-h-[280px]">
         <div className="size-11 rounded-xl bg-[#F3EBFF] flex items-center justify-center mb-3">
@@ -57,6 +69,14 @@ export const UpcomingSchedule = ({
         <p className="text-sm font-medium text-gray-500">
           No upcoming meetings today
         </p>
+        {onSchedule && (
+          <Button
+            onClick={onSchedule}
+            className="mt-4 bg-[#6619DE] hover:bg-[#5710c4] rounded-xl h-10 px-5 font-semibold"
+          >
+            Schedule Meeting
+          </Button>
+        )}
       </div>
     );
   }

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,7 +19,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addTeamMembers, getTeams } from "@/config/services/teams.service";
+import {
+  addTeamMembers,
+  getTeams,
+  getTeamMembers,
+} from "@/config/services/teams.service";
+import { getErrorMessage } from "@/shared/utils/error-message.utils";
 import { Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -72,6 +77,23 @@ export default function InviteTeamMembersDialog({
   const teams = teamsResponse?.data ?? [];
   const effectiveTeamId = fixedTeamId ?? selectedTeamId;
 
+  // Existing members of the target team — used to block re-inviting someone
+  // who's already on the team.
+  const { data: existingMembersResponse } = useQuery({
+    queryKey: ["team-members", effectiveTeamId],
+    queryFn: () => getTeamMembers(effectiveTeamId),
+    enabled: open && !!effectiveTeamId,
+  });
+  const existingEmails = useMemo(
+    () =>
+      new Set(
+        (existingMembersResponse?.data ?? [])
+          .map((m) => m.email?.trim().toLowerCase())
+          .filter(Boolean),
+      ),
+    [existingMembersResponse],
+  );
+
   const { mutate, isPending } = useMutation({
     mutationFn: () =>
       addTeamMembers({
@@ -95,6 +117,11 @@ export default function InviteTeamMembersDialog({
       queryClient.invalidateQueries({ queryKey: ["team-members"] });
       queryClient.invalidateQueries({ queryKey: ["teams"] });
       handleClose();
+    },
+    onError: (error) => {
+      // Surface backend rejections (e.g. an email that's already been invited)
+      // instead of failing silently.
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -127,10 +154,25 @@ export default function InviteTeamMembersDialog({
   const isMemberValid = (m: MemberEntry) =>
     m.first_name.trim() && m.email.trim() && m.user_role;
 
+  // Returns a human-readable reason this email can't be invited, or null.
+  const emailConflict = (member: MemberEntry): string | null => {
+    const email = member.email.trim().toLowerCase();
+    if (!email) return null;
+    if (existingEmails.has(email)) return "Already a member of this team";
+    const occurrences = members.filter(
+      (m) => m.email.trim().toLowerCase() === email,
+    ).length;
+    if (occurrences > 1) return "Duplicate email in this invite";
+    return null;
+  };
+
+  const hasEmailConflicts = members.some((m) => emailConflict(m) !== null);
+
   const isFormValid =
     members.length > 0 &&
     members.every(isMemberValid) &&
-    !!effectiveTeamId;
+    !!effectiveTeamId &&
+    !hasEmailConflicts;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -258,7 +300,13 @@ export default function InviteTeamMembersDialog({
                   }
                   disabled={isPending}
                   className="bg-[#F9FAFB]"
+                  aria-invalid={!!emailConflict(member)}
                 />
+                {emailConflict(member) && (
+                  <p className="text-red-500 text-sm">
+                    {emailConflict(member)}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">

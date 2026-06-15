@@ -3,7 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Video, Clock, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { get_upcoming_meetings_today } from "@/config/services/meeting.service";
-import { parseWallClockIso } from "@/shared/utils/date.utils";
+import {
+  parseWallClockIso,
+  MEETING_VISIBLE_GRACE_MINUTES,
+} from "@/shared/utils/date.utils";
 
 interface NormalizedMeeting {
   id: string;
@@ -103,24 +106,29 @@ function TodaysMeetingsList() {
   const primary = data?.data;
   const remaining = primary?.remaining_meetings ?? [];
 
-  const meetings: NormalizedMeeting[] = primary?.id
-    ? [
-        {
-          id: primary.id,
-          title: primary.title,
-          scheduledAt: primary.scheduled_at,
-          meetingLink: primary.meeting_link ?? null,
-          minutesUntil: minutesUntil(primary.scheduled_at),
-        },
-        ...remaining.map((m) => ({
-          id: m.id,
-          title: m.title,
-          scheduledAt: m.scheduled_at,
-          meetingLink: m.meeting_link ?? null,
-          minutesUntil: minutesUntil(m.scheduled_at),
-        })),
-      ]
-    : [];
+  const meetings: NormalizedMeeting[] = (
+    primary?.id
+      ? [
+          {
+            id: primary.id,
+            title: primary.title,
+            scheduledAt: primary.scheduled_at,
+            meetingLink: primary.meeting_link ?? null,
+            minutesUntil: minutesUntil(primary.scheduled_at),
+          },
+          ...remaining.map((m) => ({
+            id: m.id,
+            title: m.title,
+            scheduledAt: m.scheduled_at,
+            meetingLink: m.meeting_link ?? null,
+            minutesUntil: minutesUntil(m.scheduled_at),
+          })),
+        ]
+      : []
+  )
+    // Hide meetings that are more than the grace window past their start time —
+    // keep only ones that are upcoming or recently started.
+    .filter((m) => m.minutesUntil >= -MEETING_VISIBLE_GRACE_MINUTES);
 
   if (isLoading || meetings.length === 0) return null;
 

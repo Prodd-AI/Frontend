@@ -87,6 +87,34 @@ export const parseWallClockIso = (iso: string): Date => {
   return new Date(naive);
 };
 
+/**
+ * Grace window for "upcoming" meeting displays: a meeting stays visible until
+ * this many minutes after its start time, then drops off. Keeps just-started
+ * meetings joinable while hiding ones that are clearly over.
+ */
+export const MEETING_VISIBLE_GRACE_MINUTES = 10;
+
+/** Minutes until a meeting starts (negative once it has started). */
+export const minutesUntilWallClock = (scheduledAt: string): number =>
+  Math.round((parseWallClockIso(scheduledAt).getTime() - Date.now()) / 60000);
+
+/**
+ * Whether a meeting should still appear in an "upcoming" list: it is in the
+ * future, or started no more than MEETING_VISIBLE_GRACE_MINUTES ago. Meetings
+ * with no timestamp are kept (we can't prove they're stale).
+ */
+export const isMeetingUpcomingOrRecent = (
+  scheduledAt: string | null | undefined,
+  startInMinutes?: number | null,
+): boolean => {
+  const mins =
+    scheduledAt != null
+      ? minutesUntilWallClock(scheduledAt)
+      : startInMinutes ?? null;
+  if (mins == null) return true;
+  return mins >= -MEETING_VISIBLE_GRACE_MINUTES;
+};
+
 export const formatTimeAgo = (date: Date | string): string => {
   const currentDate = new Date(date);
   const now = new Date();
