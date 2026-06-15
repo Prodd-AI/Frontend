@@ -37,6 +37,11 @@ export default function OverviewAlertsBanner({
     ? buildTaskSummary(overdueCount, dueTodayCount)
     : null;
 
+  // The leading icon should reflect the alert's content: a meeting-only
+  // notification gets a meeting (calendar) icon, while a genuine task warning
+  // keeps the risk (alert) icon.
+  const isMeetingOnly = !taskSummary && Boolean(nextMeeting);
+
   return (
     <div
       role="status"
@@ -45,7 +50,11 @@ export default function OverviewAlertsBanner({
     >
       <div className="flex items-start gap-3 flex-1 min-w-0">
         <span className="size-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0 text-amber-700">
-          <AlertTriangle size={18} aria-hidden="true" />
+          {isMeetingOnly ? (
+            <Calendar size={18} aria-hidden="true" />
+          ) : (
+            <AlertTriangle size={18} aria-hidden="true" />
+          )}
         </span>
         <div className="flex-1 min-w-0 flex flex-col gap-1">
           {taskSummary && (
@@ -55,7 +64,9 @@ export default function OverviewAlertsBanner({
           )}
           {nextMeeting && (
             <p className="text-sm text-amber-900 flex items-center gap-2 min-w-0">
-              <Calendar size={14} aria-hidden="true" className="shrink-0" />
+              {!isMeetingOnly && (
+                <Calendar size={14} aria-hidden="true" className="shrink-0" />
+              )}
               <span className="truncate">
                 <span className="font-semibold">{nextMeeting.title}</span>{" "}
                 starts {formatMinutes(nextMeeting.minutesUntil)}.

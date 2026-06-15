@@ -1,14 +1,34 @@
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatCurrency } from "@/lib/utils";
-import { Clock, DollarSign, Wallet, Loader2 } from "lucide-react";
+import { Clock, Coins, Wallet, Loader2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useHrPayroll } from "../hooks/use-hr-payroll";
 import { useTeamsWithMembers } from "../hooks/use-teams-with-members";
 import { TeamEntryCard } from "@/shared/components/team-entry-card.component";
 import type { TeamEntry } from "@/shared/components/team-entry-card.component";
 
+// Supported display currencies for payroll. Symbols are rendered via
+// Intl (narrowSymbol) so amounts show the right glyph (e.g. $, €, £, ₦).
+const CURRENCY_OPTIONS = [
+  { code: "USD", label: "USD ($)" },
+  { code: "EUR", label: "EUR (€)" },
+  { code: "GBP", label: "GBP (£)" },
+  { code: "NGN", label: "NGN (₦)" },
+  { code: "CAD", label: "CAD (C$)" },
+  { code: "AUD", label: "AUD (A$)" },
+  { code: "INR", label: "INR (₹)" },
+] as const;
+
 export default function HrPayroll() {
   const [hourlyRateInput, setHourlyRateInput] = useState<number>(50);
+  const [currency, setCurrency] = useState<string>("USD");
   const {
     payroll_data,
     periodLabel,
@@ -53,17 +73,28 @@ export default function HrPayroll() {
       {/* Configuration Card */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
         <div className="flex items-center gap-3 mb-2">
-          <DollarSign className="text-[#6619DE]" size={24} />
+          <Coins className="text-[#6619DE]" size={24} />
           <h2 className="text-xl font-bold text-[#251F2D]">
             Admin Rate Configuration
           </h2>
         </div>
         <p className="text-gray-500 text-sm mb-6">
-          Set the hourly rate for payment calculations
+          Set the hourly rate and currency for payment calculations
         </p>
 
         <div className="flex items-center gap-4">
-          <span className="text-xl font-bold text-[#251F2D]">$</span>
+          <Select value={currency} onValueChange={setCurrency}>
+            <SelectTrigger className="w-[130px] h-[48px] text-lg">
+              <SelectValue aria-label="Currency" />
+            </SelectTrigger>
+            <SelectContent>
+              {CURRENCY_OPTIONS.map((c) => (
+                <SelectItem key={c.code} value={c.code}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Input
             type="number"
             value={hourlyRateInput}
@@ -109,7 +140,7 @@ export default function HrPayroll() {
               {totalHours}h
             </span>
             <span className="text-sm text-gray-500 font-semibold">
-              {formatCurrency(totalPayout)}
+              {formatCurrency(totalPayout, currency)}
             </span>
           </div>
           <div className="flex flex-col items-center justify-center p-4">
@@ -118,13 +149,13 @@ export default function HrPayroll() {
               {periodLabel}
             </span>
             <span className="text-sm text-gray-500 font-semibold">
-              {payroll_data?.currency ?? "USD"}
+              {currency}
             </span>
           </div>
           <div className="bg-[#F9FAFB] border border-[#F3F4F6] rounded-xl flex flex-col items-center justify-center p-4">
             <span className="text-xs text-gray-400 mb-1">Hourly Rate</span>
             <span className="text-xl font-bold text-[#251F2D]">
-              ${hourlyRate.toFixed(2)}
+              {formatCurrency(hourlyRate, currency)}
             </span>
             <span className="text-sm text-gray-500 font-semibold">
               per hour
@@ -148,7 +179,7 @@ export default function HrPayroll() {
                 {regularHours}h
               </p>
               <p className="text-sm text-gray-500 font-semibold">
-                {formatCurrency(regularCost)}
+                {formatCurrency(regularCost, currency)}
               </p>
             </div>
             <div>
@@ -159,7 +190,7 @@ export default function HrPayroll() {
                 {overtimeHours}h
               </p>
               <p className="text-sm text-gray-500 font-semibold">
-                {formatCurrency(overtimeCost)}
+                {formatCurrency(overtimeCost, currency)}
               </p>
             </div>
           </div>
@@ -172,7 +203,7 @@ export default function HrPayroll() {
             Total {isWeek ? "Weekly" : "Monthly"} Pay
           </span>
           <span className="text-xl font-bold text-[#251F2D]">
-            {formatCurrency(totalPayout)}
+            {formatCurrency(totalPayout, currency)}
           </span>
         </div>
       </div>
@@ -195,7 +226,12 @@ export default function HrPayroll() {
         ) : (
           <div className="space-y-3">
             {teamsWithPayout.map((team) => (
-              <TeamEntryCard key={team.id} team={team} showPayout />
+              <TeamEntryCard
+                key={team.id}
+                team={team}
+                showPayout
+                currency={currency}
+              />
             ))}
           </div>
         )}

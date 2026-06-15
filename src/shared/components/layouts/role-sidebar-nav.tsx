@@ -21,9 +21,9 @@ export const hr_sidebar_nav: SidebarNavItem[] = [
     badgeKey: "meetings",
   },
   {
-    label: "Mood Heatmap",
-    icon: <RiHeartPulseLine size={18} />,
-    to: "/dash/hr/mood",
+    label: "Teams",
+    icon: <HiOutlineUserGroup size={18} />,
+    to: "/dash/hr/teams",
   },
   {
     label: "Team Analysis",
@@ -36,9 +36,9 @@ export const hr_sidebar_nav: SidebarNavItem[] = [
     to: "/dash/hr/flight-risks",
   },
   {
-    label: "Teams",
-    icon: <HiOutlineUserGroup size={18} />,
-    to: "/dash/hr/teams",
+    label: "Mood Heatmap",
+    icon: <RiHeartPulseLine size={18} />,
+    to: "/dash/hr/mood",
   },
 ];
 

@@ -87,6 +87,8 @@ function AppTopbar({ actions }: AppTopbarProps) {
                 />
               ) : (
                 <AviPlaceholder
+                  firstName={user.user.first_name}
+                  lastName={user.user.last_name}
                   aria-label={`${userFullName}'s avatar placeholder`}
                 />
               )}
