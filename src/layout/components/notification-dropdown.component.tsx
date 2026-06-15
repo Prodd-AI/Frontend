@@ -4,6 +4,42 @@ import { Link } from "react-router-dom";
 import { formatTimeAgo } from "@/shared/utils/date.utils";
 import { NotificationIcon } from "@/shared/components/notification-icon.component";
 
+// Top-level route segments this SPA actually serves. A notification whose
+// action_url points elsewhere would hit the catch-all 404 route, so we route
+// those to the notifications page instead.
+const KNOWN_ROUTE_SEGMENTS = new Set([
+  "dash",
+  "settings",
+  "notifications",
+  "welcome",
+  "privacy-policy",
+  "auth",
+  "onboarding",
+]);
+
+type NotificationTarget =
+  | { kind: "external"; href: string }
+  | { kind: "internal"; to: string }
+  | { kind: "none" };
+
+/**
+ * Decide where a notification should navigate. Guards against action_urls that
+ * would 404: external links open in a new tab, unknown internal paths fall back
+ * to the notifications page, and missing urls are non-clickable.
+ */
+function getNotificationTarget(actionUrl?: string): NotificationTarget {
+  if (!actionUrl) return { kind: "none" };
+  if (/^https?:\/\//i.test(actionUrl)) {
+    return { kind: "external", href: actionUrl };
+  }
+  if (!actionUrl.startsWith("/")) return { kind: "internal", to: "/notifications" };
+  if (actionUrl === "/") return { kind: "internal", to: "/" };
+  const firstSegment = actionUrl.replace(/^\/+/, "").split(/[/?#]/)[0];
+  return KNOWN_ROUTE_SEGMENTS.has(firstSegment)
+    ? { kind: "internal", to: actionUrl }
+    : { kind: "internal", to: "/notifications" };
+}
+
 interface NotificationDropdownProps {
   notifications: AppNotification[];
   isLoading?: boolean;
@@ -115,14 +151,32 @@ const NotificationDropdown = ({
                 : ""
             } hover:bg-gray-50/60`;
 
-            return notification.action_url ? (
+            const target = getNotificationTarget(notification.action_url);
+            const handleNavigate = () => {
+              if (!notification.is_read) onMarkAsRead(notification.id);
+            };
+
+            if (target.kind === "external") {
+              return (
+                <a
+                  key={notification.id}
+                  href={target.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={wrapperClass}
+                  onClick={handleNavigate}
+                >
+                  {body}
+                </a>
+              );
+            }
+
+            return target.kind === "internal" ? (
               <Link
                 key={notification.id}
-                to={notification.action_url}
+                to={target.to}
                 className={wrapperClass}
-                onClick={() => {
-                  if (!notification.is_read) onMarkAsRead(notification.id);
-                }}
+                onClick={handleNavigate}
               >
                 {body}
               </Link>
