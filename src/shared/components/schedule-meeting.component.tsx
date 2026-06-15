@@ -222,6 +222,13 @@ const ScheduleMeeting = ({
     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
   };
 
+  // Meetings can't be scheduled in the past — earliest selectable day is today.
+  const minScheduleDate = (() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  })();
+
   const onSubmit = (values: ScheduleMeetingFormData) => {
     // Send the picker's local wall-clock date/time exactly as selected — no
     // timezone conversion. Backend stores what's sent, and the user expects
@@ -411,6 +418,7 @@ const ScheduleMeeting = ({
                   placeholder="Select date"
                   outputFormat="date"
                   className="h-[55px] "
+                  minDate={minScheduleDate}
                 />
               )}
             />
