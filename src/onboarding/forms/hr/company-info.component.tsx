@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TimePicker } from "@/components/ui/time-picker";
 import { UseFormReturn } from "react-hook-form";
 
 const ORGANIZATION_TYPE_OPTIONS = [
@@ -21,6 +22,8 @@ export interface CompanyInfoFormData {
   name: string;
   size: number;
   industry: string;
+  opening_time: string;
+  closing_time: string;
 }
 
 interface CompanyInfoProps {
@@ -37,6 +40,8 @@ interface CompanyInfoProps {
 function CompanyInfo({ form }: CompanyInfoProps) {
   const {
     register,
+    watch,
+    setValue,
     formState: { errors },
   } = form;
 
@@ -123,6 +128,54 @@ function CompanyInfo({ form }: CompanyInfoProps) {
               {errors.industry.message}
             </div>
           )}
+        </div>
+
+        {/* Work Hours */}
+        <div className="flex flex-col gap-2">
+          <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+            Work Hours
+          </Label>
+          <p className="text-xs sm:text-sm text-[#6B7280]">
+            Set your organization&apos;s standard operating hours
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <TimePicker
+                label="Opening Time"
+                value={watch("opening_time")}
+                onChange={(time) =>
+                  setValue("opening_time", time, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
+                placeholder="09:00 AM"
+              />
+              {errors.opening_time && (
+                <div className="text-red-500 text-xs sm:text-sm">
+                  {errors.opening_time.message}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <TimePicker
+                label="Closing Time"
+                value={watch("closing_time")}
+                onChange={(time) =>
+                  setValue("closing_time", time, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
+                placeholder="05:00 PM"
+              />
+              {errors.closing_time && (
+                <div className="text-red-500 text-xs sm:text-sm">
+                  {errors.closing_time.message}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
