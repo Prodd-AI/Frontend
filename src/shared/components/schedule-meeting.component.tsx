@@ -30,6 +30,9 @@ import {
   TeamMember,
 } from "./team-member-selector.component";
 import { DatePickerField } from "./date-picker-field.component";
+import MeetingLinkSection, {
+  type MeetingLinkMode,
+} from "./meeting-link-section.component";
 
 export type ScheduleMeetingType =
   | "1:1"
@@ -83,9 +86,31 @@ const schema = z.object({
     .array(z.email())
     .min(1, "At least one attendee is required"),
 
-  meeting_link: z
-    .url("Please enter a valid URL")
-    .min(1, "Meeting link is required"),
+  meeting_link_mode: z.enum(["manual", "google_meet"]),
+
+  meeting_link: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (!data.meeting_link?.trim()) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["meeting_link"],
+      message:
+        data.meeting_link_mode === "google_meet"
+          ? "Generate a Google Meet link before scheduling"
+          : "Meeting link is required",
+    });
+    return;
+  }
+
+  try {
+    new URL(data.meeting_link);
+  } catch {
+    ctx.addIssue({
+      code: "custom",
+      path: ["meeting_link"],
+      message: "Please enter a valid URL",
+    });
+  }
 });
 
 type ScheduleMeetingFormData = z.infer<typeof schema>;
@@ -122,6 +147,8 @@ const ScheduleMeeting = ({
       title: defaultValuesProp?.title ?? "",
       type: defaultValuesProp?.type ?? undefined,
       description: defaultValuesProp?.description ?? "",
+      meeting_link_mode: "manual" as MeetingLinkMode,
+      meeting_link: "",
       // Auto-include the organizer so they don't have to add themselves
       // before submitting.
       attendee_emails: (() => {
@@ -147,6 +174,11 @@ const ScheduleMeeting = ({
   }, [defaultValuesProp, reset, user?.user.email]);
 
   const selectedAttendeeEmails = watch("attendee_emails");
+
+  const handleMeetingLinkModeChange = (mode: MeetingLinkMode) => {
+    setValue("meeting_link_mode", mode, { shouldValidate: true });
+    setValue("meeting_link", "", { shouldValidate: true });
+  };
 
   // The two team endpoints return different shapes; normalize to a common
   // `{ data: TeamRow[] }` so React Query has a single type to infer.
@@ -243,7 +275,7 @@ const ScheduleMeeting = ({
       date: `${y}-${m}-${d}`,
       time: convertTo24Hour(values.time),
       attendee_emails: values.attendee_emails,
-      meeting_link: values.meeting_link,
+      meeting_link: values.meeting_link ?? "",
     });
   };
 
@@ -314,22 +346,30 @@ const ScheduleMeeting = ({
           )}
         </div>
 
-        {/* Meeting Link */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">
-            Meeting Link <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            {...register("meeting_link")}
-            placeholder="e.g. https://zoom.us/j/..."
-            className="h-12 bg-gray-50/80 border border-gray-200/60 rounded-xl text-sm placeholder:text-muted-foreground/50 transition-all duration-200 focus:bg-white focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
-          />
-          {errors.meeting_link && (
-            <p className="text-red-500 text-sm">
-              {errors.meeting_link.message}
-            </p>
+        <Controller
+          name="meeting_link_mode"
+          control={control}
+          defaultValue="manual"
+          render={({ field: modeField }) => (
+            <Controller
+              name="meeting_link"
+              control={control}
+              render={({ field: linkField }) => (
+                <MeetingLinkSection
+                  mode={modeField.value ?? "manual"}
+                  onModeChange={(mode) => {
+                    modeField.onChange(mode);
+                    handleMeetingLinkModeChange(mode);
+                  }}
+                  meetingLink={linkField.value ?? ""}
+                  onMeetingLinkChange={linkField.onChange}
+                  error={errors.meeting_link?.message}
+                  userEmail={user?.user.email}
+                />
+              )}
+            />
           )}
-        </div>
+        />
 
         {/* Meeting Type */}
         <div className="space-y-2">
