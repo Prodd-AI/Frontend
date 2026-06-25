@@ -93,6 +93,14 @@ const verify_email_schema = z.object({
   code: z.string().length(6, "Code must be exactly 6 digits"),
 });
 
+const time_12_hour_schema = z
+  .string()
+  .min(1, "Time is required")
+  .regex(
+    /^\d{1,2}:\d{2}\s?(AM|PM)$/i,
+    "Please select a valid time",
+  );
+
 // Company Info Schema
 const company_info_schema = z.object({
   name: z
@@ -107,6 +115,8 @@ const company_info_schema = z.object({
     .string()
     .min(1, "Industry is required")
     .max(100, "Industry must not exceed 100 characters"),
+  opening_time: time_12_hour_schema,
+  closing_time: time_12_hour_schema,
 });
 
 // Team Schema

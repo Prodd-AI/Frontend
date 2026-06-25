@@ -26,6 +26,7 @@ import { useMutation } from "@tanstack/react-query";
 import { createOrganization } from "@/config/services/organizations.service";
 import { createTeam, addTeamMembers } from "@/config/services/teams.service";
 import { useState } from "react";
+import { convertTo24Hour } from "@/shared/utils/date.utils";
 
 function HrSetup() {
   const navigate = useNavigate();
@@ -42,6 +43,8 @@ function HrSetup() {
       name: "",
       size: 0,
       industry: "",
+      opening_time: "09:00 AM",
+      closing_time: "05:00 PM",
     },
   });
 
@@ -94,7 +97,13 @@ function HrSetup() {
   const { mutate: createOrg } = useMutation<
     GeneralReturnInt<unknown>,
     GeneralErrorInt,
-    { name: string; size: string; industry: string }
+    {
+      name: string;
+      size: string;
+      industry: string;
+      opening_time: string;
+      closing_time: string;
+    }
   >({
     mutationFn: (data) => createOrganization(data),
     onSuccess: (response) => {
@@ -204,10 +213,12 @@ function HrSetup() {
         }
         const formData = companyInfoForm.getValues();
         // Convert size number to string for API
-        const apiData: { name: string; size: string; industry: string } = {
+        const apiData = {
           name: formData.name,
           size: String(formData.size),
           industry: formData.industry,
+          opening_time: convertTo24Hour(formData.opening_time),
+          closing_time: convertTo24Hour(formData.closing_time),
         };
         await new Promise<void>((resolve, reject) => {
           createOrg(apiData, {
