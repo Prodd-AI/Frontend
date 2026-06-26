@@ -3,7 +3,6 @@ import { useMemo } from "react";
 function OnboardingProgressTracker({
   steps = [],
   gotoNextWizard,
-  isMobile,
 }: OnboardingProgressTrackerPropsInt) {
   const progressPercentage = useMemo(() => {
     if (steps.length === 0) return 0;
@@ -11,18 +10,18 @@ function OnboardingProgressTracker({
     return (completedSteps / steps.length) * 100;
   }, [steps]);
 
-  if (isMobile) {
-    return (
-      <div className="w-full space-y-2">
-        <div className="flex items-center justify-between">
+  return (
+    <>
+      <div className="w-full space-y-2 min-[60rem]:hidden">
+        <div className="flex items-center justify-between gap-2">
           {steps.map(({ label, id, active }) => (
             <div
-              className="flex items-center gap-1"
+              className="flex min-w-0 items-center gap-1"
               key={id}
               onClick={gotoNextWizard(id)}
             >
               <span
-                className={`text-[12px] tracking-[-2%] whitespace-nowrap ${
+                className={`truncate text-[12px] tracking-[-2%] ${
                   active ? "text-[#6619DE] font-semibold" : "text-[#6B7280]"
                 }`}
               >
@@ -43,15 +42,12 @@ function OnboardingProgressTracker({
           </span>
         </div>
       </div>
-    );
-  }
-  return (
-    <div className="w-full h-[2.875rem] flex items-center">
+      <div className="hidden min-[60rem]:flex w-full h-[2.875rem] items-center min-w-0">
       {steps.map(({ Icon, label, active, id }, index) => (
-        <div key={id} className="flex items-center gap-[11px] flex-1">
-          <div className="flex items-center gap-[11px]">
+        <div key={id} className="flex min-w-0 items-center gap-[11px] flex-1">
+          <div className="flex min-w-0 items-center gap-[11px]">
             <div
-              className={`size-[46px] rounded-full flex justify-center items-center cursor-pointer transition-all ease-out ${
+              className={`size-[46px] shrink-0 rounded-full flex justify-center items-center cursor-pointer transition-all ease-out ${
                 active ? "bg-[#6619DE]" : "bg-[#F1EDF6]"
               }`}
               onClick={gotoNextWizard(id)}
@@ -62,7 +58,7 @@ function OnboardingProgressTracker({
               />
             </div>
             <h5
-              className={`text-[0.974rem] leading-[15px] font-semibold whitespace-nowrap ${
+              className={`truncate text-[0.974rem] leading-[15px] font-semibold ${
                 active ? "text-[#6619DE]" : "text-[#6B7280]"
               }`}
             >
@@ -72,14 +68,15 @@ function OnboardingProgressTracker({
 
           {index < steps.length - 1 && (
             <div
-              className={`h-[4px] flex-1 mx-2 rounded-full transition-all duration-300 ${
+              className={`h-[4px] min-w-[8px] flex-1 mx-2 rounded-full transition-all duration-300 ${
                 steps[index + 1]?.active ? "bg-[#6619DE]" : "bg-[#E5E7EB]"
               }`}
             />
           )}
         </div>
       ))}
-    </div>
+      </div>
+    </>
   );
 }
 
