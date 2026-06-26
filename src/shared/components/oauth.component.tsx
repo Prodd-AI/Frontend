@@ -150,9 +150,12 @@ function Oauth({ onError }: OauthProps) {
 
   return (
     <div className="flex flex-col items-center">
-      <p className="text-[#454950] text-[1rem] font-medium mt-[27px]">
-        or using
-      </p>
+      <div className="flex justify-center items-center w-full my-2 relative">
+        <div className="w-full h-0.5 bg-black opacity-10" />
+        <p className="text-[#454950] text-[1rem] font-medium absolute top-1/2 -translate-y-1/2 px-4 py-2 bg-white z-10">
+          or 
+        </p>
+      </div>
       <div className="relative mt-[17px] w-full">
         <button
           type="button"

@@ -1,7 +1,7 @@
 import { MoodType } from "@/shared/typings/mood-trend";
 
 const SERVER_URL =
-  import.meta.env.VITE_SERVER_URL || "https://api.prodily.tech/api/v1/";
+  import.meta.env.VITE_SERVER_URL || "https://api.dev.prodily.tech/api/v1/";
 
 // Common timezones with their abbreviations
 const COMMON_TIMEZONES = [
