@@ -3,6 +3,7 @@ import { RiUserLine } from "react-icons/ri";
 import { MdOutlinePhotoCamera } from "react-icons/md";
 import ProfilePictureUploadModal from "@/shared/components/profile-picture-upload-modal.component";
 import { Label } from "@/components/ui/label";
+import FormFieldLabel from "@/shared/components/form-field-label";
 import { Input } from "@/components/ui/input";
 import { GiPadlock } from "react-icons/gi";
 import useAuthStore from "@/config/stores/auth.store";
@@ -84,12 +85,13 @@ const QuickSetupComponent = ({ form }: QuickSetupComponentProps) => {
         <form className="w-full flex gap-4 flex-col mt-9">
           <div className="flex gap-5 flex-col sm:flex-row">
             <div className="flex-1">
-              <Label
+              <FormFieldLabel
                 htmlFor="first_name"
                 className="text-[#000000] font-semibold text-sm sm:text-base"
+                required
               >
                 First name
-              </Label>
+              </FormFieldLabel>
               <Input
                 type="text"
                 id="first_name"
@@ -103,12 +105,13 @@ const QuickSetupComponent = ({ form }: QuickSetupComponentProps) => {
               )}
             </div>
             <div className="flex-1">
-              <Label
+              <FormFieldLabel
                 htmlFor="last_name"
                 className="text-[#000000] font-semibold text-sm sm:text-base"
+                required
               >
                 Last name
-              </Label>
+              </FormFieldLabel>
               <Input
                 type="text"
                 id="last_name"

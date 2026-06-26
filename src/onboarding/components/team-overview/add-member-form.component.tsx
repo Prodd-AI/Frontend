@@ -1,3 +1,4 @@
+import FormFieldLabel from "@/shared/components/form-field-label";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -19,12 +20,13 @@ const AddTeamMember = ({ register, control }: AddTeamMemberPropsInt) => {
       <div className="space-y-4">
         {/* First Name */}
         <div className="space-y-1.5">
-          <label
+          <FormFieldLabel
             htmlFor="first_name"
             className="text-sm font-medium text-gray-700"
+            required
           >
             First Name
-          </label>
+          </FormFieldLabel>
           <Input
             {...register("first_name")}
             type="text"
@@ -35,12 +37,13 @@ const AddTeamMember = ({ register, control }: AddTeamMemberPropsInt) => {
         </div>
         {/* Last Name */}
         <div className="space-y-1.5">
-          <label
+          <FormFieldLabel
             htmlFor="last_name"
             className="text-sm font-medium text-gray-700"
+            required
           >
             Last Name
-          </label>
+          </FormFieldLabel>
           <Input
             {...register("last_name")}
             type="text"
@@ -52,9 +55,13 @@ const AddTeamMember = ({ register, control }: AddTeamMemberPropsInt) => {
 
         {/* Email */}
         <div className="space-y-1.5">
-          <label htmlFor="email" className="text-sm font-medium text-gray-700">
+          <FormFieldLabel
+            htmlFor="email"
+            className="text-sm font-medium text-gray-700"
+            required
+          >
             Email
-          </label>
+          </FormFieldLabel>
           <Input
             {...register("email")}
             id="email"
@@ -65,12 +72,13 @@ const AddTeamMember = ({ register, control }: AddTeamMemberPropsInt) => {
         </div>
 
         <div className="space-y-1.5">
-          <label
+          <FormFieldLabel
             htmlFor="user_role"
             className="text-sm font-medium text-gray-700"
+            required
           >
             Role
-          </label>
+          </FormFieldLabel>
           <Controller
             name="user_role"
             control={control}

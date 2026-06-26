@@ -3,6 +3,7 @@ import { FaRegUser } from "react-icons/fa6";
 import { MdOutlinePhotoCamera } from "react-icons/md";
 import ProfilePictureUploadModal from "@/shared/components/profile-picture-upload-modal.component";
 import { Label } from "@/components/ui/label";
+import FormFieldLabel from "@/shared/components/form-field-label";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { GiPadlock } from "react-icons/gi";
@@ -56,7 +57,9 @@ function SetupProfile({ form }: SetupProfileProps) {
         <form className="w-full flex gap-4 flex-col mt-9">
           <div className="flex gap-5 flex-col sm:flex-row">
             <div className="flex-1">
-              <Label htmlFor="first_name">First Name</Label>
+              <FormFieldLabel htmlFor="first_name" required>
+                First Name
+              </FormFieldLabel>
               <Input
                 type="text"
                 id="first_name"
@@ -70,7 +73,9 @@ function SetupProfile({ form }: SetupProfileProps) {
               )}
             </div>
             <div className="flex-1">
-              <Label htmlFor="last_name">Last Name</Label>
+              <FormFieldLabel htmlFor="last_name" required>
+                Last Name
+              </FormFieldLabel>
               <Input
                 type="text"
                 id="last_name"
@@ -99,11 +104,11 @@ function SetupProfile({ form }: SetupProfileProps) {
             </div>
           </div>
           <div className="mt-2">
-            <Label>Timezone</Label>
+            <FormFieldLabel required>Timezone</FormFieldLabel>
             <TimezoneSelect value={watch("timezone")} />
           </div>
           <div className="mt-2">
-            <Label>Work Hours</Label>
+            <FormFieldLabel required>Work Hours</FormFieldLabel>
             <div className="flex gap-4 mt-2">
               <TimePicker
                 value={watch("start_work_hour")}
