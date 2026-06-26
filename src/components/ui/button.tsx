@@ -20,7 +20,11 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent text-[#6B72808F] hover:text-accent-foreground bg-[#6B728017] dark:hover:bg-accent/50",
         link: "text-[#251F2D] underline-offset-4 hover:underline",
-				gradient: "text-white bg-[linear-gradient(269.35deg,_#1C75BC_-4.25%,_#6619DE_30.49%)]"
+				gradient: "text-white bg-[linear-gradient(269.35deg,_#1C75BC_-4.25%,_#6619DE_30.49%)]",
+        scheduleMeeting:
+          "brand-purple-cta-surface brand-purple-cta-btn schedule-meeting-btn shadow-none rounded-none",
+        joinCall:
+          "brand-purple-cta-surface brand-purple-cta-btn join-call-btn shadow-none rounded-none",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

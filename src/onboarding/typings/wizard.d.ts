@@ -25,7 +25,6 @@ interface OnboardingWizardCardLayoutPropsInt {
 interface OnboardingProgressTrackerPropsInt {
   steps: WizardStepActive[];
   gotoNextWizard: (id: string) => () => void;
-  isMobile: boolean;
 }
 
 interface OnboardingWizardFormComponentPropsInt {

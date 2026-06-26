@@ -7,10 +7,10 @@ function OnboardingWizardCardLayout({
   Wizard,
 }: OnboardingWizardCardLayoutPropsInt) {
   return (
-    <div className="flex justify-center sm:px-6 md:px-8">
-      <AuthCard className="w-full sm:!min-w-[60rem] lg:!min-w-[60rem]  min-h-[54.5rem]">
-        <div className="flex justify-between items-center">
-          <div className=" flex flex-col">
+    <div className="flex justify-center w-full min-w-0 box-border px-4 sm:px-6 md:px-8">
+      <AuthCard className="w-full min-w-0 !max-w-[60rem] lg:min-h-[54.5rem]">
+        <div className="flex flex-wrap justify-between items-start sm:items-center gap-4">
+          <div className="flex min-w-0 flex-col">
             {heading && (
               <h1 className=" text-[1.393rem] font-[600] text-[#251F2D]">
                 {heading}

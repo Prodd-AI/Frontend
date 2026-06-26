@@ -1,6 +1,6 @@
 import { ResetPasswordFormData } from "@/auth/typings/auth";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import FormFieldLabel from "@/shared/components/form-field-label";
 import { UseFormReturn } from "react-hook-form";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -17,9 +17,9 @@ function SetupPasswordComponent({ form }: SetupPasswordComponentProps) {
   return (
     <div className="flex flex-col gap-[19px]">
       <div className="flex flex-col gap-[9px]">
-        <Label htmlFor="new_password" className="font-semibold text-[1rem]">
+        <FormFieldLabel htmlFor="new_password" className="font-semibold text-[1rem]" required>
           Enter New Password
-        </Label>
+        </FormFieldLabel>
         <div className="relative">
           <Input
             type={showPassword ? "text" : "password"}
@@ -48,9 +48,9 @@ function SetupPasswordComponent({ form }: SetupPasswordComponentProps) {
         )}
       </div>
       <div className="flex flex-col gap-[9px]">
-        <Label htmlFor="confirm_password" className="font-semibold text-[1rem]">
+        <FormFieldLabel htmlFor="confirm_password" className="font-semibold text-[1rem]" required>
           Confirm New Password
-        </Label>
+        </FormFieldLabel>
         <div className="relative">
           <Input
             type={showConfirmPassword ? "text" : "password"}

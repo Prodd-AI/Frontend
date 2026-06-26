@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import FormFieldLabel from '@/shared/components/form-field-label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
 	Select,
@@ -41,7 +41,7 @@ const clampTime = (digits: string[]): string[] => {
 	return result;
 };
 
-export function TimePicker({ value = '', onChange, label, placeholder = 'Select time', className }: TimePickerProps) {
+export function TimePicker({ value = '', onChange, label, required = false, placeholder = 'Select time', className }: TimePickerProps) {
 	const [open, setOpen] = React.useState(false);
 	const [periodOpen, setPeriodOpen] = React.useState(false);
 	const [localTime, setLocalTime] = React.useState('12:00');
@@ -166,7 +166,14 @@ export function TimePicker({ value = '', onChange, label, placeholder = 'Select 
 
 	return (
 		<div className={cn('flex flex-col gap-2', className)}>
-			{label && <Label className="text-sm font-medium text-foreground">{label}</Label>}
+			{label && (
+				<FormFieldLabel
+					className="text-sm font-medium text-foreground"
+					required={required}
+				>
+					{label}
+				</FormFieldLabel>
+			)}
 
 			{/* Input: [HH:MM] [AM/PM toggle] [clock icon] - matches schedule-meeting form fields */}
 			<div className="relative flex items-center h-12 rounded-xl border border-gray-200/60 bg-gray-50/80 transition-all duration-200 focus-within:bg-white focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/10 focus-within:outline-none">

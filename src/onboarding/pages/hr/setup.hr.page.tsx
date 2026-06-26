@@ -41,7 +41,7 @@ function HrSetup() {
     resolver: zodResolver(company_info_schema),
     defaultValues: {
       name: "",
-      size: 0,
+      size: 1,
       industry: "",
       opening_time: "09:00 AM",
       closing_time: "05:00 PM",

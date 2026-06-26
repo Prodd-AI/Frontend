@@ -22,7 +22,6 @@ function SetupWizardFormComponent({ steps }: SetupWizardFormComponentPropsInt) {
       <OnboardingProgressTracker
         steps={activeSteps}
         gotoNextWizard={handleGotoWizard}
-        isMobile={isMobile}
       />
 
       <OnboardingWizardFormComponent

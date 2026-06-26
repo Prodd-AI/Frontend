@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import FormFieldLabel from "@/shared/components/form-field-label";
 import {
   Select,
   SelectContent,
@@ -66,9 +66,12 @@ function TeamSetup({ form }: TeamSetupProps) {
         >
           {/* Team Type */}
           <div className="flex-1 flex flex-col gap-2">
-            <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+            <FormFieldLabel
+              className="text-[#000000] font-semibold text-sm sm:text-base"
+              required
+            >
               Team Type
-            </Label>
+            </FormFieldLabel>
             <Select
               value={form.watch(`teams.${index}.team_type`)}
               onValueChange={(value) => {
@@ -132,9 +135,12 @@ function TeamSetup({ form }: TeamSetupProps) {
 
           {/* Description */}
           <div className="flex-1 flex flex-col gap-2">
-            <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+            <FormFieldLabel
+              className="text-[#000000] font-semibold text-sm sm:text-base"
+              required
+            >
               Description
-            </Label>
+            </FormFieldLabel>
             <Input
               className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
               placeholder="Enter team description"
@@ -149,9 +155,12 @@ function TeamSetup({ form }: TeamSetupProps) {
 
           {/* Team Size */}
           <div className="w-full md:w-1/3 flex flex-col gap-2">
-            <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+            <FormFieldLabel
+              className="text-[#000000] font-semibold text-sm sm:text-base"
+              required
+            >
               Team Size
-            </Label>
+            </FormFieldLabel>
             <div className="flex gap-2">
               <Input
                 className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"

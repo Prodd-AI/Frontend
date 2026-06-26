@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import FormFieldLabel from "@/shared/components/form-field-label";
 import {
   Select,
   SelectContent,
@@ -73,9 +73,12 @@ function InviteMember({ form }: InviteMemberProps) {
           <div className="flex flex-col md:flex-row gap-4">
             {/* First Name */}
             <div className="flex-1 flex flex-col gap-2">
-              <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+              <FormFieldLabel
+                className="text-[#000000] font-semibold text-sm sm:text-base"
+                required
+              >
                 First Name
-              </Label>
+              </FormFieldLabel>
               <Input
                 className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
                 placeholder="John"
@@ -90,9 +93,12 @@ function InviteMember({ form }: InviteMemberProps) {
 
             {/* Last Name */}
             <div className="flex-1 flex flex-col gap-2">
-              <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+              <FormFieldLabel
+                className="text-[#000000] font-semibold text-sm sm:text-base"
+                required
+              >
                 Last Name
-              </Label>
+              </FormFieldLabel>
               <Input
                 className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
                 placeholder="Doe"
@@ -109,9 +115,12 @@ function InviteMember({ form }: InviteMemberProps) {
           <div className="flex flex-col md:flex-row gap-4">
             {/* Email */}
             <div className="flex-1 flex flex-col gap-2">
-              <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+              <FormFieldLabel
+                className="text-[#000000] font-semibold text-sm sm:text-base"
+                required
+              >
                 Email
-              </Label>
+              </FormFieldLabel>
               <Input
                 className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
                 placeholder="john@youremail.com"
@@ -128,9 +137,12 @@ function InviteMember({ form }: InviteMemberProps) {
           <div className="flex flex-col md:flex-row gap-4">
             {/* Role */}
             <div className="flex-1 flex flex-col gap-2">
-              <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+              <FormFieldLabel
+                className="text-[#000000] font-semibold text-sm sm:text-base"
+                required
+              >
                 Role
-              </Label>
+              </FormFieldLabel>
               <Controller
                 name={`members.${index}.user_role`}
                 control={control}
@@ -155,9 +167,12 @@ function InviteMember({ form }: InviteMemberProps) {
 
             {/* Team */}
             <div className="flex-1 flex flex-col gap-2">
-              <Label className="text-[#000000] font-semibold text-sm sm:text-base">
+              <FormFieldLabel
+                className="text-[#000000] font-semibold text-sm sm:text-base"
+                required
+              >
                 Team
-              </Label>
+              </FormFieldLabel>
               <Controller
                 name={`members.${index}.team_id`}
                 control={control}

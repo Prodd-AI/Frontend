@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Video, Users, X } from "lucide-react";
+import { Video, X } from "lucide-react";
+import ScheduleMeetingCtaButton from "@/shared/components/schedule-meeting-cta-button.component";
 import { TimePicker } from "@/components/ui/time-picker";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -542,14 +543,12 @@ const ScheduleMeeting = ({
             <X className="w-4 h-4 mr-2" />
             Cancel
           </Button>
-          <Button
+          <ScheduleMeetingCtaButton
             type="submit"
             disabled={isPending}
-            className="h-11 px-6 rounded-xl bg-primary text-white font-medium transition-all duration-200 hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20"
           >
-            <Users className="w-4 h-4 mr-2" />
             {isPending ? "Scheduling..." : "Schedule Meeting"}
-          </Button>
+          </ScheduleMeetingCtaButton>
         </div>
       </div>
     </form>

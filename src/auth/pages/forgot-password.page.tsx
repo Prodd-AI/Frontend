@@ -1,5 +1,5 @@
-import AuthFormLayout from "@/shared/components/auth-form-layout";
-import AuthLayout from "@/shared/components/auth.layout.component";
+import AuthImmersiveFormLayout from "@/shared/components/auth-immersive-form-layout";
+import AuthImmersiveLayout from "@/shared/components/auth-immersive.layout.component";
 import ForgotPasswordFormComponent from "@/auth/components/forms/forgot-password.form.component";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -33,27 +33,23 @@ function ForgotPassword() {
     },
   });
   return (
-    <AuthLayout
-      children={
-        <>
-          {showEmailConfirmationComponent ? (
-            <ShowEmailConfirmation email={email} mutate={mutate} />
-          ) : (
-            <AuthFormLayout
-              title="Reset Your Password"
-              subTitle="Enter your email to receive a link and create a new password."
-              Form={
-                <ForgotPasswordFormComponent
-                  email={email}
-                  isPending={isPending}
-                  mutate={mutate}
-                />
-              }
+    <AuthImmersiveLayout>
+      {showEmailConfirmationComponent ? (
+        <ShowEmailConfirmation email={email} mutate={mutate} />
+      ) : (
+        <AuthImmersiveFormLayout
+          title="Reset Your Password"
+          subTitle="Enter your email to receive a link and create a new password."
+          Form={
+            <ForgotPasswordFormComponent
+              email={email}
+              isPending={isPending}
+              mutate={mutate}
             />
-          )}
-        </>
-      }
-    />
+          }
+        />
+      )}
+    </AuthImmersiveLayout>
   );
 }
 

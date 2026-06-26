@@ -1,5 +1,6 @@
 import { Video, Clock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ScheduleMeetingCtaButton from "@/shared/components/schedule-meeting-cta-button.component";
 import { Badge } from "@/components/ui/badge";
 import {
   parseWallClockIso,
@@ -70,12 +71,10 @@ export const UpcomingSchedule = ({
           No upcoming meetings today
         </p>
         {onSchedule && (
-          <Button
+          <ScheduleMeetingCtaButton
             onClick={onSchedule}
-            className="mt-4 bg-[#6619DE] hover:bg-[#5710c4] rounded-xl h-10 px-5 font-semibold"
-          >
-            Schedule Meeting
-          </Button>
+            className="mt-4"
+          />
         )}
       </div>
     );
@@ -86,7 +85,7 @@ export const UpcomingSchedule = ({
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="size-11 rounded-xl bg-[#6619DE] flex items-center justify-center">
+          <span className="brand-purple-cta-surface brand-purple-icon-badge">
             <Video size={20} className="text-white" />
           </span>
           <h5 className="text-[#5A5D61] text-base font-medium">
@@ -132,7 +131,7 @@ export const UpcomingSchedule = ({
       {/* Actions */}
       <div className="flex items-center gap-4 mt-auto">
         <Button
-          className="text-white rounded-xl h-11 px-7 font-semibold text-sm bg-[#6619DE] hover:bg-[#5710c4] transition-colors"
+          variant="joinCall"
           onClick={() => window.open(meeting.meeting_link, "_blank")}
         >
           Join Call

@@ -2,6 +2,7 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import FormFieldLabel from "@/shared/components/form-field-label";
 import Oauth from "@/shared/components/oauth.component";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
@@ -128,7 +129,7 @@ const RegisterFormComponent = () => {
 
   return (
     <form
-      className="flex flex-col gap-4"
+      className="auth-immersive-form"
       onSubmit={handleSubmit(onSubmit)}
       noValidate
     >
@@ -136,6 +137,7 @@ const RegisterFormComponent = () => {
         open={banner.isOpen}
         description={banner.message}
         variant={banner.variant}
+        layout="compact"
         isDismiss
         title={banner.title}
         onDismiss={() =>
@@ -143,13 +145,10 @@ const RegisterFormComponent = () => {
         }
       />
 
-      <div className="flex flex-col gap-2">
-        <Label
-          htmlFor="first_name"
-          className="text-[#000000] font-semibold text-sm sm:text-base"
-        >
+      <div className="auth-immersive-field">
+        <FormFieldLabel htmlFor="first_name" className="auth-immersive-label" required>
           First Name
-        </Label>
+        </FormFieldLabel>
         <Input
           id="first_name"
           type="text"
@@ -157,46 +156,40 @@ const RegisterFormComponent = () => {
           placeholder="Enter your First name"
           aria-invalid={!!errors.first_name}
           aria-describedby={errors.first_name ? "first_name-error" : undefined}
-          className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
+          className="auth-immersive-input"
           {...register("first_name")}
         />
         {errors.first_name && (
-          <p id="first_name-error" className="text-red-500 text-xs sm:text-sm">
+          <p id="first_name-error" className="auth-immersive-error">
             {errors.first_name.message}
           </p>
         )}
       </div>
-      <div className="flex flex-col gap-2">
-        <Label
-          htmlFor="first_name"
-          className="text-[#000000] font-semibold text-sm sm:text-base"
-        >
+      <div className="auth-immersive-field">
+        <FormFieldLabel htmlFor="last_name" className="auth-immersive-label" required>
           Last Name
-        </Label>
+        </FormFieldLabel>
         <Input
-          id="second_name"
+          id="last_name"
           type="text"
           autoComplete="last_name"
           placeholder="Enter your Last name"
           aria-invalid={!!errors.last_name}
           aria-describedby={errors.last_name ? "last_name-error" : undefined}
-          className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
+          className="auth-immersive-input"
           {...register("last_name")}
         />
         {errors.last_name && (
-          <p id="last_name-error" className="text-red-500 text-xs sm:text-sm">
+          <p id="last_name-error" className="auth-immersive-error">
             {errors.last_name.message}
           </p>
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label
-          htmlFor="email"
-          className="text-[#000000] font-semibold text-sm sm:text-base"
-        >
+      <div className="auth-immersive-field">
+        <FormFieldLabel htmlFor="email" className="auth-immersive-label" required>
           Email
-        </Label>
+        </FormFieldLabel>
         <Input
           id="email"
           type="email"
@@ -204,23 +197,20 @@ const RegisterFormComponent = () => {
           placeholder="e.g johndoe@gmail.com"
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? "email-error" : undefined}
-          className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
+          className="auth-immersive-input"
           {...register("email")}
         />
         {errors.email && (
-          <p id="email-error" className="text-red-500 text-xs sm:text-sm">
+          <p id="email-error" className="auth-immersive-error">
             {errors.email.message}
           </p>
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label
-          htmlFor="password"
-          className="text-[#000000] font-semibold text-sm sm:text-base"
-        >
+      <div className="auth-immersive-field">
+        <FormFieldLabel htmlFor="password" className="auth-immersive-label" required>
           Password
-        </Label>
+        </FormFieldLabel>
         <div className="relative">
           <Input
             id="password"
@@ -229,7 +219,7 @@ const RegisterFormComponent = () => {
             placeholder="Enter password"
             aria-invalid={!!errors.password}
             aria-describedby={errors.password ? "password-error" : undefined}
-            className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14 pr-10"
+            className="auth-immersive-input pr-10"
             {...register("password")}
           />
           <button
@@ -238,18 +228,17 @@ const RegisterFormComponent = () => {
             className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-600"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
         {errors.password && (
-          <p id="password-error" className="text-red-500 text-xs sm:text-sm">
+          <p id="password-error" className="auth-immersive-error">
             {errors.password.message}
           </p>
         )}
 
-        {/* Password Strength Indicator */}
         {watchedPassword.length > 0 && (
-          <div className="space-y-2">
+          <div className="auth-password-strength">
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-600">Password strength:</span>
               <span
@@ -282,8 +271,7 @@ const RegisterFormComponent = () => {
               />
             </div>
 
-            {/* Requirements Checklist */}
-            <div className="space-y-1">
+            <div className="auth-password-requirements space-y-1">
               <div
                 className={`text-xs flex items-center gap-2 ${
                   passwordStrength.checks.length
@@ -349,14 +337,14 @@ const RegisterFormComponent = () => {
         )}
       </div>
 
-      <div className="flex items-center  sm:items-center gap-3 text-sm sm:text-base font-medium">
+      <div className="flex items-start gap-2 text-xs font-medium sm:text-sm">
         <Controller
           control={control}
           name="accepted"
           render={({ field }) => (
             <Checkbox
               id="accepted"
-              className="size-5 sm:size-[27px] bg-[#E0DAE8] mt-1 sm:mt-0"
+              className="mt-0.5 size-4 bg-[#E0DAE8]"
               checked={field.value}
               onCheckedChange={(v) => field.onChange(Boolean(v))}
               aria-invalid={!!errors.accepted}
@@ -375,13 +363,10 @@ const RegisterFormComponent = () => {
               className="text-[#6619DE] underline underline-offset-2"
             >
               privacy policy
-            </Link>
+            </Link><span className="form-required-asterisk">*</span>
           </p>
           {errors.accepted && (
-            <p
-              id="accepted-error"
-              className="text-red-500 text-xs sm:text-sm mt-1"
-            >
+            <p id="accepted-error" className="auth-immersive-error mt-1">
               {errors.accepted.message}
             </p>
           )}
@@ -392,7 +377,7 @@ const RegisterFormComponent = () => {
         type="submit"
         loading={isPending}
         loadingText="Creating Account..."
-        className="mt-2 h-11 sm:h-[2.543rem] md:h-14"
+        className="auth-immersive-btn"
       >
         Create Account
       </LoadingButton>
@@ -406,10 +391,10 @@ const RegisterFormComponent = () => {
           })
         }
       />
-      <div className="text-center mt-[19px] font-[600] text-[1rem]">
+      <div className="auth-immersive-link-row">
         <p>
           Already have an account?{" "}
-          <Link to="/auth/login" className=" text-[#6619DE] hover:underline">
+          <Link to="/auth/login" className="text-[#6619DE] hover:underline">
             Login
           </Link>
         </p>

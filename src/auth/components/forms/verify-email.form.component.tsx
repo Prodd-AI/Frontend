@@ -4,7 +4,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { LoadingButton } from "@/components/ui/loading-button";
-import { Label } from "@/components/ui/label";
+import FormFieldLabel from "@/shared/components/form-field-label";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -204,21 +204,26 @@ function VerifyEmailFormComponent({
   const isResendDisabled = isResending || resendCooldown > 0;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="auth-immersive-form">
       <Banner
         open={banner.isOpen}
         description={banner.message}
+        layout="compact"
         onDismiss={() =>
           setBanner({ message: "", variant: "success", isOpen: false })
         }
         variant={banner.variant}
         isDismiss
       />
-      <div className="flex flex-col gap-4 items-center">
-        <div className="flex flex-col gap-2 items-center">
-          <Label htmlFor="verification-code" className="sr-only">
+      <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center gap-1.5">
+          <FormFieldLabel
+            htmlFor="verification-code"
+            className="auth-immersive-label"
+            required
+          >
             Verification Code
-          </Label>
+          </FormFieldLabel>
           <Controller
             name="code"
             control={control}
@@ -235,58 +240,40 @@ function VerifyEmailFormComponent({
                 }}
                 disabled={isPending}
               >
-                <InputOTPGroup className="gap-2 w-[350px] lg:w-full sm:w-full">
-                  <InputOTPSlot
-                    index={0}
-                    className="size-[60px] text-lg font-semibold"
-                  />
-                  <InputOTPSlot
-                    index={1}
-                    className="size-[60px] text-lg font-semibold"
-                  />
-                  <InputOTPSlot
-                    index={2}
-                    className="size-[60px] text-lg font-semibold"
-                  />
-                  <InputOTPSlot
-                    index={3}
-                    className="size-[60px] text-lg font-semibold"
-                  />
-                  <InputOTPSlot
-                    index={4}
-                    className="size-[60px] text-lg font-semibold"
-                  />
-                  <InputOTPSlot
-                    index={5}
-                    className="size-[60px] text-lg font-semibold"
-                  />
+                <InputOTPGroup className="w-full max-w-[18rem] gap-1.5 sm:max-w-[20rem] sm:gap-2">
+                  <InputOTPSlot index={0} className="auth-immersive-otp-slot" />
+                  <InputOTPSlot index={1} className="auth-immersive-otp-slot" />
+                  <InputOTPSlot index={2} className="auth-immersive-otp-slot" />
+                  <InputOTPSlot index={3} className="auth-immersive-otp-slot" />
+                  <InputOTPSlot index={4} className="auth-immersive-otp-slot" />
+                  <InputOTPSlot index={5} className="auth-immersive-otp-slot" />
                 </InputOTPGroup>
               </InputOTP>
             )}
           />
           {errors.code && (
-            <p className="text-red-500 text-sm mt-1">{errors.code.message}</p>
+            <p className="auth-immersive-error mt-1">{errors.code.message}</p>
           )}
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
         <LoadingButton
           type="submit"
           loading={isPending}
           loadingText="Verifying..."
-          className="h-11 sm:h-[2.543rem] md:h-14 lg:w-[70%] lg:mx-auto"
+          className="auth-immersive-btn"
         >
           Verify Email
         </LoadingButton>
 
         <div className="text-center">
-          <p className="text-sm text-gray-600 mb-2">Didn't receive the code?</p>
+          <p className="mb-1 text-xs text-gray-600">Didn't receive the code?</p>
           <button
             type="button"
             onClick={handleResendCode}
             disabled={isResendDisabled}
-            className="text-[#6619DE] hover:underline text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+            className="text-xs font-medium text-[#6619DE] transition-opacity hover:underline disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isResending
               ? "Resending..."
@@ -296,11 +283,11 @@ function VerifyEmailFormComponent({
           </button>
         </div>
 
-        <p className="text-center mt-[19px] font-[600] text-[1rem]">
+        <p className="auth-immersive-link-row">
           Go back to{" "}
           <Link
             to="/auth/login"
-            className=" text-[#6619DE] hover:underline transition-all duration-300"
+            className="text-[#6619DE] transition-all duration-300 hover:underline"
           >
             Login
           </Link>

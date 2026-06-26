@@ -1,7 +1,7 @@
 import { ResetPasswordFormData } from "@/auth/typings/auth";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import FormFieldLabel from "@/shared/components/form-field-label";
 import { reset_password } from "@/config/services/auth.service";
 import { reset_password_schema } from "@/lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,7 +43,6 @@ function ResetPasswordFormComponent({
 
   const token = searchParam.get("token");
   const onSubmit = (values: ResetPasswordFormData) => {
-    console.log(values);
     if (!token) return;
     const transformedData = Object.assign(
       {
@@ -55,52 +54,51 @@ function ResetPasswordFormComponent({
     mutate(transformedData);
   };
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className=" flex flex-col gap-[19px]"
-    >
-      <div className=" flex flex-col gap-[9px]">
-        <Label htmlFor="password" className=" font-semibold text-[1rem]">
+    <form onSubmit={handleSubmit(onSubmit)} className="auth-immersive-form">
+      <div className="auth-immersive-field">
+        <FormFieldLabel htmlFor="password" className="auth-immersive-label" required>
           Enter New Password
-        </Label>
+        </FormFieldLabel>
         <Input
           placeholder="New password"
           id="password"
           {...register("new_password")}
-          className=" h-[55px] rounded-[10px]"
+          className="auth-immersive-input"
         />
         {errors.new_password && (
-          <div className=" text-red-500">{errors.new_password.message}</div>
+          <div className="auth-immersive-error">{errors.new_password.message}</div>
         )}
       </div>
-      <div className=" flex flex-col gap-[9px]">
-        <Label htmlFor="password" className=" font-semibold text-[1rem]">
+      <div className="auth-immersive-field">
+        <FormFieldLabel htmlFor="confirm-password" className="auth-immersive-label" required>
           Confirm New Password
-        </Label>
+        </FormFieldLabel>
         <Input
           placeholder="Confirm new password"
-          id="conmfirm-password"
+          id="confirm-password"
           {...register("confirm_password")}
-          className=" h-[55px] rounded-[10px]"
+          className="auth-immersive-input"
         />
         {errors.confirm_password && (
-          <div className=" text-red-500">{errors.confirm_password.message}</div>
+          <div className="auth-immersive-error">
+            {errors.confirm_password.message}
+          </div>
         )}
       </div>
       <LoadingButton
         type="submit"
         loading={isPending}
         loadingText="Submitting..."
-        className="h-11 sm:h-[2.543rem] md:h-14 mt-3"
+        className="auth-immersive-btn"
       >
         Submit
       </LoadingButton>
 
-      <p className="text-center mt-[19px] font-[600] text-[1rem]">
+      <p className="auth-immersive-link-row">
         Go back to{" "}
         <Link
           to="/auth/login"
-          className=" text-[#6619DE] hover:underline transition-all duration-300"
+          className="text-[#6619DE] transition-all duration-300 hover:underline"
         >
           Login
         </Link>

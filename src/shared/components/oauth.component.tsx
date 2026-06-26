@@ -149,26 +149,24 @@ function Oauth({ onError }: OauthProps) {
   };
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="flex justify-center items-center w-full my-2 relative">
-        <div className="w-full h-0.5 bg-black opacity-10" />
-        <p className="text-[#454950] text-[1rem] font-medium absolute top-1/2 -translate-y-1/2 px-4 py-2 bg-white z-10">
-          or 
-        </p>
+    <div className="flex w-full flex-col items-center">
+      <div className="auth-immersive-oauth-divider">
+        <div className="auth-immersive-oauth-divider-line" />
+        <p className="auth-immersive-oauth-divider-text">or</p>
       </div>
-      <div className="relative mt-[17px] w-full">
+      <div className="relative mt-2 w-full">
         <button
           type="button"
           onClick={handleGoogleClick}
           disabled={isPending || !scriptLoadedSuccessfully}
-          className="border border-[#6B72804F] hover:bg-black/10 transition-all duration-300 h-10 sm:h-[2.543rem] md:h-12 rounded-[9px] flex w-full items-center justify-center py-[7px] px-[13px] gap-[10px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="auth-immersive-oauth-btn cursor-pointer"
         >
           {isPending ? (
-            <Loader2 className="h-5 w-5 animate-spin text-[#6B7280]" />
+            <Loader2 className="h-4 w-4 animate-spin text-[#6B7280]" />
           ) : (
             <img src={googleIcon} alt="" aria-hidden="true" />
           )}
-          <span className="text-[#6B7280] font-medium text-[1rem]">
+          <span>
             {isPending ? "Signing in..." : "Continue with Google"}
           </span>
         </button>
