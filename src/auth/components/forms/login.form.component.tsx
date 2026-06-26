@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import FormFieldLabel from "@/shared/components/form-field-label";
 import { login_schema } from "@/lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -135,47 +136,40 @@ function LoginFormComponent() {
           variant={banner.variant}
           title={banner.title}
           description={banner.description}
+          layout="compact"
           isDismiss
           onDismiss={() => setBanner({ ...banner, open: false })}
         />
       )}
       <form
         noValidate
-        className="flex flex-col gap-4"
+        className="auth-immersive-form"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className=" flex flex-col gap-2">
-          <Label
-            htmlFor="email"
-            className="text-[#000000] font-semibold text-sm sm:text-base"
-          >
+        <div className="auth-immersive-field">
+          <FormFieldLabel htmlFor="email" className="auth-immersive-label" required>
             Email Address
-          </Label>
+          </FormFieldLabel>
           <Input
             id="email"
             type="email"
-            className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14"
-            placeholder="e.g  johndoe@gmail.com"
+            className="auth-immersive-input"
+            placeholder="e.g johndoe@gmail.com"
             {...register("email")}
             autoComplete="true"
           />
           {errors.email && (
-            <div className="text-red-500 text-xs sm:text-sm">
-              {errors.email.message}
-            </div>
+            <div className="auth-immersive-error">{errors.email.message}</div>
           )}
         </div>
-        <div className=" flex flex-col gap-2">
-          <Label
-            htmlFor="password"
-            className="text-[#000000] font-semibold text-sm sm:text-base"
-          >
+        <div className="auth-immersive-field">
+          <FormFieldLabel htmlFor="password" className="auth-immersive-label" required>
             Password
-          </Label>
+          </FormFieldLabel>
           <div className="relative">
             <Input
               id="password"
-              className="border border-[#6B728021] rounded-[10px] h-11 sm:h-12 md:h-14 pr-10"
+              className="auth-immersive-input pr-10"
               placeholder="Enter password"
               type={showPassword ? "text" : "password"}
               {...register("password")}
@@ -187,33 +181,30 @@ function LoginFormComponent() {
               className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-600"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
           {errors.password && (
-            <div className="text-red-500 text-xs sm:text-sm">
-              {errors.password.message}
-            </div>
+            <div className="auth-immersive-error">{errors.password.message}</div>
           )}
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Checkbox id="remember-me" />
-            <Label htmlFor="remember-me" className="text-sm font-medium">
+            <Label htmlFor="remember-me" className="text-xs font-light">
               Remember me
             </Label>
           </div>
           <Link
             to="/auth/forgot-password"
-            className=" text-[#251F2D] text-[1rem] underline hover:text-[#6619DE]"
+            className="text-xs font-light text-[#251F2D] underline hover:text-[#6619DE]"
           >
             Forgot Password?
           </Link>
         </div>
         <Button
           type="submit"
-          className={`mt-2 h-11 sm:h-[2.543rem] md:h-14 ${isPending && "opacity-25"
-            }`}
+          className={`auth-immersive-btn ${isPending && "opacity-25"}`}
           disabled={isPending}
         >
           {isPending ? "..." : "Login"}
@@ -228,15 +219,10 @@ function LoginFormComponent() {
             })
           }
         />
-        <div className="text-center mt-[19px] font-[600] text-[1rem]">
+        <div className="auth-immersive-link-row">
           <p>
-            {" "}
             Dont have an account?{" "}
-            <Link
-              to="/auth/register"
-              className=" text-[#6619DE] hover:underline"
-            >
-              {" "}
+            <Link to="/auth/register" className="text-[#6619DE] hover:underline">
               Create account
             </Link>
           </p>

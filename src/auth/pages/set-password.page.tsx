@@ -1,16 +1,16 @@
 import SetPasswordFormComponent from "@/auth/components/forms/set-password.form.component";
-import AuthFormLayout from "@/shared/components/auth-form-layout";
-import AuthLayout from "@/shared/components/auth.layout.component";
+import AuthImmersiveFormLayout from "@/shared/components/auth-immersive-form-layout";
+import AuthImmersiveLayout from "@/shared/components/auth-immersive.layout.component";
 
 function SetPassword() {
   return (
-    <AuthLayout>
-      <AuthFormLayout
+    <AuthImmersiveLayout>
+      <AuthImmersiveFormLayout
         title="Create Your Password"
         subTitle="Set a password for your account to continue onboarding."
         Form={<SetPasswordFormComponent />}
       />
-    </AuthLayout>
+    </AuthImmersiveLayout>
   );
 }
 

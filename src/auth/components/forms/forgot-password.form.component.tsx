@@ -1,7 +1,7 @@
 import { ForgotPasswordFormData } from "@/auth/typings/auth";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import FormFieldLabel from "@/shared/components/form-field-label";
 import { forgot_password_schema } from "@/lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UseMutateFunction } from "@tanstack/react-query";
@@ -44,37 +44,37 @@ function ForgotPasswordFormComponent({
   return (
     <form
       onSubmit={handleSubmit(ForgotPasswordOnSubmit)}
-      className="flex flex-col gap-[30px]"
+      className="auth-immersive-form"
     >
-      <div className="flex flex-col gap-[9px]">
-        <Label htmlFor="email" className=" text-[1rem] font-semibold">
+      <div className="auth-immersive-field">
+        <FormFieldLabel htmlFor="email" className="auth-immersive-label" required>
           Email Address
-        </Label>
+        </FormFieldLabel>
         <Input
           id="email"
           placeholder="e.g johndoe@gmail.com"
           type="email"
           {...register("email")}
-          className=" h-[55px] rounded-[10px]"
+          className="auth-immersive-input"
         />
         {errors.email && (
-          <div className=" text-red-500">{errors.email.message}</div>
+          <div className="auth-immersive-error">{errors.email.message}</div>
         )}
       </div>
       <LoadingButton
         type="submit"
         loading={isPending}
         loadingText="Submitting..."
-        className="h-11 sm:h-[2.543rem] md:h-14 w-full"
+        className="auth-immersive-btn w-full"
       >
         Submit
       </LoadingButton>
 
-      <p className="text-center mt-[19px] font-[600] text-[1rem]">
+      <p className="auth-immersive-link-row">
         Go back to{" "}
         <Link
           to="/auth/login"
-          className=" text-[#6619DE] hover:underline transition-all duration-300"
+          className="text-[#6619DE] transition-all duration-300 hover:underline"
         >
           Login
         </Link>

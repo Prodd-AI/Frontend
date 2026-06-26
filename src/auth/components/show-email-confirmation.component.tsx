@@ -1,4 +1,4 @@
-import AuthFormLayout from "@/shared/components/auth-form-layout";
+import AuthImmersiveFormLayout from "@/shared/components/auth-immersive-form-layout";
 import { UseMutateFunction } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import EmailIcon from "@/components/ui/email-icon";
@@ -35,29 +35,29 @@ function ShowEmailConfirmation({
   };
   const isResendCoolDown = resendCooldown > 0;
   return (
-    <AuthFormLayout
-      authCardClassName=" !max-w-[41.875rem] !min-h-[35.563rem] "
+    <AuthImmersiveFormLayout
+      centralizeText
       Form={
-        <div className="flex flex-col items-center">
-          <div className="size-[118px] bg-[#6619DE1A] rounded-full flex justify-center items-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="auth-immersive-status-icon">
             <EmailIcon />
           </div>
-          <div className=" flex flex-col items-center mt-[1.5rem] gap-[9px]">
-            <h2 className=" text-[1.75rem] font-[600] text-[#251F2D]">
-              Email Confirmation
-            </h2>
-            <p className=" text-[1rem] text-[#6B7280] text-center w-3/4">
-              We have sent email to <b>{email} </b> to confirm the validity of
+          <div className="flex flex-col items-center gap-1.5 text-center">
+            <h2 className="auth-immersive-status-title">Email Confirmation</h2>
+            <p className="auth-immersive-status-copy max-w-[18rem]">
+              We have sent email to <b>{email}</b> to confirm the validity of
               our email address. After receiving the email follow the link
               provided to complete you registration
             </p>
           </div>
 
-          <p className=" mt-[4.625rem] text-[1rem] text-[#6B7280]">
+          <p className="auth-immersive-status-copy text-center">
             Didn’t receive a link?{" "}
             <button
-              className={`text-[#6619DE] font-semibold hover:underline cursor-pointer ${
-                isResendCoolDown && "opacity-50 cursor-not-allowed"
+              className={`font-semibold text-[#6619DE] hover:underline ${
+                isResendCoolDown
+                  ? "cursor-not-allowed opacity-50"
+                  : "cursor-pointer"
               }`}
               onClick={handleResendLink}
               disabled={isResendCoolDown}
@@ -65,7 +65,11 @@ function ShowEmailConfirmation({
               Click here to resend
             </button>
           </p>
-          {isResendCoolDown && <span>Resend in {resendCooldown}s</span>}
+          {isResendCoolDown && (
+            <span className="text-xs text-[#6B7280]">
+              Resend in {resendCooldown}s
+            </span>
+          )}
         </div>
       }
     />
