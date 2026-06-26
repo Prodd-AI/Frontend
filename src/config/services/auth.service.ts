@@ -21,6 +21,17 @@ const login_team_member = (data: LoginFormData) => {
   );
 };
 
+// Google OAuth login
+const google_login_team_member = (data: {
+  id_token: string;
+  device_info?: string;
+}) => {
+  return auth_service.post<
+    GeneralReturnInt<TeamMember>,
+    typeof data
+  >("google", data);
+};
+
 //Verify Email
 const verify_email = (data: { email: string; otp: string }) => {
   return auth_service.post<GeneralReturnInt<TeamMember>, typeof data>(
@@ -127,6 +138,7 @@ const close_account = () => {
 export {
   regsiter_team_member,
   login_team_member,
+  google_login_team_member,
   verify_email,
   resend_otp,
   refresh_auth_with_team_member_profile,

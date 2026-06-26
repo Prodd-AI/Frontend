@@ -5,7 +5,7 @@ import { login_schema } from "@/lib/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-// import Oauth from "@/shared/components/oauth.component";
+import Oauth from "@/shared/components/oauth.component";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,8 +15,10 @@ import { login_team_member } from "@/config/services/auth.service";
 import useAuthStore from "@/config/stores/auth.store";
 import { TeamMember } from "@/shared/typings/team-member";
 import Banner from "@/shared/components/banner.component";
-
-const getRolePath = (role?: string | null) => role?.replace(/_/g, "-") ?? "";
+import {
+  getPostLoginPath,
+  persistAuthSession,
+} from "@/auth/utils/auth-success.utils";
 
 function LoginFormComponent() {
   const [showPassword, setShowPassword] = useState(false);
@@ -46,9 +48,7 @@ function LoginFormComponent() {
     mutationFn: (data) => login_team_member(data),
     onSuccess: (response) => {
       if (response?.data) {
-        login(response.data, response.data.access_token);
-        console.log(response.data.refresh_token)
-        localStorage.setItem("refresh_token_id", response.data.refresh_token);
+        persistAuthSession(response.data, login);
 
         setBanner({
           open: true,
@@ -58,18 +58,7 @@ function LoginFormComponent() {
         });
 
         reset();
-
-        const rolePath = getRolePath(response.data.user.user_role);
-
-        if (response.data.user.organization_id && response.data.user.is_onboarded) {
-          return navigate(rolePath ? `/dash/${rolePath}` : "/");
-        }
-        if (response.data.user.organization_id && !response.data.user.is_onboarded) {
-          return navigate(
-            rolePath ? `/onboarding/${rolePath}-setup` : "/onboarding/hr-setup",
-          );
-        }
-        return navigate("/onboarding/hr-setup");
+        return navigate(getPostLoginPath(response.data.user));
       } else {
         setBanner({
           open: true,
@@ -229,7 +218,16 @@ function LoginFormComponent() {
         >
           {isPending ? "..." : "Login"}
         </Button>
-        {/* <Oauth /> */}
+        <Oauth
+          onError={(title, description) =>
+            setBanner({
+              open: true,
+              variant: "critical",
+              title,
+              description,
+            })
+          }
+        />
         <div className="text-center mt-[19px] font-[600] text-[1rem]">
           <p>
             {" "}

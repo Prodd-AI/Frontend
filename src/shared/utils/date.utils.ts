@@ -115,6 +115,29 @@ export const isMeetingUpcomingOrRecent = (
   return mins >= -MEETING_VISIBLE_GRACE_MINUTES;
 };
 
+/** Converts a 12-hour time string (e.g. "09:00 AM") to military HH:MM. */
+export const convertTo24Hour = (timeStr: string): string => {
+  const match = timeStr
+    .trim()
+    .match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s?(AM|PM)$/i);
+
+  if (!match) {
+    return "00:00";
+  }
+
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2];
+  const period = match[4].toUpperCase();
+
+  if (period === "PM" && hours !== 12) {
+    hours += 12;
+  } else if (period === "AM" && hours === 12) {
+    hours = 0;
+  }
+
+  return `${hours.toString().padStart(2, "0")}:${minutes}`;
+};
+
 export const formatTimeAgo = (date: Date | string): string => {
   const currentDate = new Date(date);
   const now = new Date();

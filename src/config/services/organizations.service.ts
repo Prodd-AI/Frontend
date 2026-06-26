@@ -11,6 +11,8 @@ interface CreateOrganizationData {
   name: string;
   size: string | number;
   industry: string;
+  opening_time: string;
+  closing_time: string;
 }
 
 const createOrganization = (data: CreateOrganizationData) => {
