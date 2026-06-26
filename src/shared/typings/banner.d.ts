@@ -9,6 +9,9 @@ interface BannerPropsInt {
   title?: string;
   description?: string;
   className?: string;
+  titleClassName?: string;
+  descriptionClassName?: string;
+  contentClassName?: string;
   icon?: React.ReactNode;
   isDismiss?: boolean;
   onDismiss?: () => void;

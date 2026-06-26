@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { MdError, MdCheckCircle, MdInfo, MdWarning } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 
-// Variant-based color styles - brighter and more vibrant
 const variantStyles = {
   critical: "bg-gradient-to-r from-red-50 to-red-100 border-red-300",
   success: "bg-gradient-to-r from-emerald-50 to-emerald-100 border-emerald-300",
@@ -24,10 +23,30 @@ const textStyles = {
   info: "text-blue-700",
 };
 
-const paddingStyles = {
-  default: "p-4",
-  compact: "p-3",
-};
+const layoutStyles = {
+  default: {
+    root: "gap-3 rounded-xl p-4",
+    iconWrapper: "h-8 w-8",
+    iconSize: 20,
+    content: "py-0.5",
+    title: "text-sm font-semibold leading-5",
+    description: "text-sm leading-5",
+    descriptionSpacing: "mt-0.5",
+    dismissButton: "h-7 w-7",
+    dismissIconSize: 18,
+  },
+  compact: {
+    root: "gap-2 rounded-lg p-2.5",
+    iconWrapper: "h-6 w-6",
+    iconSize: 16,
+    content: "py-0",
+    title: "text-xs font-semibold leading-4",
+    description: "text-xs leading-snug",
+    descriptionSpacing: "mt-0.5",
+    dismissButton: "h-6 w-6",
+    dismissIconSize: 14,
+  },
+} as const;
 
 function Banner({
   className,
@@ -42,15 +61,20 @@ function Banner({
   isDismiss = false,
   layout = "default",
   actionsLayout = "inline",
+  titleClassName,
+  descriptionClassName,
+  contentClassName,
 }: BannerPropsInt) {
   const Icon =
     variant === "critical"
       ? MdError
       : variant === "success"
-      ? MdCheckCircle
-      : variant === "warning"
-      ? MdWarning
-      : MdInfo;
+        ? MdCheckCircle
+        : variant === "warning"
+          ? MdWarning
+          : MdInfo;
+
+  const styles = layoutStyles[layout];
 
   const handleDismiss = () => {
     onDismiss?.();
@@ -65,30 +89,35 @@ function Banner({
     <aside
       role={role}
       className={clsx(
-        "flex gap-3 border rounded-xl shadow-sm transition-all duration-300",
-        paddingStyles[layout],
+        "flex border shadow-sm transition-all duration-300",
+        styles.root,
         variant && variantStyles[variant],
-        className
+        className,
       )}
       aria-label={ariaLabel}
     >
       <div
         className={clsx(
-          "flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0",
+          "flex shrink-0 items-center justify-center rounded-full",
+          styles.iconWrapper,
           variant === "critical" && "bg-red-100",
           variant === "success" && "bg-emerald-100",
           variant === "warning" && "bg-amber-100",
-          variant === "info" && "bg-blue-100"
+          variant === "info" && "bg-blue-100",
         )}
       >
-        <Icon size={20} className={clsx(variant && iconStyles[variant])} />
+        <Icon
+          size={styles.iconSize}
+          className={clsx(variant && iconStyles[variant])}
+        />
       </div>
-      <div className="flex-1 min-w-0 py-0.5">
+      <div className={clsx("min-w-0 flex-1", styles.content, contentClassName)}>
         {title && (
           <p
             className={clsx(
-              "font-semibold text-sm leading-5",
-              variant && textStyles[variant]
+              styles.title,
+              variant && textStyles[variant],
+              titleClassName,
             )}
           >
             {title}
@@ -97,9 +126,10 @@ function Banner({
         {description && (
           <p
             className={clsx(
-              "text-sm leading-5",
-              title && "mt-0.5",
-              variant && textStyles[variant]
+              styles.description,
+              title && styles.descriptionSpacing,
+              variant && textStyles[variant],
+              descriptionClassName,
             )}
           >
             {description}
@@ -109,9 +139,9 @@ function Banner({
       {(primaryAction || secondaryAction) && (
         <div
           className={clsx(
-            "flex items-start gap-3 flex-shrink-0",
+            "flex shrink-0 items-start gap-3",
             actionsLayout === "stacked" && "flex-col",
-            actionsLayout === "inline" && "flex-row"
+            actionsLayout === "inline" && "flex-row",
           )}
         >
           {primaryAction}
@@ -123,7 +153,8 @@ function Banner({
         <button
           onClick={handleDismiss}
           className={clsx(
-            "flex items-center justify-center w-7 h-7 cursor-pointer rounded-full transition-all duration-200 flex-shrink-0",
+            "flex shrink-0 cursor-pointer items-center justify-center rounded-full transition-all duration-200",
+            styles.dismissButton,
             "hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-offset-1",
             variant === "critical" &&
               "text-red-400 hover:text-red-600 focus:ring-red-300",
@@ -132,11 +163,11 @@ function Banner({
             variant === "warning" &&
               "text-amber-400 hover:text-amber-600 focus:ring-amber-300",
             variant === "info" &&
-              "text-blue-400 hover:text-blue-600 focus:ring-blue-300"
+              "text-blue-400 hover:text-blue-600 focus:ring-blue-300",
           )}
           aria-label="Dismiss banner"
         >
-          <IoClose size={18} />
+          <IoClose size={styles.dismissIconSize} />
         </button>
       )}
     </aside>
