@@ -2,6 +2,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./shared/styles/auth-immersive.css";
+@import "./shared/styles/schedule-meeting-button.css";
 
 @custom-variant dark (&:is(.dark *));
 

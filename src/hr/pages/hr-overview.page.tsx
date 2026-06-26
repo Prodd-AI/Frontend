@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { RiCalendarScheduleLine, RiHeartPulseLine } from "react-icons/ri";
+import { RiHeartPulseLine } from "react-icons/ri";
+import ScheduleMeetingCtaButton from "@/shared/components/schedule-meeting-cta-button.component";
 import { PiUsersThree } from "react-icons/pi";
 import { GoGraph } from "react-icons/go";
 import { IoWarningOutline, IoFlameOutline } from "react-icons/io5";
@@ -201,13 +201,9 @@ function HrOverviewPage() {
         actions={
           <>
             <TakeTourButton onStart={startTour} />
-            <Button
+            <ScheduleMeetingCtaButton
               onClick={() => openScheduleMeeting(null)}
-              className="bg-[#6619DE] hover:bg-[#5710c4] h-11 px-6 rounded-xl gap-2 font-semibold"
-            >
-              <RiCalendarScheduleLine className="h-4 w-4" />
-              Schedule Meeting
-            </Button>
+            />
           </>
         }
       />

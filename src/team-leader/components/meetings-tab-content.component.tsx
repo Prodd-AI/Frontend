@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
+import ScheduleMeetingCtaButton from "@/shared/components/schedule-meeting-cta-button.component";
 import {
   Select,
   SelectContent,
@@ -82,9 +82,7 @@ const MeetingsTabContent = ({
           )}
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="h-[52px]">
-                <Plus /> Schedule Meeting
-              </Button>
+              <ScheduleMeetingCtaButton />
             </DialogTrigger>
             <DialogContent className="max-w-[720px] p-8 rounded-lg border-gray-200/80 shadow-xl">
               <ScheduleMeeting
